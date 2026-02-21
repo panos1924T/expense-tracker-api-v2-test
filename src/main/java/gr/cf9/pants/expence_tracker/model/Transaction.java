@@ -1,5 +1,6 @@
 package gr.cf9.pants.expence_tracker.model;
 
+import gr.cf9.pants.expence_tracker.enums.TransactionType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -37,5 +38,7 @@ public class Transaction extends AbstractEntity{
 
     private String description;
 
-    //private TransactionType type;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private TransactionType type;
 }
