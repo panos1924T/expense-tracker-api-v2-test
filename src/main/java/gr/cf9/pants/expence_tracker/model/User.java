@@ -46,6 +46,7 @@ public class User extends AbstractEntity {
     @Column(nullable = false)
     private boolean isActive;
 
+    @PrePersist
     public void initializeUuid() {
         if (uuid == null) uuid = UUID.randomUUID();
     }
