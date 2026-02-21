@@ -1,0 +1,41 @@
+package gr.cf9.pants.expence_tracker.model;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.math.BigDecimal;
+
+/**
+ * Represents a financial transaction (movement of money).
+ * <p>
+ * A transaction records the amount, date, and type of activity.
+ * It links to a user and potentially two accounts:
+ * - Source Account: Where money comes FROM (used in EXPENSE and TRANSFER).
+ * - Target Account: Where money goes TO (used in INCOME and TRANSFER).
+ * </p>
+ *
+ * @author PanTs
+ */
+
+@Entity
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Table(name = "transactions")
+public class Transaction extends AbstractEntity{
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false)
+    private BigDecimal amount;
+
+    private String description;
+
+    //private TransactionType type;
+}
