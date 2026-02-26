@@ -44,7 +44,7 @@ public class User extends AbstractEntity {
     private String password;
 
     @Column(nullable = false)
-    private boolean isActive;
+    private boolean active;
 
     @PrePersist
     public void initializeUuid() {
