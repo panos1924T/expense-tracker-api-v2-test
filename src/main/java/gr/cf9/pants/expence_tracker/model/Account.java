@@ -33,7 +33,10 @@ public class Account extends AbstractEntity{
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false)
-    private BigDecimal balance;
+    @Column(nullable = false, precision = 19, scale = 4)
+    private BigDecimal balance = BigDecimal.ZERO;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 }
