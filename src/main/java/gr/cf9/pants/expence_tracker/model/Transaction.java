@@ -50,7 +50,7 @@ public class Transaction extends AbstractEntity{
     @JoinColumn(name = "source_account_id", nullable = false)
     private Account sourceAccount;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "target_account_id")
     private Account targetAccount;
 }
