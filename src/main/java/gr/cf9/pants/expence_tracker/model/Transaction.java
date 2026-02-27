@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 /**
  * Represents a financial transaction (movement of money).
@@ -53,4 +54,7 @@ public class Transaction extends AbstractEntity{
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "target_account_id")
     private Account targetAccount;
+
+    @Column(nullable = false)
+    private LocalDate transactionDate;
 }
