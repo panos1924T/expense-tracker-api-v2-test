@@ -35,7 +35,7 @@ public class Transaction extends AbstractEntity{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, precision = 19, scale = 4)
     @DecimalMin(value = "0.01", message = "Amount must be positive!")
     private BigDecimal amount;
 
