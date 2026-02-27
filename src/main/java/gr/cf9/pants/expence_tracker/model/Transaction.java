@@ -2,6 +2,7 @@ package gr.cf9.pants.expence_tracker.model;
 
 import gr.cf9.pants.expence_tracker.enums.TransactionType;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.DecimalMin;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -35,6 +36,7 @@ public class Transaction extends AbstractEntity{
     private Long id;
 
     @Column(nullable = false)
+    @DecimalMin(value = "0.01", message = "Amount must be positive!")
     private BigDecimal amount;
 
     private String description;
