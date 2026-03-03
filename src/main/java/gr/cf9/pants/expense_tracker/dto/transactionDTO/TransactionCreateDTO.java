@@ -5,7 +5,7 @@ import gr.cf9.pants.expense_tracker.enums.TransactionType;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-public record TransactionRequestDTO(
+public record TransactionCreateDTO(
    Long sourceAccountId,
    Long categoryId,
    TransactionType type,
