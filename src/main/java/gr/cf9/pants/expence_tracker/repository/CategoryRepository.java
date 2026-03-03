@@ -12,7 +12,7 @@ import java.util.Optional;
 @Repository
 public interface CategoryRepository extends JpaRepository<Category, Long> {
 
-    List<Category> findByUserAndCategory(User user, TransactionType type);
+    List<Category> findByUserAndType(User user, TransactionType type);
 
     List<Category> findByUser(User user);
 
