@@ -1,6 +1,6 @@
-package gr.cf9.pants.expence_tracker.model;
+package gr.cf9.pants.expense_tracker.model;
 
-import gr.cf9.pants.expence_tracker.enums.TransactionType;
+import gr.cf9.pants.expense_tracker.enums.TransactionType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
 import lombok.AllArgsConstructor;

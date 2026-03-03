@@ -1,6 +1,6 @@
-package gr.cf9.pants.expence_tracker.repository;
+package gr.cf9.pants.expense_tracker.repository;
 
-import gr.cf9.pants.expence_tracker.model.User;
+import gr.cf9.pants.expense_tracker.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

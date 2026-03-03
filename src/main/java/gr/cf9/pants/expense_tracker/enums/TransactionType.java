@@ -1,4 +1,4 @@
-package gr.cf9.pants.expence_tracker.enums;
+package gr.cf9.pants.expense_tracker.enums;
 
 public enum TransactionType {
 

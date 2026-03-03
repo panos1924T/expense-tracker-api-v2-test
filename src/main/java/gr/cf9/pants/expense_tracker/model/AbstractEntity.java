@@ -1,4 +1,4 @@
-package gr.cf9.pants.expence_tracker.model;
+package gr.cf9.pants.expense_tracker.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
