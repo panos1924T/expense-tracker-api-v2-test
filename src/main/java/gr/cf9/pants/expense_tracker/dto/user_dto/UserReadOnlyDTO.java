@@ -1,4 +1,4 @@
-package gr.cf9.pants.expense_tracker.dto.userDTO;
+package gr.cf9.pants.expense_tracker.dto.user_dto;
 
 import java.time.Instant;
 import java.util.UUID;

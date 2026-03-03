@@ -1,4 +1,4 @@
-package gr.cf9.pants.expense_tracker.dto.transactionDTO;
+package gr.cf9.pants.expense_tracker.dto.transaction_dto;
 
 import gr.cf9.pants.expense_tracker.enums.TransactionType;
 

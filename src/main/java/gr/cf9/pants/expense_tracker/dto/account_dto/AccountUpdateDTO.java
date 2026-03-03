@@ -1,4 +1,4 @@
-package gr.cf9.pants.expense_tracker.dto.accountDTO;
+package gr.cf9.pants.expense_tracker.dto.account_dto;
 
 public record AccountUpdateDTO(
    String name,
