@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
@@ -20,5 +21,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     Page<Transaction> findByUserAndSourceAccount(User user, Account account, Pageable pageable);
 
     Page<Transaction> findByUserAndType(User user, TransactionType type, Pageable pageable);
+
+    Optional<Transaction> findByIdAndUser(Long id, User user);
 
 }
