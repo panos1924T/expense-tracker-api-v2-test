@@ -1,6 +1,6 @@
 package gr.cf9.pants.expense_tracker.model;
 
-import gr.cf9.pants.expense_tracker.enums.TransactionType;
+import gr.cf9.pants.expense_tracker.core.enums.TransactionType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

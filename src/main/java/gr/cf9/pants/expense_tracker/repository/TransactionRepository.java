@@ -1,6 +1,6 @@
 package gr.cf9.pants.expense_tracker.repository;
 
-import gr.cf9.pants.expense_tracker.enums.TransactionType;
+import gr.cf9.pants.expense_tracker.core.enums.TransactionType;
 import gr.cf9.pants.expense_tracker.model.Account;
 import gr.cf9.pants.expense_tracker.model.Transaction;
 import gr.cf9.pants.expense_tracker.model.User;
