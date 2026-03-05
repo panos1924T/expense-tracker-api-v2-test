@@ -6,12 +6,13 @@ import gr.cf9.pants.expense_tracker.dto.category_dto.CategoryUpdateDTO;
 
 import java.util.UUID;
 
-public interface ICategoryInterface {
+public interface ICategoryService {
 
     CategoryReadOnlyDTO createCategory(CategoryCreateDTO dto, UUID userUuid);
 
     CategoryReadOnlyDTO updateCategory(CategoryUpdateDTO dto, UUID userUuid);
 
     void deleteCategory(Long id, UUID userUuid);
+
 
 }
