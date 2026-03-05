@@ -7,5 +7,5 @@ import java.time.LocalDate;
 public record TransactionUpdateDTO(
         String description,
         LocalDate transactionDate,
-        Category category
+        Long categoryId
 ) {}

@@ -4,5 +4,5 @@ import gr.cf9.pants.expense_tracker.model.Category;
 
 public record CategoryUpdateDTO(
         String name,
-        Category parent
+        Long parentId
 ) {}
