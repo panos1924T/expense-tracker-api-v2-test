@@ -8,7 +8,7 @@ public class AppGenericException extends RuntimeException {
         this.code = code;
     }
 
-    public String getCODE() {
+    public String getCode() {
         return code;
     }
 }
