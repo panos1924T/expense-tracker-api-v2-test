@@ -1,0 +1,56 @@
+package gr.cf9.pants.expense_tracker.service;
+
+import gr.cf9.pants.expense_tracker.core.exceptions.EntityAlreadyExistsException;
+import gr.cf9.pants.expense_tracker.dto.user_dto.UserReadOnlyDTO;
+import gr.cf9.pants.expense_tracker.dto.user_dto.UserRegisterDTO;
+import gr.cf9.pants.expense_tracker.dto.user_dto.UserUpdateDTO;
+import gr.cf9.pants.expense_tracker.mapper.UserMapper;
+import gr.cf9.pants.expense_tracker.model.User;
+import gr.cf9.pants.expense_tracker.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import java.beans.Encoder;
+import java.util.UUID;
+
+@Service
+@Slf4j
+@RequiredArgsConstructor
+public class UserService implements IUserService{
+
+    private final UserRepository userRepository;
+    private final UserMapper userMapper;
+    private final PasswordEncoder passwordEncoder;
+
+    @Override
+    public UserReadOnlyDTO register(UserRegisterDTO dto) {
+
+        if (userRepository.existsByEmail(dto.email())) {
+            throw new EntityAlreadyExistsException("Email already exists: " + dto.email());
+        }
+
+        if (userRepository.existsByUsername((dto.username()))) {
+            throw new EntityAlreadyExistsException("Username already exists: " + dto.username());
+        }
+
+        return null;
+    }
+
+    @Override
+    public UserReadOnlyDTO update(UserUpdateDTO dto) {
+        return null;
+    }
+
+    @Override
+    public void deleteUser(UUID uuid) {
+
+    }
+
+    @Override
+    public UserReadOnlyDTO getByUuid(UUID uuid) {
+        return null;
+    }
+
+}
