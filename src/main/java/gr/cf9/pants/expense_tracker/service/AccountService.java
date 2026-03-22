@@ -15,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -66,17 +67,22 @@ public class AccountService implements IAccountService{
         return accountMapper.toReadOnly(updatedAccount);
     }
 
+    @Transactional
     @Override
     public void deleteAccount(Long id, UUID userUuid) {
 
         //VALIDATE
-
+        User user = userRepository.findByUuid(userUuid)
+                .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + "does not exist!"));
+        Account account = accountRepository.findByIdAndUser(id, user)
+                .orElseThrow(() -> new UnauthorizedException("Unauthorized access to account with id " + id));
 
         //PREPARE
 
 
         //EXECUTE
-
+        account.softDelete(Instant.now());
+        accountRepository.save(account);
 
         //RETURN
 
