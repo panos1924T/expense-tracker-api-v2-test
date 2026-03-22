@@ -92,16 +92,16 @@ public class AccountService implements IAccountService{
     public List<AccountReadOnlyDTO> getAllAccounts(UUID userUuid) {
 
         //VALIDATE
-
+        User user = userRepository.findByUuid(userUuid)
+                .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + "does not exist!"));
 
         //PREPARE
+        List<Account> accounts = accountRepository.findByUser(user);
 
-
-        //EXECUTE
-
-
-        //RETURN
-        return List.of();
+        //EXECUTE AND RETURN
+        return accounts.stream()
+                .map(accountMapper::toReadOnly)
+                .toList();
     }
 
     @Override
