@@ -1,15 +1,18 @@
 package gr.cf9.pants.expense_tracker.service;
 
+import gr.cf9.pants.expense_tracker.core.exceptions.EntityNotFoundException;
 import gr.cf9.pants.expense_tracker.dto.account_dto.AccountCreateDTO;
 import gr.cf9.pants.expense_tracker.dto.account_dto.AccountReadOnlyDTO;
 import gr.cf9.pants.expense_tracker.dto.account_dto.AccountUpdateDTO;
 import gr.cf9.pants.expense_tracker.mapper.AccountMapper;
+import gr.cf9.pants.expense_tracker.model.Account;
 import gr.cf9.pants.expense_tracker.model.User;
 import gr.cf9.pants.expense_tracker.repository.AccountRepository;
 import gr.cf9.pants.expense_tracker.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -23,20 +26,22 @@ public class AccountService implements IAccountService{
     private final UserRepository userRepository;
     private final AccountMapper accountMapper;
 
+    @Transactional
     @Override
     public AccountReadOnlyDTO createAccount(AccountCreateDTO dto, UUID userUuid) {
 
         //VALIDATE
-
+        User user = userRepository.findByUuid(userUuid)
+                .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + "does not exist!"));
 
         //PREPARE
-
+        Account account = accountMapper.toEntity(dto, user);
 
         //EXECUTE
-
+        Account savedAccount = accountRepository.save(account);
 
         //RETURN
-        return null;
+        return accountMapper.toReadOnly(savedAccount);
     }
 
     @Override
