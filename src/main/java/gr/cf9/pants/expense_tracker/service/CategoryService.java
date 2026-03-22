@@ -121,15 +121,15 @@ public class CategoryService implements ICategoryService{
     @Override
     public List<CategoryReadOnlyDTO> getCategoryByType(TransactionType type, UUID userUuid) {
         //VALIDATE
-
+        User user = userRepository.findByUuid(userUuid)
+                .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + " does not exist!"));
 
         //PREPARE
+        List<Category> categories = categoryRepository.findByUserAndType(user, type);
 
-
-        //EXECUTE
-
-
-        //RETURN
-        return List.of();
+        //EXECUTE & RETURN
+        return categories.stream()
+                .map(categoryMapper::toReadOnly)
+                .toList();
     }
 }
