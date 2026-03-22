@@ -32,16 +32,21 @@ public class CategoryService implements ICategoryService{
     public CategoryReadOnlyDTO createCategory(CategoryCreateDTO dto, UUID userUuid) {
         //VALIDATE
         User user = userRepository.findByUuid(userUuid)
-                .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + "does not exist!"));
+                .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + " does not exist!"));
 
         //PREPARE
-
+        Category category = categoryMapper.toEntity(dto, user);
+        if (dto.parentId() != null) {
+            Category parent = categoryRepository.findById(dto.parentId())
+                    .orElseThrow(() -> new EntityNotFoundException("Parent category: " + dto.parentId() + " not found!"));
+            category.setParent(parent);
+        }
 
         //EXECUTE
-
+        Category savedCategory = categoryRepository.save(category);
 
         //RETURN
-        return null;
+        return categoryMapper.toReadOnly(savedCategory);
     }
 
     @Transactional
