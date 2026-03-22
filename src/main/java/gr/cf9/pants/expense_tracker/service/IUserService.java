@@ -10,7 +10,7 @@ public interface IUserService {
 
     UserReadOnlyDTO register(UserRegisterDTO dto);
 
-    UserReadOnlyDTO update(UserUpdateDTO dto);
+    UserReadOnlyDTO update(UUID userUuid, UserUpdateDTO dto);
 
     void deleteUser(UUID uuid);
 

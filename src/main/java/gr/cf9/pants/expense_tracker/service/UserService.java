@@ -48,7 +48,16 @@ public class UserService implements IUserService{
     }
 
     @Override
-    public UserReadOnlyDTO update(UserUpdateDTO dto) {
+    public UserReadOnlyDTO update(UUID userUuid, UserUpdateDTO dto) {
+
+        //VALIDATE
+
+
+        //PREPARE
+
+        //EXECUTE
+
+        //RETURN
         return null;
     }
 
