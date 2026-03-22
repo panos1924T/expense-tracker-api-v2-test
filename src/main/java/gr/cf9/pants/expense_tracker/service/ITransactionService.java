@@ -1,6 +1,7 @@
 package gr.cf9.pants.expense_tracker.service;
 
 import gr.cf9.pants.expense_tracker.core.enums.TransactionType;
+import gr.cf9.pants.expense_tracker.dto.transaction_dto.TransactionCreateDTO;
 import gr.cf9.pants.expense_tracker.dto.transaction_dto.TransactionReadOnlyDTO;
 import gr.cf9.pants.expense_tracker.dto.transaction_dto.TransactionUpdateDTO;
 import gr.cf9.pants.expense_tracker.dto.transaction_dto.TransferCreateDTO;
@@ -11,7 +12,7 @@ import java.util.UUID;
 
 public interface ITransactionService {
 
-        TransactionReadOnlyDTO createTransaction(TransferCreateDTO dto, UUID userUuid);
+        TransactionReadOnlyDTO createTransaction(TransactionCreateDTO dto, UUID userUuid);
 
         TransactionReadOnlyDTO createTransfer(TransferCreateDTO dto, UUID userUuid);
 
