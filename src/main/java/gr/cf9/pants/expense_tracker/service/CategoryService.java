@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -80,15 +81,14 @@ public class CategoryService implements ICategoryService{
     @Override
     public void deleteCategory(Long id, UUID userUuid) {
         //VALIDATE
-
-
-        //PREPARE
-
+        User user = userRepository.findByUuid(userUuid)
+                .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + " does not exist!"));
+        Category category = categoryRepository.findByIdAndUser(id, user)
+                .orElseThrow(() -> new UnauthorizedException("Unauthorized access to category with id: " + id));
 
         //EXECUTE
-
-
-        //RETURN
+        category.softDelete(Instant.now());
+        categoryRepository.save(category);
     }
 
     @Override
