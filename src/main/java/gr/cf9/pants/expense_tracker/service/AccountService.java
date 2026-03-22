@@ -77,15 +77,9 @@ public class AccountService implements IAccountService{
         Account account = accountRepository.findByIdAndUser(id, user)
                 .orElseThrow(() -> new UnauthorizedException("Unauthorized access to account with id " + id));
 
-        //PREPARE
-
-
         //EXECUTE
         account.softDelete(Instant.now());
         accountRepository.save(account);
-
-        //RETURN
-
     }
 
     @Override
@@ -108,15 +102,12 @@ public class AccountService implements IAccountService{
     public AccountReadOnlyDTO getAccount(Long id, UUID userUuid) {
 
         //VALIDATE
-
-
-        //PREPARE
-
-
-        //EXECUTE
-
+        User user = userRepository.findByUuid(userUuid)
+                .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + "does not exist!"));
+        Account account = accountRepository.findByIdAndUser(id, user)
+                .orElseThrow(() -> new UnauthorizedException("Unauthorized access to account with id " + id));
 
         //RETURN
-        return null;
+        return accountMapper.toReadOnly(account);
     }
 }
