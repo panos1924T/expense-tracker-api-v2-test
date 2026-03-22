@@ -81,7 +81,9 @@ public class UserService implements IUserService{
 
     @Override
     public UserReadOnlyDTO getByUuid(UUID uuid) {
-        return null;
+        User user = userRepository.findByUuid(uuid)
+                .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + uuid + " doesn't exist."));
+        return userMapper.toReadOnly(user);
     }
 
 }
