@@ -1,6 +1,7 @@
 package gr.cf9.pants.expense_tracker.service;
 
 import gr.cf9.pants.expense_tracker.core.exceptions.EntityAlreadyExistsException;
+import gr.cf9.pants.expense_tracker.core.exceptions.EntityNotFoundException;
 import gr.cf9.pants.expense_tracker.dto.user_dto.UserReadOnlyDTO;
 import gr.cf9.pants.expense_tracker.dto.user_dto.UserRegisterDTO;
 import gr.cf9.pants.expense_tracker.dto.user_dto.UserUpdateDTO;
@@ -51,14 +52,26 @@ public class UserService implements IUserService{
     public UserReadOnlyDTO update(UUID userUuid, UserUpdateDTO dto) {
 
         //VALIDATE
+        User user = userRepository.findByUuid(userUuid)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with uuid: " + userUuid));
 
+        if (userRepository.existsByEmailAndUuidNot(dto.email(), userUuid)) {
+            throw new EntityAlreadyExistsException("Email already exists! " + dto.email());
+        }
+
+        if (userRepository.existsByUsernameAndUuidNot(dto.username(), userUuid)) {
+            throw new EntityAlreadyExistsException("Username already exists! " + dto.username());
+        }
 
         //PREPARE
+        user.setUsername(dto.username());
+        user.setEmail(dto.email());
 
         //EXECUTE
+        User updatedUser = userRepository.save(user);
 
         //RETURN
-        return null;
+        return userMapper.toReadOnly(updatedUser);
     }
 
     @Override
