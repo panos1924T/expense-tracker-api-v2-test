@@ -94,16 +94,13 @@ public class CategoryService implements ICategoryService{
     @Override
     public CategoryReadOnlyDTO getCategoryById(Long id, UUID userUuid) {
         //VALIDATE
-
-
-        //PREPARE
-
-
-        //EXECUTE
-
+        User user = userRepository.findByUuid(userUuid)
+                .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + " does not exist!"));
+        Category category = categoryRepository.findByIdAndUser(id, user)
+                .orElseThrow(() -> new UnauthorizedException("Unauthorized access to category with id: " + id));
 
         //RETURN
-        return null;
+        return categoryMapper.toReadOnly(category);
     }
 
     @Override
