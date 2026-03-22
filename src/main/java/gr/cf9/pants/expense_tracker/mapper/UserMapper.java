@@ -17,11 +17,11 @@ public class UserMapper {
         );
     }
 
-    public User toEntity(UserRegisterDTO dto) {
+    public User toEntity(UserRegisterDTO dto, String hashedPassword) {
         User user = new User();
         user.setUsername(dto.username());
         user.setEmail(dto.email());
-        user.setPassword(dto.password());
+        user.setPassword(hashedPassword);
         return user;
     }
 }
