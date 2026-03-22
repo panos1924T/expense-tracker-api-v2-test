@@ -27,15 +27,24 @@ public class UserService implements IUserService{
     @Override
     public UserReadOnlyDTO register(UserRegisterDTO dto) {
 
+        //VALIDATE
         if (userRepository.existsByEmail(dto.email())) {
             throw new EntityAlreadyExistsException("Email already exists: " + dto.email());
         }
 
-        if (userRepository.existsByUsername((dto.username()))) {
+        if (userRepository.existsByUsername(dto.username())) {
             throw new EntityAlreadyExistsException("Username already exists: " + dto.username());
         }
 
-        return null;
+        //PREPARE
+        String hashedPassword = passwordEncoder.encode(dto.password());
+        User user = userMapper.toEntity(dto, hashedPassword);
+
+        //EXECUTE
+        User savedUser = userRepository.save(user);
+
+        //RETURN
+        return userMapper.toReadOnly(savedUser);
     }
 
     @Override
