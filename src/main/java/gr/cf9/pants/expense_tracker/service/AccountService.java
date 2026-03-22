@@ -1,6 +1,7 @@
 package gr.cf9.pants.expense_tracker.service;
 
 import gr.cf9.pants.expense_tracker.core.exceptions.EntityNotFoundException;
+import gr.cf9.pants.expense_tracker.core.exceptions.UnauthorizedException;
 import gr.cf9.pants.expense_tracker.dto.account_dto.AccountCreateDTO;
 import gr.cf9.pants.expense_tracker.dto.account_dto.AccountReadOnlyDTO;
 import gr.cf9.pants.expense_tracker.dto.account_dto.AccountUpdateDTO;
@@ -44,20 +45,25 @@ public class AccountService implements IAccountService{
         return accountMapper.toReadOnly(savedAccount);
     }
 
+    @Transactional
     @Override
     public AccountReadOnlyDTO updateAccount(Long id, AccountUpdateDTO dto, UUID userUuid) {
 
         //VALIDATE
-
+        User user = userRepository.findByUuid(userUuid)
+                .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + "does not exist!"));
+        Account account = accountRepository.findByIdAndUser(id, user)
+                .orElseThrow(() -> new UnauthorizedException("Unauthorized access to account with id " + id));
 
         //PREPARE
-
+        account.setName(dto.name());
+        account.setAccountType(dto.accountType());
 
         //EXECUTE
-
+        Account updatedAccount = accountRepository.save(account);
 
         //RETURN
-        return null;
+        return accountMapper.toReadOnly(updatedAccount);
     }
 
     @Override
