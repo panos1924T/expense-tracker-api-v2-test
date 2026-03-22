@@ -2,6 +2,7 @@ package gr.cf9.pants.expense_tracker.service;
 
 import gr.cf9.pants.expense_tracker.core.enums.TransactionType;
 import gr.cf9.pants.expense_tracker.core.exceptions.EntityNotFoundException;
+import gr.cf9.pants.expense_tracker.core.exceptions.UnauthorizedException;
 import gr.cf9.pants.expense_tracker.dto.category_dto.CategoryCreateDTO;
 import gr.cf9.pants.expense_tracker.dto.category_dto.CategoryReadOnlyDTO;
 import gr.cf9.pants.expense_tracker.dto.category_dto.CategoryUpdateDTO;
@@ -53,16 +54,26 @@ public class CategoryService implements ICategoryService{
     @Override
     public CategoryReadOnlyDTO updateCategory(Long id, CategoryUpdateDTO dto, UUID userUuid) {
         //VALIDATE
+        User user = userRepository.findByUuid(userUuid)
+                .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + " does not exist!"));
+        Category category = categoryRepository.findByIdAndUser(id, user)
+                .orElseThrow(() -> new UnauthorizedException("Unauthorized access to category with id: " + id));
 
 
         //PREPARE
+        if (dto.parentId() != null) {
+            Category parent = categoryRepository.findById(dto.parentId())
+                    .orElseThrow(() -> new EntityNotFoundException("Parent category: " + dto.parentId() + " not found!"));
+            category.setParent(parent);
+        }
 
+        category.setName(dto.name());
 
         //EXECUTE
-
+        Category updatedCategory = categoryRepository.save(category);
 
         //RETURN
-        return null;
+        return categoryMapper.toReadOnly(updatedCategory);
     }
 
     @Transactional
