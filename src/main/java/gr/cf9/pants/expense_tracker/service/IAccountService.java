@@ -12,7 +12,7 @@ public interface IAccountService {
 
     AccountReadOnlyDTO createAccount(AccountCreateDTO dto, UUID userUuid);
 
-    AccountReadOnlyDTO updateAccount(AccountUpdateDTO dto, UUID userUuid);
+    AccountReadOnlyDTO updateAccount(Long id, AccountUpdateDTO dto, UUID userUuid);
 
     void deleteAccount(Long id, UUID userUuid);
 
