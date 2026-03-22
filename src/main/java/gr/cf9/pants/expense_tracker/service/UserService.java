@@ -12,8 +12,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.beans.Encoder;
+import java.time.Instant;
 import java.util.UUID;
 
 @Service
@@ -25,6 +27,7 @@ public class UserService implements IUserService{
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
 
+    @Transactional
     @Override
     public UserReadOnlyDTO register(UserRegisterDTO dto) {
 
@@ -48,6 +51,7 @@ public class UserService implements IUserService{
         return userMapper.toReadOnly(savedUser);
     }
 
+    @Transactional
     @Override
     public UserReadOnlyDTO update(UUID userUuid, UserUpdateDTO dto) {
 
@@ -74,9 +78,14 @@ public class UserService implements IUserService{
         return userMapper.toReadOnly(updatedUser);
     }
 
+    @Transactional
     @Override
     public void deleteUser(UUID uuid) {
+        User user = userRepository.findByUuid(uuid)
+                .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + uuid + " doesn't exist."));
 
+        user.softDelete(Instant.now());
+        userRepository.save(user);
     }
 
     @Override
