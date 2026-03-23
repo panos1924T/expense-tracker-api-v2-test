@@ -82,8 +82,20 @@ public class TransactionService implements ITransactionService {
     }
 
     @Override
-    public TransactionReadOnlyDTO createTransfer(TransferCreateDTO dto, UUID userUuid) {
+    public TransactionReadOnlyDTO createTransfer(TransferCreateDTO dto, UUID userUuid) throws InsufficientBalanceException {
         //VALIDATE
+        User user = userRepository.findByUuid(userUuid)
+                .orElseThrow(() -> new EntityNotFoundException("User with id: " + userUuid + " not found!"));
+
+        Account sourceAccount = accountRepository.findByIdAndUser(dto.sourceAccountId(), user)
+                .orElseThrow(() -> new UnauthorizedException("Unauthorized access to account with id " + dto.sourceAccountId()));
+
+        Account targetAccount = accountRepository.findByIdAndUser(dto.targetAccountId(), user)
+                .orElseThrow(() -> new UnauthorizedException("Unauthorized access to account with id " + dto.targetAccountId()));
+
+        if (sourceAccount.getBalance().compareTo(dto.amount()) < 0) {
+            throw new InsufficientBalanceException("Insufficient balance!");
+        }
 
         //PREPARE
 

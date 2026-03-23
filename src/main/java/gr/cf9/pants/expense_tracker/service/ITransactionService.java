@@ -16,7 +16,7 @@ public interface ITransactionService {
 
         TransactionReadOnlyDTO createTransaction(TransactionCreateDTO dto, UUID userUuid) throws InvalidTransactionException, InsufficientBalanceException;
 
-        TransactionReadOnlyDTO createTransfer(TransferCreateDTO dto, UUID userUuid);
+        TransactionReadOnlyDTO createTransfer(TransferCreateDTO dto, UUID userUuid) throws InsufficientBalanceException;
 
         TransactionReadOnlyDTO getTransaction(Long id, UUID userUuid);
 
