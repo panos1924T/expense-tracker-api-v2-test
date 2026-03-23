@@ -28,5 +28,5 @@ public interface ITransactionService {
 
         List<TransactionReadOnlyDTO> getTransactionByType(TransactionType type, UUID userUuid, Pageable pageable);
 
-        void deleteTransaction(Long id, UUID userUuid);
+        void deleteTransaction(Long id, UUID userUuid) throws InvalidTransactionException;
 }

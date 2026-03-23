@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -196,13 +197,31 @@ public class TransactionService implements ITransactionService {
                 .toList();
     }
 
+    @Transactional
     @Override
-    public void deleteTransaction(Long id, UUID userUuid) {
+    public void deleteTransaction(Long id, UUID userUuid) throws InvalidTransactionException {
         //VALIDATE
+        User user = userRepository.findByUuid(userUuid)
+                .orElseThrow(() -> new EntityNotFoundException("User with id: " + userUuid + " not found!"));
+        Transaction transaction = transactionRepository.findByIdAndUser(id, user)
+                .orElseThrow(() -> new EntityNotFoundException("Transaction with id: " + id + " not found!"));
 
         //PREPARE
+        Account sourceAccount = transaction.getSourceAccount();
+        Account targetAccount = transaction.getTargetAccount();
+
+        switch (transaction.getType()) {
+            case INCOME -> transaction.getSourceAccount().getBalance().subtract(transaction.getAmount());
+            case EXPENSE -> transaction.getSourceAccount().getBalance().add(transaction.getAmount());
+            case TRANSFER -> {
+                transaction.getSourceAccount().getBalance().add(transaction.getAmount());
+                transaction.getTargetAccount().getBalance().subtract(transaction.getAmount());
+            }
+            default -> throw new InvalidTransactionException("Unknown transaction type");
+        }
 
         //EXECUTE
-
+        transaction.softDelete(Instant.now());
+        transactionRepository.save(transaction);
     }
 }
