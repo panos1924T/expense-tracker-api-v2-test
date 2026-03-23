@@ -169,13 +169,17 @@ public class TransactionService implements ITransactionService {
     @Override
     public List<TransactionReadOnlyDTO> getTransactionByAccount(Long accountId, UUID userUuid, Pageable pageable) {
         //VALIDATE
-
-        //PREPARE
-
-        //EXECUTE
+        User user = userRepository.findByUuid(userUuid)
+                .orElseThrow(() -> new EntityNotFoundException("User with id: " + userUuid + " not found!"));
+        Account account = accountRepository.findByIdAndUser(accountId, user)
+                .orElseThrow(() -> new EntityNotFoundException("Account with id: " + accountId + " not found!"));
 
         //RETURN
-        return List.of();
+        return transactionRepository.findByUserAndSourceAccount(user, account, pageable)
+                .getContent()
+                .stream()
+                .map(transactionMapper::toReadOnly)
+                .toList();
     }
 
     @Override
