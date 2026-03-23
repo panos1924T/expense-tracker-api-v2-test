@@ -32,7 +32,7 @@ public abstract class AbstractEntity {
     private Instant updatedAt;
 
     @Column(nullable = false)
-    public boolean deleted = false;
+    private boolean deleted = false;
 
     @Column(name = "deleted_at", columnDefinition = "TIMESTAMPTZ")
     private Instant deletedAt;
