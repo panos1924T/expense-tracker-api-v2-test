@@ -185,13 +185,15 @@ public class TransactionService implements ITransactionService {
     @Override
     public List<TransactionReadOnlyDTO> getTransactionByType(TransactionType type, UUID userUuid, Pageable pageable) {
         //VALIDATE
-
-        //PREPARE
-
-        //EXECUTE
+        User user = userRepository.findByUuid(userUuid)
+                .orElseThrow(() -> new EntityNotFoundException("User with id: " + userUuid + " not found!"));
 
         //RETURN
-        return List.of();
+        return transactionRepository.findByUserAndType(user, type, pageable)
+                .getContent()
+                .stream()
+                .map(transactionMapper::toReadOnly)
+                .toList();
     }
 
     @Override
