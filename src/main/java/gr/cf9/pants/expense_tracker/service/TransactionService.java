@@ -81,6 +81,7 @@ public class TransactionService implements ITransactionService {
         return transactionMapper.toReadOnly(transaction);
     }
 
+    @Transactional
     @Override
     public TransactionReadOnlyDTO createTransfer(TransferCreateDTO dto, UUID userUuid) throws InsufficientBalanceException {
         //VALIDATE
@@ -98,11 +99,20 @@ public class TransactionService implements ITransactionService {
         }
 
         //PREPARE
+        Transaction transaction = transactionMapper.toEntity(dto, user, sourceAccount, targetAccount);
+        BigDecimal newSourceBalance;
+        BigDecimal newTargetBalance;
+
+        newSourceBalance = sourceAccount.getBalance().subtract(dto.amount());
+        newTargetBalance = targetAccount.getBalance().add(dto.amount());
 
         //EXECUTE
+        sourceAccount.setBalance(newSourceBalance);
+        targetAccount.setBalance(newTargetBalance);
+        transactionRepository.save(transaction);
 
         //RETURN
-        return null;
+        return transactionMapper.toReadOnly(transaction);
     }
 
     @Override
