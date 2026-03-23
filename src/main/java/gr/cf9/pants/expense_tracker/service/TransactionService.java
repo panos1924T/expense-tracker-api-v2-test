@@ -9,6 +9,7 @@ import gr.cf9.pants.expense_tracker.dto.transaction_dto.TransferCreateDTO;
 import gr.cf9.pants.expense_tracker.mapper.TransactionMapper;
 import gr.cf9.pants.expense_tracker.model.Account;
 import gr.cf9.pants.expense_tracker.model.Category;
+import gr.cf9.pants.expense_tracker.model.Transaction;
 import gr.cf9.pants.expense_tracker.model.User;
 import gr.cf9.pants.expense_tracker.repository.AccountRepository;
 import gr.cf9.pants.expense_tracker.repository.CategoryRepository;
@@ -20,6 +21,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -55,18 +57,28 @@ public class TransactionService implements ITransactionService {
         Category category = categoryRepository.findById(dto.categoryId())
                 .orElseThrow(() -> new EntityNotFoundException("Category with id: " + dto.categoryId() + " not found!"));
 
-
-        if (sourceAccount.getBalance().compareTo(dto.amount()) < 0) {
-            throw new InsufficientBalanceException("Insufficient balance!");
+        if (dto.type() == TransactionType.EXPENSE) {
+            if (sourceAccount.getBalance().compareTo(dto.amount()) < 0) {
+                throw new InsufficientBalanceException("Insufficient balance!");
+            }
         }
 
         //PREPARE
-
+        Transaction transaction = transactionMapper.toEntity(dto, user, sourceAccount, category);
+        BigDecimal newBalance;
+        if (dto.type() == TransactionType.INCOME) {
+            newBalance = sourceAccount.getBalance().add(dto.amount());
+        } else {
+            newBalance = sourceAccount.getBalance().subtract(dto.amount());
+        }
 
         //EXECUTE
+        sourceAccount.setBalance(newBalance);
+        transactionRepository.save(transaction);
+
 
         //RETURN
-        return null;
+        return transactionMapper.toReadOnly(transaction);
     }
 
     @Override
