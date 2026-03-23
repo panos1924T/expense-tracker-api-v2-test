@@ -118,25 +118,38 @@ public class TransactionService implements ITransactionService {
     @Override
     public TransactionReadOnlyDTO getTransaction(Long id, UUID userUuid) {
         //VALIDATE
-
-        //PREPARE
-
-        //EXECUTE
+        User user = userRepository.findByUuid(userUuid)
+                .orElseThrow(() -> new EntityNotFoundException("User with id: " + userUuid + " not found!"));
+        Transaction transaction = transactionRepository.findByIdAndUser(id, user)
+                .orElseThrow(() -> new EntityNotFoundException("Transaction with id: " + id + " not found!"));
 
         //RETURN
-        return null;
+        return transactionMapper.toReadOnly(transaction);
     }
 
+    @Transactional
     @Override
     public TransactionReadOnlyDTO updateTransaction(Long id, TransactionUpdateDTO dto, UUID userUuid) {
         //VALIDATE
+        User user = userRepository.findByUuid(userUuid)
+                .orElseThrow(() -> new EntityNotFoundException("User with id: " + userUuid + " not found!"));
+        Transaction transaction = transactionRepository.findByIdAndUser(id, user)
+                .orElseThrow(() -> new EntityNotFoundException("Transaction with id: " + id + " not found!"));
+        Category category = dto.categoryId() != null
+                ? categoryRepository.findById(dto.categoryId())
+                    .orElseThrow(() -> new EntityNotFoundException("Category with id: " + dto.categoryId() + " not found!"))
+                : null;
 
         //PREPARE
+        transaction.setDescription(dto.description());
+        transaction.setTransactionDate(dto.transactionDate());
+        transaction.setCategory(category);
 
         //EXECUTE
+        Transaction updatedTransaction = transactionRepository.save(transaction);
 
         //RETURN
-        return null;
+        return transactionMapper.toReadOnly(updatedTransaction);
     }
 
     @Override
