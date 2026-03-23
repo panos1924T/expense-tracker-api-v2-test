@@ -214,8 +214,8 @@ public class TransactionService implements ITransactionService {
             case INCOME -> sourceAccount.setBalance(sourceAccount.getBalance().subtract(transaction.getAmount()));
             case EXPENSE -> sourceAccount.setBalance(sourceAccount.getBalance().add(transaction.getAmount()));
             case TRANSFER -> {
-                sourceAccount.setBalance(sourceAccount.getBalance().subtract(transaction.getAmount()));
-                targetAccount.setBalance(targetAccount.getBalance().add(transaction.getAmount()));
+                sourceAccount.setBalance(sourceAccount.getBalance().add(transaction.getAmount()));
+                targetAccount.setBalance(targetAccount.getBalance().subtract(transaction.getAmount()));
             }
             default -> throw new InvalidTransactionException("Unknown transaction type");
         }
