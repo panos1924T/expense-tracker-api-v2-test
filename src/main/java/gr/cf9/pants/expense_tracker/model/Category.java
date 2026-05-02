@@ -7,6 +7,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Entity
 @Getter
 @Setter
@@ -30,4 +33,7 @@ public class Category extends AbstractEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
     private Category parent;
+
+    @OneToMany(mappedBy = "category",fetch = FetchType.LAZY)
+    private Set<Transaction> transactions = new HashSet<>();
 }
