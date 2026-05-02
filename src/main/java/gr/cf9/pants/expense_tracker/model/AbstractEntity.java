@@ -1,8 +1,6 @@
 package gr.cf9.pants.expense_tracker.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.EntityListeners;
-import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,15 +11,22 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.Instant;
+import java.util.UUID;
 
 @MappedSuperclass       // no db table, just inheritance
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)  // +JpaAuditing -> automate auditing for fields: CreatedDate and LastModifiedDate
 @SQLRestriction("deleted = false")
 public abstract class AbstractEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(unique = true, nullable = false, updatable = false, columnDefinition = "UUID")
+    private UUID uuid;
 
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false, columnDefinition = "TIMESTAMPTZ")
@@ -40,5 +45,10 @@ public abstract class AbstractEntity {
     public void softDelete(Instant now) {
         this.deleted = true;
         this.deletedAt = now;
+    }
+
+    @PrePersist
+    public void initializeUuid() {
+        if (uuid == null) uuid = UUID.randomUUID();
     }
 }

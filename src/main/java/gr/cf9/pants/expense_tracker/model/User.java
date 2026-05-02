@@ -1,6 +1,7 @@
 package gr.cf9.pants.expense_tracker.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -27,14 +28,8 @@ import java.util.UUID;
 @Table(name = "users")
 public class User extends AbstractEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(unique = true, nullable = false, updatable = false)
-    private UUID uuid;
-
     @Column(unique = true, nullable = false)
+    @Email
     private String email;
 
     @Column(unique = true, nullable = false)
@@ -45,9 +40,4 @@ public class User extends AbstractEntity {
 
     @Column(nullable = false)
     private boolean active;
-
-    @PrePersist
-    public void initializeUuid() {
-        if (uuid == null) uuid = UUID.randomUUID();
-    }
 }
