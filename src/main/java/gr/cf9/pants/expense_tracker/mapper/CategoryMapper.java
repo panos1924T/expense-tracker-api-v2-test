@@ -16,8 +16,7 @@ public class CategoryMapper {
                 category.getName(),
                 category.getType(),
                 category.getParent() != null ? category.getParent().getId() : null,
-                category.getParent() != null ? category.getParent().getName() : null,
-                category.isSystemDefault()
+                category.getParent() != null ? category.getParent().getName() : null
         );
     }
 

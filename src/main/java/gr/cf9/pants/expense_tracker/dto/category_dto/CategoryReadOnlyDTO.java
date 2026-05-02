@@ -7,6 +7,5 @@ public record CategoryReadOnlyDTO(
         String name,
         TransactionType type,
         Long parentId,
-        String parentName,
-        boolean isSystemDefault
+        String parentName
 ) {}

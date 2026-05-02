@@ -1,12 +1,15 @@
 package gr.cf9.pants.expense_tracker.service;
 
+import gr.cf9.pants.expense_tracker.core.enums.TransactionType;
 import gr.cf9.pants.expense_tracker.core.exceptions.EntityAlreadyExistsException;
 import gr.cf9.pants.expense_tracker.core.exceptions.EntityNotFoundException;
 import gr.cf9.pants.expense_tracker.dto.user_dto.UserReadOnlyDTO;
 import gr.cf9.pants.expense_tracker.dto.user_dto.UserRegisterDTO;
 import gr.cf9.pants.expense_tracker.dto.user_dto.UserUpdateDTO;
 import gr.cf9.pants.expense_tracker.mapper.UserMapper;
+import gr.cf9.pants.expense_tracker.model.Category;
 import gr.cf9.pants.expense_tracker.model.User;
+import gr.cf9.pants.expense_tracker.repository.CategoryRepository;
 import gr.cf9.pants.expense_tracker.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -25,6 +29,7 @@ public class UserService implements IUserService{
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+    private final CategoryRepository categoryRepository;
 
     @Transactional
     @Override
@@ -45,8 +50,10 @@ public class UserService implements IUserService{
 
         //EXECUTE
         User savedUser = userRepository.save(user);
+        createDefaultCategories(savedUser);
 
         //RETURN
+
         return userMapper.toReadOnly(savedUser);
     }
 
@@ -94,4 +101,56 @@ public class UserService implements IUserService{
         return userMapper.toReadOnly(user);
     }
 
+
+    private void createDefaultCategories(User user) {
+
+        //Default categories for expenses
+        Category personal = new Category();
+        personal.setUser(user);
+        personal.setName("Personal");
+        personal.setType(TransactionType.EXPENSE);
+
+        Category home = new Category();
+        home.setUser(user);
+        home.setName("Home");
+        home.setType(TransactionType.EXPENSE);
+
+        Category buys = new Category();
+        buys.setUser(user);
+        buys.setName("Buys");
+        buys.setType(TransactionType.EXPENSE);
+
+        Category trans = new Category();
+        trans.setUser(user);
+        trans.setName("Transportation");
+        trans.setType(TransactionType.EXPENSE);
+
+        Category other = new Category();
+        other.setUser(user);
+        other.setName("Other");
+        other.setType(TransactionType.EXPENSE);
+
+        Category bills = new Category();
+        bills.setUser(user);
+        bills.setName("Bills");
+        bills.setType(TransactionType.EXPENSE);
+
+        //Default categories for income
+        Category salary = new Category();
+        salary.setUser(user);
+        salary.setName("Salary");
+        salary.setType(TransactionType.INCOME);
+
+        Category business = new Category();
+        business.setUser(user);
+        business.setName("Business");
+        business.setType(TransactionType.INCOME);
+
+        Category invest = new Category();
+        invest.setUser(user);
+        invest.setName("Investment");
+        invest.setType(TransactionType.INCOME);
+
+        categoryRepository.saveAll(List.of(personal,home,buys,trans,other,bills,salary,business,invest));
+    }
 }
