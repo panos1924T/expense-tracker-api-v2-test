@@ -40,10 +40,6 @@ public class UserService implements IUserService{
             throw new EntityAlreadyExistsException("Email already exists: " + dto.email());
         }
 
-        if (userRepository.existsByUsername(dto.username())) {
-            throw new EntityAlreadyExistsException("Username already exists: " + dto.username());
-        }
-
         //PREPARE
         String hashedPassword = passwordEncoder.encode(dto.password());
         User user = userMapper.toEntity(dto, hashedPassword);
@@ -69,13 +65,10 @@ public class UserService implements IUserService{
             throw new EntityAlreadyExistsException("Email already exists! " + dto.email());
         }
 
-        if (userRepository.existsByUsernameAndUuidNot(dto.username(), userUuid)) {
-            throw new EntityAlreadyExistsException("Username already exists! " + dto.username());
-        }
-
         //PREPARE
         user.setUsername(dto.username());
         user.setEmail(dto.email());
+        user.setPassword(passwordEncoder.encode(dto.password()));
 
         //EXECUTE
         User updatedUser = userRepository.save(user);
