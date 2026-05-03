@@ -37,7 +37,7 @@ public class Account extends AbstractEntity{
     @Column(name = "account_type", nullable = false)
     private AccountType accountType;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false, cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 }

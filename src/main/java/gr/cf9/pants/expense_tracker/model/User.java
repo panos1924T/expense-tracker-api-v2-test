@@ -9,7 +9,6 @@ import lombok.Setter;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
 
 /**
  * Represents a registered user in the application.
@@ -43,12 +42,9 @@ public class User extends AbstractEntity {
     @Column(nullable = false)
     private boolean active;
 
-    @OneToMany(mappedBy = "account", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "account")
     private Set<Account> accounts = new HashSet<>();
 
-    @OneToMany(mappedBy = "transaction", fetch = FetchType.LAZY)
-    private Set<Transaction> transactions = new HashSet<>();
-
-    @OneToMany(mappedBy = "category", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "category")
     private Set<Category> categories = new HashSet<>();
 }
