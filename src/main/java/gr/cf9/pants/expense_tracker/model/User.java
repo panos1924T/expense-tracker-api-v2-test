@@ -42,9 +42,9 @@ public class User extends AbstractEntity {
     @Column(nullable = false)
     private boolean active;
 
-    @OneToMany(mappedBy = "account")
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private Set<Account> accounts = new HashSet<>();
 
-    @OneToMany(mappedBy = "category")
+    @OneToMany(mappedBy = "user")
     private Set<Category> categories = new HashSet<>();
 }

@@ -29,9 +29,6 @@ public class Category extends AbstractEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @OneToMany(mappedBy = "category",fetch = FetchType.LAZY)
-    private Set<Transaction> transactions = new HashSet<>();
-
     // later usage
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")

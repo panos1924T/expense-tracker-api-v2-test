@@ -52,7 +52,7 @@ public class Transaction extends AbstractEntity{
     @Column(nullable = false)
     private LocalDate transactionDate;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
     private Category category;
 }
