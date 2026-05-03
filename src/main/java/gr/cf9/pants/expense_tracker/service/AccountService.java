@@ -1,6 +1,8 @@
 package gr.cf9.pants.expense_tracker.service;
 
+import gr.cf9.pants.expense_tracker.core.exceptions.EntityHasTransactionsException;
 import gr.cf9.pants.expense_tracker.core.exceptions.EntityNotFoundException;
+import gr.cf9.pants.expense_tracker.core.exceptions.InvalidArgumentException;
 import gr.cf9.pants.expense_tracker.core.exceptions.UnauthorizedException;
 import gr.cf9.pants.expense_tracker.dto.account_dto.AccountCreateDTO;
 import gr.cf9.pants.expense_tracker.dto.account_dto.AccountReadOnlyDTO;
@@ -9,6 +11,7 @@ import gr.cf9.pants.expense_tracker.mapper.AccountMapper;
 import gr.cf9.pants.expense_tracker.model.Account;
 import gr.cf9.pants.expense_tracker.model.User;
 import gr.cf9.pants.expense_tracker.repository.AccountRepository;
+import gr.cf9.pants.expense_tracker.repository.TransactionRepository;
 import gr.cf9.pants.expense_tracker.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +30,7 @@ public class AccountService implements IAccountService{
     private final AccountRepository accountRepository;
     private final UserRepository userRepository;
     private final AccountMapper accountMapper;
+    private final TransactionRepository transactionRepository;
 
     @Transactional
     @Override
@@ -76,6 +80,13 @@ public class AccountService implements IAccountService{
                 .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + "does not exist!"));
         Account account = accountRepository.findAccountByUuidAndUser(accountUuid, user)
                 .orElseThrow(() -> new UnauthorizedException("Unauthorized access to account with uuid " + accountUuid));
+
+        if (account.isDefault()) {
+            throw new InvalidArgumentException("Cannot delete default account!");
+        }
+        if (transactionRepository.existsTransByAccount(account)) {
+            throw new EntityHasTransactionsException("Cannot delete entity with existing transactions");
+        }
 
         //EXECUTE
         account.softDelete(Instant.now());

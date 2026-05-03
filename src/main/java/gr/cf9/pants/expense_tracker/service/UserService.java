@@ -158,6 +158,7 @@ public class UserService implements IUserService{
                 "Cash",
                 BigDecimal.ZERO,
                 AccountType.LIQUIDITY,
+                true,
                 user
         );
 

@@ -1,6 +1,7 @@
 package gr.cf9.pants.expense_tracker.service;
 
 import gr.cf9.pants.expense_tracker.core.enums.TransactionType;
+import gr.cf9.pants.expense_tracker.core.exceptions.EntityHasTransactionsException;
 import gr.cf9.pants.expense_tracker.core.exceptions.EntityNotFoundException;
 import gr.cf9.pants.expense_tracker.core.exceptions.UnauthorizedException;
 import gr.cf9.pants.expense_tracker.dto.category_dto.CategoryCreateDTO;
@@ -85,6 +86,10 @@ public class CategoryService implements ICategoryService{
                 .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + " does not exist!"));
         Category category = categoryRepository.findCategoryByUuidAndUser(categoryUuid, user)
                 .orElseThrow(() -> new UnauthorizedException("Unauthorized access to category with uuid: " + categoryUuid));
+
+        if (category.getTransactions().size() > 0) {
+            throw new EntityHasTransactionsException("Cannot delete entity with existing transactions");
+        }
 
         //EXECUTE
         category.softDelete(Instant.now());

@@ -23,4 +23,5 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
 
     Optional<Transaction> findTransByUuidAndUser(UUID uuid, User user);
 
+    boolean existsTransByAccount(Account account);
 }
