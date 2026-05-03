@@ -38,7 +38,7 @@ public class AccountService implements IAccountService{
 
         //VALIDATE
         User user = userRepository.findUserByUuid(userUuid)
-                .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + "does not exist!"));
+                .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + "not found!"));
 
         //PREPARE
         Account account = accountMapper.toEntity(dto, user);
@@ -56,9 +56,9 @@ public class AccountService implements IAccountService{
 
         //VALIDATE
         User user = userRepository.findUserByUuid(userUuid)
-                .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + "does not exist!"));
+                .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + "not found!"));
         Account account = accountRepository.findAccountByUuidAndUser(accountUuid, user)
-                .orElseThrow(() -> new UnauthorizedException("Unauthorized access to account with uuid " + accountUuid));
+                .orElseThrow(() -> new EntityNotFoundException("Account with uuid: " + accountUuid + "not found!"));
 
         //PREPARE
         account.setName(dto.name());
@@ -77,9 +77,9 @@ public class AccountService implements IAccountService{
 
         //VALIDATE
         User user = userRepository.findUserByUuid(userUuid)
-                .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + "does not exist!"));
+                .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + "not found!"));
         Account account = accountRepository.findAccountByUuidAndUser(accountUuid, user)
-                .orElseThrow(() -> new UnauthorizedException("Unauthorized access to account with uuid " + accountUuid));
+                .orElseThrow(() -> new EntityNotFoundException("Account with uuid: " + accountUuid + "not found!"));
 
         if (account.isDefault()) {
             throw new InvalidArgumentException("Cannot delete default account!");
@@ -98,7 +98,7 @@ public class AccountService implements IAccountService{
 
         //VALIDATE
         User user = userRepository.findUserByUuid(userUuid)
-                .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + "does not exist!"));
+                .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + "not found!"));
 
         //PREPARE
         List<Account> accounts = accountRepository.findAccountByUser(user);
@@ -114,9 +114,9 @@ public class AccountService implements IAccountService{
 
         //VALIDATE
         User user = userRepository.findUserByUuid(userUuid)
-                .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + "does not exist!"));
+                .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + "not found!"));
         Account account = accountRepository.findAccountByUuidAndUser(userUuid, user)
-                .orElseThrow(() -> new UnauthorizedException("Unauthorized access to account with uuid " + accountUuid));
+                .orElseThrow(() -> new EntityNotFoundException("Account with uuid: " + accountUuid + "not found!"));
 
         //RETURN
         return accountMapper.toReadOnly(account);

@@ -35,7 +35,7 @@ public class CategoryService implements ICategoryService{
     public CategoryReadOnlyDTO createCategory(CategoryCreateDTO dto, UUID userUuid) {
         //VALIDATE
         User user = userRepository.findUserByUuid(userUuid)
-                .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + " does not exist!"));
+                .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + " not found!"));
 
         //PREPARE
         Category category = categoryMapper.toEntity(dto, user);
@@ -57,9 +57,9 @@ public class CategoryService implements ICategoryService{
     public CategoryReadOnlyDTO updateCategory(UUID categoryUuid, CategoryUpdateDTO dto, UUID userUuid) {
         //VALIDATE
         User user = userRepository.findUserByUuid(userUuid)
-                .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + " does not exist!"));
+                .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + " not found!"));
         Category category = categoryRepository.findCategoryByUuidAndUser(categoryUuid, user)
-                .orElseThrow(() -> new UnauthorizedException("Unauthorized access to category with uuid: " + categoryUuid));
+                .orElseThrow(() -> new EntityNotFoundException("Category with uuid: " + categoryUuid + "not found!"));
 
 
         //PREPARE
@@ -83,9 +83,9 @@ public class CategoryService implements ICategoryService{
     public void deleteCategory(UUID categoryUuid, UUID userUuid) {
         //VALIDATE
         User user = userRepository.findUserByUuid(userUuid)
-                .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + " does not exist!"));
+                .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + " not found!"));
         Category category = categoryRepository.findCategoryByUuidAndUser(categoryUuid, user)
-                .orElseThrow(() -> new UnauthorizedException("Unauthorized access to category with uuid: " + categoryUuid));
+                .orElseThrow(() -> new EntityNotFoundException("Category with uuid: " + categoryUuid + "not found!"));
 
         if (category.getTransactions().size() > 0) {
             throw new EntityHasTransactionsException("Cannot delete entity with existing transactions");
@@ -100,9 +100,9 @@ public class CategoryService implements ICategoryService{
     public CategoryReadOnlyDTO getCategoryByUuid(UUID categoryUuid, UUID userUuid) {
         //VALIDATE
         User user = userRepository.findUserByUuid(userUuid)
-                .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + " does not exist!"));
+                .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + " not found!"));
         Category category = categoryRepository.findCategoryByUuidAndUser(categoryUuid, user)
-                .orElseThrow(() -> new UnauthorizedException("Unauthorized access to category with uuid: " + categoryUuid));
+                .orElseThrow(() -> new EntityNotFoundException("Category with uuid: " + categoryUuid + "not found!"));
 
         //RETURN
         return categoryMapper.toReadOnly(category);
@@ -112,7 +112,7 @@ public class CategoryService implements ICategoryService{
     public List<CategoryReadOnlyDTO> getAllCategories(UUID userUuid) {
         //VALIDATE
         User user = userRepository.findUserByUuid(userUuid)
-                .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + " does not exist!"));
+                .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + " not found!"));
 
         //PREPARE
         List<Category> categories = categoryRepository.findCategoryByUser(user);
@@ -127,7 +127,7 @@ public class CategoryService implements ICategoryService{
     public List<CategoryReadOnlyDTO> getCategoryByType(TransactionType type, UUID userUuid) {
         //VALIDATE
         User user = userRepository.findUserByUuid(userUuid)
-                .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + " does not exist!"));
+                .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + " not found!"));
 
         //PREPARE
         List<Category> categories = categoryRepository.findCategoryByUserAndType(user, type);

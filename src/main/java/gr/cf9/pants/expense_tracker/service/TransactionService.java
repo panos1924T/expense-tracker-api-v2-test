@@ -45,7 +45,7 @@ public class TransactionService implements ITransactionService {
                 .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + " not found!"));
 
         Account sourceAccount = accountRepository.findAccountByUuidAndUser(dto.sourceAccountUuid(), user)
-                .orElseThrow(() -> new UnauthorizedException("Unauthorized access to account with uuid " + dto.sourceAccountUuid()));
+                .orElseThrow(() -> new EntityNotFoundException("Account with uuid: " + dto.sourceAccountUuid() + "not found!"));
 
         if (dto.type() == TransactionType.TRANSFER) {
             throw new InvalidTransactionException("Use /transfer endpoint for transfers");
@@ -55,7 +55,7 @@ public class TransactionService implements ITransactionService {
             throw new ValidationException("Category is required for non-transfer transactions");
         }
 
-        Category category = categoryRepository.findCategoryByUuid(dto.categoryUuid())
+        Category category = categoryRepository.findCategoryByUuidAndUser(dto.categoryUuid(), user)
                 .orElseThrow(() -> new EntityNotFoundException("Category with uuid: " + dto.categoryUuid() + " not found!"));
 
         if (dto.type() == TransactionType.EXPENSE) {
@@ -90,10 +90,10 @@ public class TransactionService implements ITransactionService {
                 .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + " not found!"));
 
         Account sourceAccount = accountRepository.findAccountByUuidAndUser(dto.sourceAccountUuid(), user)
-                .orElseThrow(() -> new UnauthorizedException("Unauthorized access to account with uuid " + dto.sourceAccountUuid()));
+                .orElseThrow(() -> new EntityNotFoundException("Account with uuid: " + dto.sourceAccountUuid() + "not found!"));
 
         Account targetAccount = accountRepository.findAccountByUuidAndUser(dto.targetAccountUuid(), user)
-                .orElseThrow(() -> new UnauthorizedException("Unauthorized access to account with uuid " + dto.targetAccountUuid()));
+                .orElseThrow(() -> new EntityNotFoundException("Account with uuid: " + dto.targetAccountUuid() + "not found!"));
 
         if (sourceAccount.getBalance().compareTo(dto.amount()) < 0) {
             throw new InsufficientBalanceException("Insufficient balance!");

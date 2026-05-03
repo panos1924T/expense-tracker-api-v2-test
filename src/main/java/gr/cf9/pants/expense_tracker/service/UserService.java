@@ -87,7 +87,7 @@ public class UserService implements IUserService{
     @Override
     public void deleteUser(UUID uuid) {
         User user = userRepository.findUserByUuid(uuid)
-                .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + uuid + " doesn't exist."));
+                .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + uuid + " not found!"));
 
         user.softDelete(Instant.now());
         userRepository.save(user);
@@ -96,7 +96,7 @@ public class UserService implements IUserService{
     @Override
     public UserReadOnlyDTO getByUuid(UUID uuid) {
         User user = userRepository.findUserByUuid(uuid)
-                .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + uuid + " doesn't exist."));
+                .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + uuid + " not found!"));
         return userMapper.toReadOnly(user);
     }
 
