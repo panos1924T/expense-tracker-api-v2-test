@@ -1,5 +1,6 @@
 package gr.cf9.pants.expense_tracker.service;
 
+import gr.cf9.pants.expense_tracker.core.enums.AccountType;
 import gr.cf9.pants.expense_tracker.core.enums.TransactionType;
 import gr.cf9.pants.expense_tracker.core.exceptions.EntityAlreadyExistsException;
 import gr.cf9.pants.expense_tracker.core.exceptions.EntityNotFoundException;
@@ -7,8 +8,10 @@ import gr.cf9.pants.expense_tracker.dto.user_dto.UserReadOnlyDTO;
 import gr.cf9.pants.expense_tracker.dto.user_dto.UserRegisterDTO;
 import gr.cf9.pants.expense_tracker.dto.user_dto.UserUpdateDTO;
 import gr.cf9.pants.expense_tracker.mapper.UserMapper;
+import gr.cf9.pants.expense_tracker.model.Account;
 import gr.cf9.pants.expense_tracker.model.Category;
 import gr.cf9.pants.expense_tracker.model.User;
+import gr.cf9.pants.expense_tracker.repository.AccountRepository;
 import gr.cf9.pants.expense_tracker.repository.CategoryRepository;
 import gr.cf9.pants.expense_tracker.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +20,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -30,6 +34,7 @@ public class UserService implements IUserService{
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private final CategoryRepository categoryRepository;
+    private final AccountRepository accountRepository;
 
     @Transactional
     @Override
@@ -47,6 +52,7 @@ public class UserService implements IUserService{
         //EXECUTE
         User savedUser = userRepository.save(user);
         createDefaultCategories(savedUser);
+        createDefaultCashAccount(savedUser);
 
         //RETURN
 
@@ -145,5 +151,16 @@ public class UserService implements IUserService{
         invest.setType(TransactionType.INCOME);
 
         categoryRepository.saveAll(List.of(personal,home,buys,trans,other,bills,salary,business,invest));
+    }
+
+    private void createDefaultCashAccount(User user) {
+        Account cashDefault = new Account(
+                "Cash",
+                BigDecimal.ZERO,
+                AccountType.LIQUIDITY,
+                user
+        );
+
+        accountRepository.save(cashDefault);
     }
 }
