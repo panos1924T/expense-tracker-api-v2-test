@@ -18,15 +18,15 @@ public interface ITransactionService {
 
         TransactionReadOnlyDTO createTransfer(TransferCreateDTO dto, UUID userUuid) throws InsufficientBalanceException;
 
-        TransactionReadOnlyDTO getTransaction(Long id, UUID userUuid);
+        TransactionReadOnlyDTO getTransaction(UUID transUuid, UUID userUuid);
 
-        TransactionReadOnlyDTO updateTransaction(Long id, TransactionUpdateDTO dto, UUID userUuid);
+        TransactionReadOnlyDTO updateTransaction(UUID transUuid, TransactionUpdateDTO dto, UUID userUuid);
 
         List<TransactionReadOnlyDTO> getAllTransactions(UUID userUuid, Pageable pageable);
 
-        List<TransactionReadOnlyDTO> getTransactionByAccount(Long accountId, UUID userUuid, Pageable pageable);
+        List<TransactionReadOnlyDTO> getTransactionByAccount(UUID accountUuid, UUID userUuid, Pageable pageable);
 
         List<TransactionReadOnlyDTO> getTransactionByType(TransactionType type, UUID userUuid, Pageable pageable);
 
-        void deleteTransaction(Long id, UUID userUuid) throws InvalidTransactionException;
+        void deleteTransaction(UUID transUuid, UUID userUuid) throws InvalidTransactionException;
 }

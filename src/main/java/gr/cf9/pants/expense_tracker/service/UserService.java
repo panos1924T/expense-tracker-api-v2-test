@@ -36,7 +36,7 @@ public class UserService implements IUserService{
     public UserReadOnlyDTO register(UserRegisterDTO dto) {
 
         //VALIDATE
-        if (userRepository.existsByEmail(dto.email())) {
+        if (userRepository.existsUserByEmail(dto.email())) {
             throw new EntityAlreadyExistsException("Email already exists: " + dto.email());
         }
 
@@ -58,10 +58,10 @@ public class UserService implements IUserService{
     public UserReadOnlyDTO update(UUID userUuid, UserUpdateDTO dto) {
 
         //VALIDATE
-        User user = userRepository.findByUuid(userUuid)
+        User user = userRepository.findUserByUuid(userUuid)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with uuid: " + userUuid));
 
-        if (userRepository.existsByEmailAndUuidNot(dto.email(), userUuid)) {
+        if (userRepository.existsUserByEmailAndUuidNot(dto.email(), userUuid)) {
             throw new EntityAlreadyExistsException("Email already exists! " + dto.email());
         }
 
@@ -80,7 +80,7 @@ public class UserService implements IUserService{
     @Transactional
     @Override
     public void deleteUser(UUID uuid) {
-        User user = userRepository.findByUuid(uuid)
+        User user = userRepository.findUserByUuid(uuid)
                 .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + uuid + " doesn't exist."));
 
         user.softDelete(Instant.now());
@@ -89,7 +89,7 @@ public class UserService implements IUserService{
 
     @Override
     public UserReadOnlyDTO getByUuid(UUID uuid) {
-        User user = userRepository.findByUuid(uuid)
+        User user = userRepository.findUserByUuid(uuid)
                 .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + uuid + " doesn't exist."));
         return userMapper.toReadOnly(user);
     }

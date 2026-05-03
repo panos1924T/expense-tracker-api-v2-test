@@ -8,13 +8,16 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 public interface CategoryRepository extends JpaRepository<Category, Long> {
 
-    List<Category> findByUserAndType(User user, TransactionType type);
+    List<Category> findCategoryByUserAndType(User user, TransactionType type);
 
-    List<Category> findByUser(User user);
+    List<Category> findCategoryByUser(User user);
 
-    Optional<Category> findByIdAndUser(Long id, User user);
+    Optional<Category> findCategoryByUuidAndUser(UUID uuid, User user);
+
+    Optional<Category> findCategoryByUuid(UUID categoryUuid)
 }

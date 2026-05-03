@@ -10,16 +10,17 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
 
-    Page<Transaction> findByUser(User user, Pageable pageable);
+    Page<Transaction> findTransByUser(User user, Pageable pageable);
 
-    Page<Transaction> findByUserAndSourceAccount(User user, Account account, Pageable pageable);
+    Page<Transaction> findTransByUserAndSourceAccount(User user, Account account, Pageable pageable);
 
-    Page<Transaction> findByUserAndType(User user, TransactionType type, Pageable pageable);
+    Page<Transaction> findTransByUserAndType(User user, TransactionType type, Pageable pageable);
 
-    Optional<Transaction> findByIdAndUser(Long id, User user);
+    Optional<Transaction> findTransByUuidAndUser(UUID uuid, User user);
 
 }

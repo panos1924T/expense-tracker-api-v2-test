@@ -12,11 +12,11 @@ public interface ICategoryService {
 
     CategoryReadOnlyDTO createCategory(CategoryCreateDTO dto, UUID userUuid);
 
-    CategoryReadOnlyDTO updateCategory(Long id, CategoryUpdateDTO dto, UUID userUuid);
+    CategoryReadOnlyDTO updateCategory(UUID categoryUuid, CategoryUpdateDTO dto, UUID userUuid);
 
-    void deleteCategory(Long id, UUID userUuid);
+    void deleteCategory(UUID categoryUuid, UUID userUuid);
 
-    CategoryReadOnlyDTO getCategoryById(Long id, UUID userUuid);
+    CategoryReadOnlyDTO getCategoryByUuid(UUID categoryUuid, UUID userUuid);
 
     List<CategoryReadOnlyDTO> getAllCategories(UUID userUuid);
 

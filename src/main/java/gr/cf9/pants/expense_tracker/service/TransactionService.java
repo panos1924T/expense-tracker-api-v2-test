@@ -41,22 +41,22 @@ public class TransactionService implements ITransactionService {
     @Override
     public TransactionReadOnlyDTO createTransaction(TransactionCreateDTO dto, UUID userUuid) throws InvalidTransactionException, InsufficientBalanceException {
         //VALIDATE
-        User user = userRepository.findByUuid(userUuid)
-                .orElseThrow(() -> new EntityNotFoundException("User with id: " + userUuid + " not found!"));
+        User user = userRepository.findUserByUuid(userUuid)
+                .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + " not found!"));
 
-        Account sourceAccount = accountRepository.findByIdAndUser(dto.sourceAccountId(), user)
-                .orElseThrow(() -> new UnauthorizedException("Unauthorized access to account with id " + dto.sourceAccountId()));
+        Account sourceAccount = accountRepository.findAccountByUuidAndUser(dto.sourceAccountUuid(), user)
+                .orElseThrow(() -> new UnauthorizedException("Unauthorized access to account with uuid " + dto.sourceAccountUuid()));
 
         if (dto.type() == TransactionType.TRANSFER) {
             throw new InvalidTransactionException("Use /transfer endpoint for transfers");
         }
 
-        if (dto.categoryId() == null) {
+        if (dto.categoryUuid() == null) {
             throw new ValidationException("Category is required for non-transfer transactions");
         }
 
-        Category category = categoryRepository.findById(dto.categoryId())
-                .orElseThrow(() -> new EntityNotFoundException("Category with id: " + dto.categoryId() + " not found!"));
+        Category category = categoryRepository.findCategoryByUuid(dto.categoryUuid())
+                .orElseThrow(() -> new EntityNotFoundException("Category with uuid: " + dto.categoryUuid() + " not found!"));
 
         if (dto.type() == TransactionType.EXPENSE) {
             if (sourceAccount.getBalance().compareTo(dto.amount()) < 0) {
@@ -86,14 +86,14 @@ public class TransactionService implements ITransactionService {
     @Override
     public TransactionReadOnlyDTO createTransfer(TransferCreateDTO dto, UUID userUuid) throws InsufficientBalanceException {
         //VALIDATE
-        User user = userRepository.findByUuid(userUuid)
-                .orElseThrow(() -> new EntityNotFoundException("User with id: " + userUuid + " not found!"));
+        User user = userRepository.findUserByUuid(userUuid)
+                .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + " not found!"));
 
-        Account sourceAccount = accountRepository.findByIdAndUser(dto.sourceAccountId(), user)
-                .orElseThrow(() -> new UnauthorizedException("Unauthorized access to account with id " + dto.sourceAccountId()));
+        Account sourceAccount = accountRepository.findAccountByUuidAndUser(dto.sourceAccountUuid(), user)
+                .orElseThrow(() -> new UnauthorizedException("Unauthorized access to account with uuid " + dto.sourceAccountUuid()));
 
-        Account targetAccount = accountRepository.findByIdAndUser(dto.targetAccountId(), user)
-                .orElseThrow(() -> new UnauthorizedException("Unauthorized access to account with id " + dto.targetAccountId()));
+        Account targetAccount = accountRepository.findAccountByUuidAndUser(dto.targetAccountUuid(), user)
+                .orElseThrow(() -> new UnauthorizedException("Unauthorized access to account with uuid " + dto.targetAccountUuid()));
 
         if (sourceAccount.getBalance().compareTo(dto.amount()) < 0) {
             throw new InsufficientBalanceException("Insufficient balance!");
@@ -117,12 +117,12 @@ public class TransactionService implements ITransactionService {
     }
 
     @Override
-    public TransactionReadOnlyDTO getTransaction(Long id, UUID userUuid) {
+    public TransactionReadOnlyDTO getTransaction(UUID transUuid, UUID userUuid) {
         //VALIDATE
-        User user = userRepository.findByUuid(userUuid)
-                .orElseThrow(() -> new EntityNotFoundException("User with id: " + userUuid + " not found!"));
-        Transaction transaction = transactionRepository.findByIdAndUser(id, user)
-                .orElseThrow(() -> new EntityNotFoundException("Transaction with id: " + id + " not found!"));
+        User user = userRepository.findUserByUuid(userUuid)
+                .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + " not found!"));
+        Transaction transaction = transactionRepository.findTransByUuidAndUser(transUuid, user)
+                .orElseThrow(() -> new EntityNotFoundException("Transaction with uuid: " + transUuid + " not found!"));
 
         //RETURN
         return transactionMapper.toReadOnly(transaction);
@@ -130,15 +130,15 @@ public class TransactionService implements ITransactionService {
 
     @Transactional
     @Override
-    public TransactionReadOnlyDTO updateTransaction(Long id, TransactionUpdateDTO dto, UUID userUuid) {
+    public TransactionReadOnlyDTO updateTransaction(UUID transUuid, TransactionUpdateDTO dto, UUID userUuid) {
         //VALIDATE
-        User user = userRepository.findByUuid(userUuid)
-                .orElseThrow(() -> new EntityNotFoundException("User with id: " + userUuid + " not found!"));
-        Transaction transaction = transactionRepository.findByIdAndUser(id, user)
-                .orElseThrow(() -> new EntityNotFoundException("Transaction with id: " + id + " not found!"));
+        User user = userRepository.findUserByUuid(userUuid)
+                .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + " not found!"));
+        Transaction transaction = transactionRepository.findTransByUuidAndUser(transUuid, user)
+                .orElseThrow(() -> new EntityNotFoundException("Transaction with uuid: " + transUuid + " not found!"));
         Category category = dto.categoryId() != null
                 ? categoryRepository.findById(dto.categoryId())
-                    .orElseThrow(() -> new EntityNotFoundException("Category with id: " + dto.categoryId() + " not found!"))
+                    .orElseThrow(() -> new EntityNotFoundException("Category with uuid: " + dto.categoryId() + " not found!"))
                 : null;
 
         //PREPARE
@@ -156,11 +156,11 @@ public class TransactionService implements ITransactionService {
     @Override
     public List<TransactionReadOnlyDTO> getAllTransactions(UUID userUuid, Pageable pageable) {
         //VALIDATE
-        User user = userRepository.findByUuid(userUuid)
-                .orElseThrow(() -> new EntityNotFoundException("User with id: " + userUuid + " not found!"));
+        User user = userRepository.findUserByUuid(userUuid)
+                .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + " not found!"));
 
         //RETURN
-        return transactionRepository.findByUser(user, pageable)
+        return transactionRepository.findTransByUser(user, pageable)
                 .getContent()
                 .stream()
                 .map(transactionMapper::toReadOnly)
@@ -168,15 +168,15 @@ public class TransactionService implements ITransactionService {
     }
 
     @Override
-    public List<TransactionReadOnlyDTO> getTransactionByAccount(Long accountId, UUID userUuid, Pageable pageable) {
+    public List<TransactionReadOnlyDTO> getTransactionByAccount(UUID accountUuid, UUID userUuid, Pageable pageable) {
         //VALIDATE
-        User user = userRepository.findByUuid(userUuid)
-                .orElseThrow(() -> new EntityNotFoundException("User with id: " + userUuid + " not found!"));
-        Account account = accountRepository.findByIdAndUser(accountId, user)
-                .orElseThrow(() -> new EntityNotFoundException("Account with id: " + accountId + " not found!"));
+        User user = userRepository.findUserByUuid(userUuid)
+                .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + " not found!"));
+        Account account = accountRepository.findAccountByUuidAndUser(accountUuid, user)
+                .orElseThrow(() -> new EntityNotFoundException("Account with uuid: " + accountUuid + " not found!"));
 
         //RETURN
-        return transactionRepository.findByUserAndSourceAccount(user, account, pageable)
+        return transactionRepository.findTransByUserAndSourceAccount(user, account, pageable)
                 .getContent()
                 .stream()
                 .map(transactionMapper::toReadOnly)
@@ -186,11 +186,11 @@ public class TransactionService implements ITransactionService {
     @Override
     public List<TransactionReadOnlyDTO> getTransactionByType(TransactionType type, UUID userUuid, Pageable pageable) {
         //VALIDATE
-        User user = userRepository.findByUuid(userUuid)
-                .orElseThrow(() -> new EntityNotFoundException("User with id: " + userUuid + " not found!"));
+        User user = userRepository.findUserByUuid(userUuid)
+                .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + " not found!"));
 
         //RETURN
-        return transactionRepository.findByUserAndType(user, type, pageable)
+        return transactionRepository.findTransByUserAndType(user, type, pageable)
                 .getContent()
                 .stream()
                 .map(transactionMapper::toReadOnly)
@@ -199,12 +199,12 @@ public class TransactionService implements ITransactionService {
 
     @Transactional
     @Override
-    public void deleteTransaction(Long id, UUID userUuid) throws InvalidTransactionException {
+    public void deleteTransaction(UUID transUuid, UUID userUuid) throws InvalidTransactionException {
         //VALIDATE
-        User user = userRepository.findByUuid(userUuid)
-                .orElseThrow(() -> new EntityNotFoundException("User with id: " + userUuid + " not found!"));
-        Transaction transaction = transactionRepository.findByIdAndUser(id, user)
-                .orElseThrow(() -> new EntityNotFoundException("Transaction with id: " + id + " not found!"));
+        User user = userRepository.findUserByUuid(userUuid)
+                .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + " not found!"));
+        Transaction transaction = transactionRepository.findTransByUuidAndUser(transUuid, user)
+                .orElseThrow(() -> new EntityNotFoundException("Transaction with uuid: " + transUuid + " not found!"));
 
         //PREPARE
         Account sourceAccount = transaction.getSourceAccount();

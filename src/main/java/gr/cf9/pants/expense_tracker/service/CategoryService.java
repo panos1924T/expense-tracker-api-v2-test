@@ -33,7 +33,7 @@ public class CategoryService implements ICategoryService{
     @Override
     public CategoryReadOnlyDTO createCategory(CategoryCreateDTO dto, UUID userUuid) {
         //VALIDATE
-        User user = userRepository.findByUuid(userUuid)
+        User user = userRepository.findUserByUuid(userUuid)
                 .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + " does not exist!"));
 
         //PREPARE
@@ -53,12 +53,12 @@ public class CategoryService implements ICategoryService{
 
     @Transactional
     @Override
-    public CategoryReadOnlyDTO updateCategory(Long id, CategoryUpdateDTO dto, UUID userUuid) {
+    public CategoryReadOnlyDTO updateCategory(UUID categoryUuid, CategoryUpdateDTO dto, UUID userUuid) {
         //VALIDATE
-        User user = userRepository.findByUuid(userUuid)
+        User user = userRepository.findUserByUuid(userUuid)
                 .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + " does not exist!"));
-        Category category = categoryRepository.findByIdAndUser(id, user)
-                .orElseThrow(() -> new UnauthorizedException("Unauthorized access to category with id: " + id));
+        Category category = categoryRepository.findCategoryByUuidAndUser(categoryUuid, user)
+                .orElseThrow(() -> new UnauthorizedException("Unauthorized access to category with uuid: " + categoryUuid));
 
 
         //PREPARE
@@ -79,12 +79,12 @@ public class CategoryService implements ICategoryService{
 
     @Transactional
     @Override
-    public void deleteCategory(Long id, UUID userUuid) {
+    public void deleteCategory(UUID categoryUuid, UUID userUuid) {
         //VALIDATE
-        User user = userRepository.findByUuid(userUuid)
+        User user = userRepository.findUserByUuid(userUuid)
                 .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + " does not exist!"));
-        Category category = categoryRepository.findByIdAndUser(id, user)
-                .orElseThrow(() -> new UnauthorizedException("Unauthorized access to category with id: " + id));
+        Category category = categoryRepository.findCategoryByUuidAndUser(categoryUuid, user)
+                .orElseThrow(() -> new UnauthorizedException("Unauthorized access to category with uuid: " + categoryUuid));
 
         //EXECUTE
         category.softDelete(Instant.now());
@@ -92,12 +92,12 @@ public class CategoryService implements ICategoryService{
     }
 
     @Override
-    public CategoryReadOnlyDTO getCategoryById(Long id, UUID userUuid) {
+    public CategoryReadOnlyDTO getCategoryByUuid(UUID categoryUuid, UUID userUuid) {
         //VALIDATE
-        User user = userRepository.findByUuid(userUuid)
+        User user = userRepository.findUserByUuid(userUuid)
                 .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + " does not exist!"));
-        Category category = categoryRepository.findByIdAndUser(id, user)
-                .orElseThrow(() -> new UnauthorizedException("Unauthorized access to category with id: " + id));
+        Category category = categoryRepository.findCategoryByUuidAndUser(categoryUuid, user)
+                .orElseThrow(() -> new UnauthorizedException("Unauthorized access to category with uuid: " + categoryUuid));
 
         //RETURN
         return categoryMapper.toReadOnly(category);
@@ -106,11 +106,11 @@ public class CategoryService implements ICategoryService{
     @Override
     public List<CategoryReadOnlyDTO> getAllCategories(UUID userUuid) {
         //VALIDATE
-        User user = userRepository.findByUuid(userUuid)
+        User user = userRepository.findUserByUuid(userUuid)
                 .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + " does not exist!"));
 
         //PREPARE
-        List<Category> categories = categoryRepository.findByUser(user);
+        List<Category> categories = categoryRepository.findCategoryByUser(user);
 
         //EXECUTE & RETURN
         return categories.stream()
@@ -121,11 +121,11 @@ public class CategoryService implements ICategoryService{
     @Override
     public List<CategoryReadOnlyDTO> getCategoryByType(TransactionType type, UUID userUuid) {
         //VALIDATE
-        User user = userRepository.findByUuid(userUuid)
+        User user = userRepository.findUserByUuid(userUuid)
                 .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + " does not exist!"));
 
         //PREPARE
-        List<Category> categories = categoryRepository.findByUserAndType(user, type);
+        List<Category> categories = categoryRepository.findCategoryByUserAndType(user, type);
 
         //EXECUTE & RETURN
         return categories.stream()

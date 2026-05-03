@@ -12,11 +12,11 @@ public interface IAccountService {
 
     AccountReadOnlyDTO createAccount(AccountCreateDTO dto, UUID userUuid);
 
-    AccountReadOnlyDTO updateAccount(Long id, AccountUpdateDTO dto, UUID userUuid);
+    AccountReadOnlyDTO updateAccount(UUID accountUuid, AccountUpdateDTO dto, UUID userUuid);
 
-    void deleteAccount(Long id, UUID userUuid);
+    void deleteAccount(UUID accountUuid, UUID userUuid);
 
     List<AccountReadOnlyDTO> getAllAccounts(UUID userUuid);
 
-    AccountReadOnlyDTO getAccount(Long id, UUID userUuid);
+    AccountReadOnlyDTO getAccount(UUID accountUuid, UUID userUuid);
 }

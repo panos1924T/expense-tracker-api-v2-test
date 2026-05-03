@@ -33,7 +33,7 @@ public class AccountService implements IAccountService{
     public AccountReadOnlyDTO createAccount(AccountCreateDTO dto, UUID userUuid) {
 
         //VALIDATE
-        User user = userRepository.findByUuid(userUuid)
+        User user = userRepository.findUserByUuid(userUuid)
                 .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + "does not exist!"));
 
         //PREPARE
@@ -48,13 +48,13 @@ public class AccountService implements IAccountService{
 
     @Transactional
     @Override
-    public AccountReadOnlyDTO updateAccount(Long id, AccountUpdateDTO dto, UUID userUuid) {
+    public AccountReadOnlyDTO updateAccount(UUID accountUuid, AccountUpdateDTO dto, UUID userUuid) {
 
         //VALIDATE
-        User user = userRepository.findByUuid(userUuid)
+        User user = userRepository.findUserByUuid(userUuid)
                 .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + "does not exist!"));
-        Account account = accountRepository.findByIdAndUser(id, user)
-                .orElseThrow(() -> new UnauthorizedException("Unauthorized access to account with id " + id));
+        Account account = accountRepository.findAccountByUuidAndUser(accountUuid, user)
+                .orElseThrow(() -> new UnauthorizedException("Unauthorized access to account with uuid " + accountUuid));
 
         //PREPARE
         account.setName(dto.name());
@@ -69,13 +69,13 @@ public class AccountService implements IAccountService{
 
     @Transactional
     @Override
-    public void deleteAccount(Long id, UUID userUuid) {
+    public void deleteAccount(UUID accountUuid, UUID userUuid) {
 
         //VALIDATE
-        User user = userRepository.findByUuid(userUuid)
+        User user = userRepository.findUserByUuid(userUuid)
                 .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + "does not exist!"));
-        Account account = accountRepository.findByIdAndUser(id, user)
-                .orElseThrow(() -> new UnauthorizedException("Unauthorized access to account with id " + id));
+        Account account = accountRepository.findAccountByUuidAndUser(accountUuid, user)
+                .orElseThrow(() -> new UnauthorizedException("Unauthorized access to account with uuid " + accountUuid));
 
         //EXECUTE
         account.softDelete(Instant.now());
@@ -86,11 +86,11 @@ public class AccountService implements IAccountService{
     public List<AccountReadOnlyDTO> getAllAccounts(UUID userUuid) {
 
         //VALIDATE
-        User user = userRepository.findByUuid(userUuid)
+        User user = userRepository.findUserByUuid(userUuid)
                 .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + "does not exist!"));
 
         //PREPARE
-        List<Account> accounts = accountRepository.findByUser(user);
+        List<Account> accounts = accountRepository.findAccountByUser(user);
 
         //EXECUTE AND RETURN
         return accounts.stream()
@@ -99,13 +99,13 @@ public class AccountService implements IAccountService{
     }
 
     @Override
-    public AccountReadOnlyDTO getAccount(Long id, UUID userUuid) {
+    public AccountReadOnlyDTO getAccount(UUID accountUuid, UUID userUuid) {
 
         //VALIDATE
-        User user = userRepository.findByUuid(userUuid)
+        User user = userRepository.findUserByUuid(userUuid)
                 .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + "does not exist!"));
-        Account account = accountRepository.findByIdAndUser(id, user)
-                .orElseThrow(() -> new UnauthorizedException("Unauthorized access to account with id " + id));
+        Account account = accountRepository.findAccountByUuidAndUser(userUuid, user)
+                .orElseThrow(() -> new UnauthorizedException("Unauthorized access to account with uuid " + accountUuid));
 
         //RETURN
         return accountMapper.toReadOnly(account);

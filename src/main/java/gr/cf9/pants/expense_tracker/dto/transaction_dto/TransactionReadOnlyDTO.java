@@ -5,18 +5,19 @@ import gr.cf9.pants.expense_tracker.core.enums.TransactionType;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.UUID;
 
 public record TransactionReadOnlyDTO(
-        Long id,
+        UUID uuid,
         BigDecimal amount,
         LocalDate transactionDate,
         String description,
         TransactionType type,
-        Long sourceAccountId,
+        UUID sourceAccountUuid,
         String sourceAccountName,
-        Long targetAccountId,
+        UUID targetAccountUuid,
         String targetAccountName,
-        Long categoryId,
+        UUID categoryUuid,
         String categoryName,
         Instant createdAt,
         Instant updatedAt
