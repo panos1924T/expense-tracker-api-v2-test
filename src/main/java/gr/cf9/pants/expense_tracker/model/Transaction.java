@@ -41,11 +41,11 @@ public class Transaction extends AbstractEntity{
     @Column(nullable = false)
     private TransactionType type;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "source_account_id", nullable = false)
     private Account sourceAccount;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "target_account_id")
     private Account targetAccount;
 

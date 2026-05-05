@@ -38,7 +38,7 @@ public class Account extends AbstractEntity{
     private AccountType accountType;
 
     @Column(nullable = false, updatable = false)
-    private boolean isDefault;
+    private boolean defaultAccount;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
