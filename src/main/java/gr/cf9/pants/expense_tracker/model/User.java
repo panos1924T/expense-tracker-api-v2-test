@@ -33,7 +33,7 @@ public class User extends AbstractEntity {
     @Email
     private String email;
 
-    @Column(unique = true, nullable = false)
+    @Column(unique = true, nullable = false, length = 50)
     private String username;
 
     @Column(nullable = false)

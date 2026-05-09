@@ -24,17 +24,24 @@ import java.math.BigDecimal;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "accounts")
+@Table(name = "accounts",
+        uniqueConstraints = {
+            @UniqueConstraint(
+                name = "uk_accounts_name_user",
+                columnNames = {"name", "user_id"}
+            )
+        }
+)
 public class Account extends AbstractEntity{
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 50)
     private String name;
 
     @Column(nullable = false, precision = 19, scale = 4)
     private BigDecimal balance = BigDecimal.ZERO;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "account_type", nullable = false)
+    @Column(name = "account_type", nullable = false, length = 50)
     private AccountType accountType;
 
     @Column(nullable = false, updatable = false)
