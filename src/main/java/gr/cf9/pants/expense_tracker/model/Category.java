@@ -15,14 +15,21 @@ import java.util.Set;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "categories")
+@Table(name = "categories",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uk_categories_name_user",
+                        columnNames= {"name", "user_id"}
+                )
+        }
+        )
 public class Category extends AbstractEntity {
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 50)
     private String name;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "transaction_type", nullable = false)
+    @Column(name = "transaction_type", nullable = false, length = 50)
     private TransactionType type;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
