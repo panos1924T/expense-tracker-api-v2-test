@@ -31,15 +31,18 @@ import java.time.LocalDate;
 @Table(name = "transactions")
 public class Transaction extends AbstractEntity{
 
+    @Column(nullable = false)
+    private LocalDate transactionDate;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "transaction_type", nullable = false, length = 50)
+    private TransactionType type;
+
     @Column(nullable = false, precision = 19, scale = 4)
     @DecimalMin(value = "0.01", message = "Amount must be positive!")
     private BigDecimal amount;
 
     private String description;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private TransactionType type;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "source_account_id", nullable = false)
@@ -48,9 +51,6 @@ public class Transaction extends AbstractEntity{
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "target_account_id")
     private Account targetAccount;
-
-    @Column(nullable = false)
-    private LocalDate transactionDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
