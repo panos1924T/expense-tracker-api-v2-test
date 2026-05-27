@@ -65,7 +65,7 @@ public class TransactionService implements ITransactionService {
         }
 
         //PREPARE
-        Transaction transaction = transactionMapper.toEntity(dto, user, sourceAccount, category);
+        Transaction transaction = transactionMapper.toEntity(dto, sourceAccount, category);
         BigDecimal newBalance;
         if (dto.type() == TransactionType.INCOME) {
             newBalance = sourceAccount.getBalance().add(dto.amount());
@@ -100,7 +100,7 @@ public class TransactionService implements ITransactionService {
         }
 
         //PREPARE
-        Transaction transaction = transactionMapper.toEntity(dto, user, sourceAccount, targetAccount);
+        Transaction transaction = transactionMapper.toEntity(dto, sourceAccount, targetAccount);
         BigDecimal newSourceBalance;
         BigDecimal newTargetBalance;
 

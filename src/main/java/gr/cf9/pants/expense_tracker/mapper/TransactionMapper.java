@@ -15,18 +15,18 @@ public class TransactionMapper {
 
     public TransactionReadOnlyDTO toReadOnly (Transaction transaction) {
         return new TransactionReadOnlyDTO(
-                transaction.getId(),
+                transaction.getUuid(),
                 transaction.getAmount(),
                 transaction.getTransactionDate(),
                 transaction.getDescription(),
                 transaction.getType(),
-                transaction.getSourceAccount().getId(),
+                transaction.getSourceAccount().getUuid(),
                 transaction.getSourceAccount().getName(),
 
-                transaction.getTargetAccount() != null ? transaction.getTargetAccount().getId() : null,
+                transaction.getTargetAccount() != null ? transaction.getTargetAccount().getUuid() : null,
                 transaction.getTargetAccount() != null ? transaction.getTargetAccount().getName() : null,
 
-                transaction.getCategory() != null ? transaction.getCategory().getId() : null,
+                transaction.getCategory() != null ? transaction.getCategory().getUuid() : null,
                 transaction.getCategory() != null ? transaction.getCategory().getName() : null,
 
                 transaction.getCreatedAt(),
@@ -34,9 +34,8 @@ public class TransactionMapper {
         );
     }
 
-    public Transaction toEntity(TransactionCreateDTO dto, User user, Account sourceAccount, Category category) {
+    public Transaction toEntity(TransactionCreateDTO dto, Account sourceAccount, Category category) {
         Transaction transaction = new Transaction();
-        transaction.setUser(user);
         transaction.setSourceAccount(sourceAccount);
         transaction.setCategory(category);
         transaction.setType(dto.type());
@@ -46,9 +45,8 @@ public class TransactionMapper {
         return transaction;
     }
 
-    public Transaction toEntity(TransferCreateDTO dto, User user, Account sourceAccount, Account targetAccount) {
+    public Transaction toEntity(TransferCreateDTO dto, Account sourceAccount, Account targetAccount) {
         Transaction transaction = new Transaction();
-        transaction.setUser(user);
         transaction.setSourceAccount(sourceAccount);
         transaction.setTargetAccount(targetAccount);
         transaction.setType(TransactionType.TRANSFER);
