@@ -11,6 +11,7 @@ import gr.cf9.pants.expense_tracker.mapper.CategoryMapper;
 import gr.cf9.pants.expense_tracker.model.Category;
 import gr.cf9.pants.expense_tracker.model.User;
 import gr.cf9.pants.expense_tracker.repository.CategoryRepository;
+import gr.cf9.pants.expense_tracker.repository.TransactionRepository;
 import gr.cf9.pants.expense_tracker.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +30,7 @@ public class CategoryService implements ICategoryService{
     private final CategoryMapper categoryMapper;
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
+    private final TransactionRepository transactionRepository;
 
     @Transactional
     @Override
@@ -87,7 +89,7 @@ public class CategoryService implements ICategoryService{
         Category category = categoryRepository.findCategoryByUuidAndUser(categoryUuid, user)
                 .orElseThrow(() -> new EntityNotFoundException("Category with uuid: " + categoryUuid + "not found!"));
 
-        if (category.getTransactions().size() > 0) {
+        if (transactionRepository.existsTransByCategory(category)) {
             throw new EntityHasTransactionsException("Cannot delete entity with existing transactions");
         }
 
