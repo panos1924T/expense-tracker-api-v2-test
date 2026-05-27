@@ -36,7 +36,7 @@ CREATE TABLE accounts (
     CONSTRAINT uk_accounts_name_user    UNIQUE (name, user_id),
     CONSTRAINT fk_accounts_user
         FOREIGN KEY (user_id) REFERENCES users (id)
-        ON DELETE CASCADE
+        ON DELETE RESTRICT
 );
 
 CREATE INDEX ix_accounts_deleted ON accounts (deleted) WHERE deleted = false;
@@ -59,7 +59,7 @@ CREATE TABLE categories (
     CONSTRAINT uk_categories_name_user  UNIQUE (name, user_id),
     CONSTRAINT fk_categories_user
                         FOREIGN KEY (user_id) REFERENCES users (id)
-                        ON DELETE CASCADE ,
+                        ON DELETE RESTRICT,
     CONSTRAINT fk_categories_parent
                         FOREIGN KEY (parent_id) REFERENCES categories (id)
                         ON DELETE RESTRICT
