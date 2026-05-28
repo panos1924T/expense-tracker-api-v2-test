@@ -17,4 +17,6 @@ public interface IUserService {
     UserReadOnlyDTO getByUuid(UUID uuid);
 
     UserReadOnlyDTO getUserByUuidAndDeletedFalse(UUID uuid);
+
+    boolean isUserExists(String email);
 }

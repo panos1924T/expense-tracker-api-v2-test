@@ -102,10 +102,17 @@ public class UserService implements IUserService{
     }
 
     @Override
+    @Transactional(readOnly = true)
     public UserReadOnlyDTO getUserByUuidAndDeletedFalse(UUID uuid) {
         User user = userRepository.findUserByUuidAndDeletedFalse(uuid)
                 .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + uuid + " not found!"));
         return userMapper.toReadOnly(user);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean isUserExists(String email) {
+        return userRepository.existsUserByEmail(email);
     }
 
     private void createDefaultCategories(User user) {
