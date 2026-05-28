@@ -1,8 +1,14 @@
 package gr.cf9.pants.expense_tracker.core.exceptions;
 
+import org.springframework.validation.BindingResult;
+
 public class ValidationException extends AppGenericException{
 
-    public ValidationException(String message) {
-        super("VALIDATION_ERROR", message);
+    private static final String DEFAULT_CODE = "ValidationError";
+    private final BindingResult bindingResult;
+
+    public ValidationException(String code, String message, BindingResult bindingResult) {
+        super(code + DEFAULT_CODE, message);
+        this.bindingResult = bindingResult;
     }
 }
