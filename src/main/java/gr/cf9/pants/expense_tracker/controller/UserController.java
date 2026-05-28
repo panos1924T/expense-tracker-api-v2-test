@@ -25,9 +25,9 @@ public class UserController {
 
     @PostMapping("/register")
     public ResponseEntity<UserReadOnlyDTO> register(
-            @Valid @RequestBody UserInsertDTO dto) {
+            @Valid @RequestBody UserInsertDTO userInsertDTO) {
 
-        UserReadOnlyDTO responseDTO = userService.register(dto);
+        UserReadOnlyDTO responseDTO = userService.saveUser(userInsertDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
     }
 
