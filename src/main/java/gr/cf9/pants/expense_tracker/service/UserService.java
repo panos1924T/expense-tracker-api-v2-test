@@ -61,20 +61,20 @@ public class UserService implements IUserService{
 
     @Transactional
     @Override
-    public UserReadOnlyDTO update(UUID userUuid, UserUpdateDTO dto) {
+    public UserReadOnlyDTO update(UUID userUuid, UserUpdateDTO userUpdateDTO) {
 
         //VALIDATE
         User user = userRepository.findUserByUuid(userUuid)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with uuid: " + userUuid));
 
-        if (userRepository.existsUserByEmailAndUuidNot(dto.email(), userUuid)) {
-            throw new EntityAlreadyExistsException("Email already exists! " + dto.email());
+        if (userRepository.existsUserByEmailAndUuidNot(userUpdateDTO.email(), userUuid)) {
+            throw new EntityAlreadyExistsException("Email already exists! " + userUpdateDTO.email());
         }
 
         //PREPARE
-        user.setUsername(dto.username());
-        user.setEmail(dto.email());
-        user.setPassword(passwordEncoder.encode(dto.password()));
+        user.setUsername(userUpdateDTO.username());
+        user.setEmail(userUpdateDTO.email());
+        user.setPassword(passwordEncoder.encode(userUpdateDTO.password()));
 
         //EXECUTE
         User updatedUser = userRepository.save(user);
@@ -94,12 +94,19 @@ public class UserService implements IUserService{
     }
 
     @Override
+    @Transactional(readOnly = true)
     public UserReadOnlyDTO getByUuid(UUID uuid) {
         User user = userRepository.findUserByUuid(uuid)
                 .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + uuid + " not found!"));
         return userMapper.toReadOnly(user);
     }
 
+    @Override
+    public UserReadOnlyDTO getUserByUuidAndDeletedFalse(UUID uuid) {
+        User user = userRepository.findUserByUuidAndDeletedFalse(uuid)
+                .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + uuid + " not found!"));
+        return userMapper.toReadOnly(user);
+    }
 
     private void createDefaultCategories(User user) {
 

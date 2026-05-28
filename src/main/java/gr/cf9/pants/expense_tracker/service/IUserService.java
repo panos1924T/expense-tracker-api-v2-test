@@ -15,4 +15,6 @@ public interface IUserService {
     void deleteUser(UUID uuid);
 
     UserReadOnlyDTO getByUuid(UUID uuid);
+
+    UserReadOnlyDTO getUserByUuidAndDeletedFalse(UUID uuid);
 }
