@@ -1,7 +1,7 @@
 package gr.cf9.pants.expense_tracker.controller;
 
 import gr.cf9.pants.expense_tracker.dto.user_dto.UserReadOnlyDTO;
-import gr.cf9.pants.expense_tracker.dto.user_dto.UserRegisterDTO;
+import gr.cf9.pants.expense_tracker.dto.user_dto.UserInsertDTO;
 import gr.cf9.pants.expense_tracker.service.IUserService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -25,7 +25,7 @@ public class UserController {
 
     @PostMapping("/register")
     public ResponseEntity<UserReadOnlyDTO> register(
-            @Valid @RequestBody UserRegisterDTO dto) {
+            @Valid @RequestBody UserInsertDTO dto) {
 
         UserReadOnlyDTO responseDTO = userService.register(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);

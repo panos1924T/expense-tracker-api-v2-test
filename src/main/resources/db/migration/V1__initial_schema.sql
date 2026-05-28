@@ -13,7 +13,6 @@ CREATE TABLE users (
     CONSTRAINT pk_users             PRIMARY KEY (id),
     CONSTRAINT uk_users_uuid        UNIQUE (uuid),
     CONSTRAINT uk_users_email       UNIQUE (email),
-    CONSTRAINT uk_users_username    UNIQUE (username)
 );
 
 CREATE INDEX ix_users_deleted ON users (deleted) WHERE deleted = false;

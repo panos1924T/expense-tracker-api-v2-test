@@ -1,7 +1,7 @@
 package gr.cf9.pants.expense_tracker.mapper;
 
 import gr.cf9.pants.expense_tracker.dto.user_dto.UserReadOnlyDTO;
-import gr.cf9.pants.expense_tracker.dto.user_dto.UserRegisterDTO;
+import gr.cf9.pants.expense_tracker.dto.user_dto.UserInsertDTO;
 import gr.cf9.pants.expense_tracker.model.User;
 import org.springframework.stereotype.Component;
 
@@ -17,7 +17,7 @@ public class UserMapper {
         );
     }
 
-    public User toEntity(UserRegisterDTO dto, String hashedPassword) {
+    public User toEntity(UserInsertDTO dto, String hashedPassword) {
         User user = new User();
         user.setUsername(dto.username());
         user.setEmail(dto.email());

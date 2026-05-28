@@ -5,7 +5,7 @@ import gr.cf9.pants.expense_tracker.core.enums.TransactionType;
 import gr.cf9.pants.expense_tracker.core.exceptions.EntityAlreadyExistsException;
 import gr.cf9.pants.expense_tracker.core.exceptions.EntityNotFoundException;
 import gr.cf9.pants.expense_tracker.dto.user_dto.UserReadOnlyDTO;
-import gr.cf9.pants.expense_tracker.dto.user_dto.UserRegisterDTO;
+import gr.cf9.pants.expense_tracker.dto.user_dto.UserInsertDTO;
 import gr.cf9.pants.expense_tracker.dto.user_dto.UserUpdateDTO;
 import gr.cf9.pants.expense_tracker.mapper.UserMapper;
 import gr.cf9.pants.expense_tracker.model.Account;
@@ -38,16 +38,16 @@ public class UserService implements IUserService{
 
     @Transactional
     @Override
-    public UserReadOnlyDTO register(UserRegisterDTO dto) {
+    public UserReadOnlyDTO saveUser(UserInsertDTO userInsertDTO) {
 
         //VALIDATE
-        if (userRepository.existsUserByEmail(dto.email())) {
-            throw new EntityAlreadyExistsException("Email already exists: " + dto.email());
+        if (userRepository.existsUserByEmail(userInsertDTO.email())) {
+            throw new EntityAlreadyExistsException("Email already exists: " + userInsertDTO.email());
         }
 
         //PREPARE
-        String hashedPassword = passwordEncoder.encode(dto.password());
-        User user = userMapper.toEntity(dto, hashedPassword);
+        String hashedPassword = passwordEncoder.encode(userInsertDTO.password());
+        User user = userMapper.toEntity(userInsertDTO, hashedPassword);
 
         //EXECUTE
         User savedUser = userRepository.save(user);
