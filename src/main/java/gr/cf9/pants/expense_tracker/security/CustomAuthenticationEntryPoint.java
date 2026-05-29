@@ -2,7 +2,6 @@ package gr.cf9.pants.expense_tracker.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gr.cf9.pants.expense_tracker.dto.ErrorResponseDTO;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
