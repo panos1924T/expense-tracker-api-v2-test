@@ -1,34 +1,54 @@
 package gr.cf9.pants.expense_tracker.controller;
 
+import gr.cf9.pants.expense_tracker.core.exceptions.ValidationException;
 import gr.cf9.pants.expense_tracker.dto.user_dto.UserReadOnlyDTO;
 import gr.cf9.pants.expense_tracker.dto.user_dto.UserInsertDTO;
 import gr.cf9.pants.expense_tracker.service.IUserService;
+import gr.cf9.pants.expense_tracker.validator.UserInsertValidator;
+import gr.cf9.pants.expense_tracker.validator.UserUpdateValidator;
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import java.net.URI;
 
 @RestController
 @RequestMapping("/api/v1/users")
-@Validated
+@RequiredArgsConstructor
 public class UserController {
 
     private final IUserService userService;
-
-    public UserController(IUserService userService) {
-        this.userService = userService;
-    }
+    private final UserInsertValidator userInsertValidator;
+    private final UserUpdateValidator userUpdateValidator;
 
     @PostMapping("/register")
     public ResponseEntity<UserReadOnlyDTO> register(
-            @Valid @RequestBody UserInsertDTO userInsertDTO) {
+            @Valid @RequestBody UserInsertDTO userInsertDTO,
+            BindingResult bindingResult) {
 
-        UserReadOnlyDTO responseDTO = userService.saveUser(userInsertDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
+        userInsertValidator.validate(userInsertDTO, bindingResult);
+        if (bindingResult.hasErrors()) {
+            throw new ValidationException("User", "Invalid user data", bindingResult);
+        }
+
+        UserReadOnlyDTO userReadOnlyDTO = userService.saveUser(userInsertDTO);
+
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .path("/{uuid}")
+                .buildAndExpand(userReadOnlyDTO.uuid())
+                .toUri();
+
+        return ResponseEntity
+                .created(location)
+                .body(userReadOnlyDTO);
     }
+
 
 }
