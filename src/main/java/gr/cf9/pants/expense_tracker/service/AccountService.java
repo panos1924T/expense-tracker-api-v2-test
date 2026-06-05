@@ -13,6 +13,7 @@ import gr.cf9.pants.expense_tracker.model.User;
 import gr.cf9.pants.expense_tracker.repository.AccountRepository;
 import gr.cf9.pants.expense_tracker.repository.TransactionRepository;
 import gr.cf9.pants.expense_tracker.repository.UserRepository;
+import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -60,6 +61,10 @@ public class AccountService implements IAccountService{
         Account account = accountRepository.findAccountByUuidAndUser(accountUuid, user)
                 .orElseThrow(() -> new EntityNotFoundException("Account with uuid: " + accountUuid + "not found!"));
 
+        if (account.isDefaultAccount() == true) {
+            throw new InvalidArgumentException("Cannot update default account");
+        }
+
         //PREPARE
         account.setName(dto.name());
         account.setAccountType(dto.accountType());
@@ -81,7 +86,7 @@ public class AccountService implements IAccountService{
         Account account = accountRepository.findAccountByUuidAndUser(accountUuid, user)
                 .orElseThrow(() -> new EntityNotFoundException("Account with uuid: " + accountUuid + "not found!"));
 
-        if (account.isDefault()) {
+        if (account.isDefaultAccount()) {
             throw new InvalidArgumentException("Cannot delete default account!");
         }
         if (transactionRepository.existsTransByAccount(account)) {
