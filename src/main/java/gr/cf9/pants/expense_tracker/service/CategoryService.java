@@ -72,6 +72,7 @@ public class CategoryService implements ICategoryService{
         }
 
         category.setName(dto.name());
+        category.setType(dto.type());
 
         //EXECUTE
         Category updatedCategory = categoryRepository.save(category);
