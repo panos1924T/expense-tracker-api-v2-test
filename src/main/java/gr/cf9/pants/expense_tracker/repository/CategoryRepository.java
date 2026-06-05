@@ -18,6 +18,4 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
     List<Category> findCategoryByUser(User user);
 
     Optional<Category> findCategoryByUuidAndUser(UUID uuid, User user);
-
-    Optional<Category> findCategoryByUuid(UUID categoryUuid);
 }
