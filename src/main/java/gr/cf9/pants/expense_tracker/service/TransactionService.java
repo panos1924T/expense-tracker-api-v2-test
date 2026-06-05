@@ -44,39 +44,45 @@ public class TransactionService implements ITransactionService {
         User user = userRepository.findUserByUuid(userUuid)
                 .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + " not found!"));
 
-        Account sourceAccount = accountRepository.findAccountByUuidAndUser(dto.sourceAccountUuid(), user)
-                .orElseThrow(() -> new EntityNotFoundException("Account with uuid: " + dto.sourceAccountUuid() + "not found!"));
-
         if (dto.type() == TransactionType.TRANSFER) {
             throw new InvalidTransactionException("Use /transfer endpoint for transfers");
         }
 
         if (dto.categoryUuid() == null) {
-            throw new ValidationException("Category is required for non-transfer transactions");
+            throw new InvalidArgumentException("Category is required for non-transfer transactions");
         }
 
         Category category = categoryRepository.findCategoryByUuidAndUser(dto.categoryUuid(), user)
                 .orElseThrow(() -> new EntityNotFoundException("Category with uuid: " + dto.categoryUuid() + " not found!"));
 
-        if (dto.type() == TransactionType.EXPENSE) {
-            if (sourceAccount.getBalance().compareTo(dto.amount()) < 0) {
+        Account activeAccount;
+        BigDecimal newBalance;
+
+        if (dto.type() == TransactionType.INCOME) {
+            activeAccount = accountRepository.findAccountByUserAndDefaultAccountTrue(user)
+                    .orElseThrow(() -> new EntityNotFoundException("Default account not found for user with uuid=" + userUuid));
+
+            newBalance = activeAccount.getBalance().add(dto.amount());
+            activeAccount.setBalance(newBalance);
+
+        } else {
+            activeAccount = accountRepository.findAccountByUuidAndUser(dto.sourceAccountUuid(), user)
+                    .orElseThrow(() -> new EntityNotFoundException("Account with uuid=" + dto.sourceAccountUuid() + " not found"));
+
+
+            if (activeAccount.getBalance().compareTo(dto.amount()) < 0) {
                 throw new InsufficientBalanceException("Insufficient balance!");
             }
+
+            newBalance = activeAccount.getBalance().subtract(dto.amount());
+            activeAccount.setBalance(newBalance);
         }
 
         //PREPARE
-        Transaction transaction = transactionMapper.toEntity(dto, sourceAccount, category);
-        BigDecimal newBalance;
-        if (dto.type() == TransactionType.INCOME) {
-            newBalance = sourceAccount.getBalance().add(dto.amount());
-        } else {
-            newBalance = sourceAccount.getBalance().subtract(dto.amount());
-        }
+        Transaction transaction = transactionMapper.toEntity(dto, activeAccount, category);
 
         //EXECUTE
-        sourceAccount.setBalance(newBalance);
         transactionRepository.save(transaction);
-
 
         //RETURN
         return transactionMapper.toReadOnly(transaction);
