@@ -50,16 +50,6 @@ public class ErrorHandler {
                 ));
     }
 
-    @ExceptionHandler(InsufficientBalanceException.class)
-    public ResponseEntity<ErrorResponseDTO> handleInsufficientBalance(InsufficientBalanceException e) {
-        return ResponseEntity
-                .status(HttpStatus.UNPROCESSABLE_ENTITY)
-                .body(new ErrorResponseDTO(
-                        e.getCode(),
-                        e.getMessage()
-                ));
-    }
-
     @ExceptionHandler(InvalidTransactionException.class)
     public ResponseEntity<ErrorResponseDTO> handleInvalidTransaction(InvalidTransactionException e) {
         return ResponseEntity

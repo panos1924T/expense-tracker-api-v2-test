@@ -1,7 +1,6 @@
 package gr.cf9.pants.expense_tracker.service;
 
 import gr.cf9.pants.expense_tracker.core.enums.TransactionType;
-import gr.cf9.pants.expense_tracker.core.exceptions.InsufficientBalanceException;
 import gr.cf9.pants.expense_tracker.core.exceptions.InvalidTransactionException;
 import gr.cf9.pants.expense_tracker.dto.transaction_dto.TransactionCreateDTO;
 import gr.cf9.pants.expense_tracker.dto.transaction_dto.TransactionReadOnlyDTO;
@@ -14,9 +13,9 @@ import java.util.UUID;
 
 public interface ITransactionService {
 
-        TransactionReadOnlyDTO createTransaction(TransactionCreateDTO dto, UUID userUuid) throws InvalidTransactionException, InsufficientBalanceException;
+        TransactionReadOnlyDTO createTransaction(TransactionCreateDTO dto, UUID userUuid) throws InvalidTransactionException;
 
-        TransactionReadOnlyDTO createTransfer(TransferCreateDTO dto, UUID userUuid) throws InsufficientBalanceException;
+        TransactionReadOnlyDTO createTransfer(TransferCreateDTO dto, UUID userUuid);
 
         TransactionReadOnlyDTO getTransaction(UUID transUuid, UUID userUuid);
 

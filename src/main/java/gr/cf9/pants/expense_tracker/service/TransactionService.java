@@ -39,7 +39,7 @@ public class TransactionService implements ITransactionService {
 
     @Transactional
     @Override
-    public TransactionReadOnlyDTO createTransaction(TransactionCreateDTO dto, UUID userUuid) throws InvalidTransactionException, InsufficientBalanceException {
+    public TransactionReadOnlyDTO createTransaction(TransactionCreateDTO dto, UUID userUuid) throws InvalidTransactionException{
         //VALIDATE
         User user = userRepository.findUserByUuid(userUuid)
                 .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + " not found!"));
@@ -69,11 +69,6 @@ public class TransactionService implements ITransactionService {
             activeAccount = accountRepository.findAccountByUuidAndUser(dto.sourceAccountUuid(), user)
                     .orElseThrow(() -> new EntityNotFoundException("Account with uuid=" + dto.sourceAccountUuid() + " not found"));
 
-
-            if (activeAccount.getBalance().compareTo(dto.amount()) < 0) {
-                throw new InsufficientBalanceException("Insufficient balance!");
-            }
-
             newBalance = activeAccount.getBalance().subtract(dto.amount());
             activeAccount.setBalance(newBalance);
         }
@@ -90,7 +85,7 @@ public class TransactionService implements ITransactionService {
 
     @Transactional
     @Override
-    public TransactionReadOnlyDTO createTransfer(TransferCreateDTO dto, UUID userUuid) throws InsufficientBalanceException {
+    public TransactionReadOnlyDTO createTransfer(TransferCreateDTO dto, UUID userUuid) {
         //VALIDATE
         User user = userRepository.findUserByUuid(userUuid)
                 .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + " not found!"));
@@ -100,10 +95,6 @@ public class TransactionService implements ITransactionService {
 
         Account targetAccount = accountRepository.findAccountByUuidAndUser(dto.targetAccountUuid(), user)
                 .orElseThrow(() -> new EntityNotFoundException("Account with uuid: " + dto.targetAccountUuid() + "not found!"));
-
-        if (sourceAccount.getBalance().compareTo(dto.amount()) < 0) {
-            throw new InsufficientBalanceException("Insufficient balance!");
-        }
 
         //PREPARE
         Transaction transaction = transactionMapper.toEntity(dto, sourceAccount, targetAccount);
@@ -134,6 +125,8 @@ public class TransactionService implements ITransactionService {
         return transactionMapper.toReadOnly(transaction);
     }
 
+
+    // TODO figure out update logic
     @Transactional
     @Override
     public TransactionReadOnlyDTO updateTransaction(UUID transUuid, TransactionUpdateDTO dto, UUID userUuid) {
