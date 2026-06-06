@@ -1,6 +1,5 @@
 package gr.cf9.pants.expense_tracker.dto.transaction_dto;
 
-import gr.cf9.pants.expense_tracker.core.enums.TransactionType;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
@@ -9,12 +8,9 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.UUID;
 
-public record TransactionUpdateDTO(
+public record TransferUpdateDTO(
         @NotNull @Positive
         BigDecimal amount,
-
-        @NotNull
-        TransactionType type,
 
         @NotNull
         LocalDate transactionDate,
@@ -22,7 +18,10 @@ public record TransactionUpdateDTO(
         @Size(max = 255)
         String description,
 
-        UUID sourceAccountUuid,
         @NotNull
-        UUID categoryUuid
-) {}
+        UUID sourceAccountUuid,
+
+        @NotNull
+        UUID targetAccountUuid
+) {
+}
