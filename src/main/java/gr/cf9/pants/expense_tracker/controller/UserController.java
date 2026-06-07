@@ -60,7 +60,14 @@ public class UserController {
             throw new ValidationException("User", "Invalid user data", bindingResult);
         }
 
-        UserReadOnlyDTO userReadOnlyDTO = userService.update(uuid, userUpdateDTO);
+        UserReadOnlyDTO userReadOnlyDTO = userService.updateUser(uuid, userUpdateDTO);
         return ResponseEntity.ok(userReadOnlyDTO);
+    }
+
+    @GetMapping("/{uuid}")
+    public ResponseEntity<UserReadOnlyDTO> getUserByUuid(
+            @PathVariable UUID uuid
+    ) {
+        return ResponseEntity.ok(userService.getUserByUuid(uuid));
     }
 }
