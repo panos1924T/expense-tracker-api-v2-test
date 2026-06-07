@@ -1,7 +1,9 @@
 package gr.cf9.pants.expense_tracker.core.exceptions;
 
+import lombok.Getter;
 import org.springframework.validation.BindingResult;
 
+@Getter
 public class ValidationException extends AppGenericException{
 
     private static final String DEFAULT_CODE = "ValidationError";

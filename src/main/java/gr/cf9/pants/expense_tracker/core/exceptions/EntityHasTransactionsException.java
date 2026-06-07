@@ -1,7 +1,9 @@
 package gr.cf9.pants.expense_tracker.core.exceptions;
 
 public class EntityHasTransactionsException extends AppGenericException {
-    public EntityHasTransactionsException(String message) {
-        super("CATEGORY_INVALID" ,message);
+    private static final String DEFAULT_CODE = "HasTransactions";
+
+    public EntityHasTransactionsException(String code, String message) {
+        super(code + DEFAULT_CODE, message);
     }
 }
