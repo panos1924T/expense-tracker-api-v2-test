@@ -61,7 +61,7 @@ public class UserService implements IUserService{
 
     @Transactional
     @Override
-    public UserReadOnlyDTO update(UUID userUuid, UserUpdateDTO userUpdateDTO) {
+    public UserReadOnlyDTO updateUser(UUID userUuid, UserUpdateDTO userUpdateDTO) {
 
         //VALIDATE
         User user = userRepository.findUserByUuid(userUuid)
@@ -95,7 +95,7 @@ public class UserService implements IUserService{
 
     @Override
     @Transactional(readOnly = true)
-    public UserReadOnlyDTO getByUuid(UUID uuid) {
+    public UserReadOnlyDTO getUserByUuid(UUID uuid) {
         User user = userRepository.findUserByUuid(uuid)
                 .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + uuid + " not found!"));
         return userMapper.toReadOnly(user);
