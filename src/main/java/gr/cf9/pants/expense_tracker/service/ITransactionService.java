@@ -12,7 +12,7 @@ public interface ITransactionService {
 
         TransactionReadOnlyDTO createTransaction(TransactionCreateDTO dto, UUID userUuid) throws InvalidTransactionException;
 
-        TransactionReadOnlyDTO createTransfer(TransferCreateDTO dto, UUID userUuid);
+        TransactionReadOnlyDTO createTransfer(TransferCreateDTO dto, UUID userUuid) throws InvalidTransactionException;
 
         TransactionReadOnlyDTO getTransaction(UUID transUuid, UUID userUuid);
 

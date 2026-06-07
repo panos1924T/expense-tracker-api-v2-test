@@ -36,7 +36,6 @@ public class Category extends AbstractEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    // later usage
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
     private Category parent;

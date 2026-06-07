@@ -41,6 +41,10 @@ public class TransactionService implements ITransactionService {
         User user = userRepository.findUserByUuid(userUuid)
                 .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + " not found!"));
 
+        if (dto.amount() == null || dto.amount().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new InvalidTransactionException("Amount must be positive");
+        }
+
         if (dto.type() == TransactionType.TRANSFER) {
             throw new InvalidTransactionException("Use /transfer endpoint for transfers");
         }
@@ -82,10 +86,14 @@ public class TransactionService implements ITransactionService {
 
     @Transactional
     @Override
-    public TransactionReadOnlyDTO createTransfer(TransferCreateDTO dto, UUID userUuid) {
+    public TransactionReadOnlyDTO createTransfer(TransferCreateDTO dto, UUID userUuid) throws InvalidTransactionException{
         //VALIDATE
         User user = userRepository.findUserByUuid(userUuid)
                 .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + " not found!"));
+
+        if (dto.amount() == null || dto.amount().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new InvalidTransactionException("Amount must be positive");
+        }
 
         Account sourceAccount = accountRepository.findAccountByUuidAndUser(dto.sourceAccountUuid(), user)
                 .orElseThrow(() -> new EntityNotFoundException("Account with uuid: " + dto.sourceAccountUuid() + "not found!"));
@@ -132,6 +140,10 @@ public class TransactionService implements ITransactionService {
 
         Transaction transaction = transactionRepository.findTransByUuidAndUser(transUuid, user)
                 .orElseThrow(() -> new EntityNotFoundException("Transaction with uuid: " + transUuid + " not found!"));
+
+        if (dto.amount() == null || dto.amount().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new InvalidTransactionException("Amount must be positive");
+        }
 
         if (transaction.getType() == TransactionType.TRANSFER || dto.type() == TransactionType.TRANSFER) {
             throw new InvalidTransactionException("Use /transfers endpoint for transfer transactions");
@@ -181,6 +193,10 @@ public class TransactionService implements ITransactionService {
 
         Transaction transaction = transactionRepository.findTransByUuidAndUser(transUuid, user)
                 .orElseThrow(() -> new EntityNotFoundException("Transaction with uuid=" + transUuid + " not found"));
+
+        if (dto.amount() == null || dto.amount().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new InvalidTransactionException("Amount must be positive");
+        }
 
         if (transaction.getType() != TransactionType.TRANSFER) {
             throw new InvalidTransactionException("Transaction with uuid=" + transUuid + " is not a transfer");
