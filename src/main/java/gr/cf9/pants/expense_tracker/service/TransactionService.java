@@ -39,14 +39,17 @@ public class TransactionService implements ITransactionService {
     public TransactionReadOnlyDTO createTransaction(TransactionCreateDTO dto, UUID userUuid) throws InvalidTransactionException{
         //VALIDATE
         User user = userRepository.findUserByUuid(userUuid)
-                .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + " not found!"));
+                .orElseThrow(() -> new EntityNotFoundException("NOT_FOUND", "User with uuid: " + userUuid + " not found!"));
 
-        if (dto.amount() == null || dto.amount().compareTo(BigDecimal.ZERO) <= 0) {
+        if (dto.amount() == null) {
+            throw new InvalidArgumentException("Amount is required");
+        }
+        if (dto.amount().compareTo(BigDecimal.ZERO) <= 0) {
             throw new InvalidTransactionException("Amount must be positive");
         }
 
         if (dto.type() == TransactionType.TRANSFER) {
-            throw new InvalidTransactionException("Use /transfer endpoint for transfers");
+            throw new InvalidArgumentException("Use /transfer endpoint for transfers");
         }
 
         if (dto.categoryUuid() == null) {
@@ -91,7 +94,10 @@ public class TransactionService implements ITransactionService {
         User user = userRepository.findUserByUuid(userUuid)
                 .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + " not found!"));
 
-        if (dto.amount() == null || dto.amount().compareTo(BigDecimal.ZERO) <= 0) {
+        if (dto.amount() == null) {
+            throw new InvalidArgumentException("Amount is required");
+        }
+        if (dto.amount().compareTo(BigDecimal.ZERO) <= 0) {
             throw new InvalidTransactionException("Amount must be positive");
         }
 
@@ -141,12 +147,15 @@ public class TransactionService implements ITransactionService {
         Transaction transaction = transactionRepository.findTransByUuidAndUser(transUuid, user)
                 .orElseThrow(() -> new EntityNotFoundException("Transaction with uuid: " + transUuid + " not found!"));
 
-        if (dto.amount() == null || dto.amount().compareTo(BigDecimal.ZERO) <= 0) {
+        if (dto.amount() == null) {
+            throw new InvalidArgumentException("Amount is required");
+        }
+        if (dto.amount().compareTo(BigDecimal.ZERO) <= 0) {
             throw new InvalidTransactionException("Amount must be positive");
         }
 
         if (transaction.getType() == TransactionType.TRANSFER || dto.type() == TransactionType.TRANSFER) {
-            throw new InvalidTransactionException("Use /transfers endpoint for transfer transactions");
+            throw new InvalidArgumentException("Use /transfers endpoint for transfer transactions");
         }
 
         Category newCategory = categoryRepository.findCategoryByUuidAndUser(dto.categoryUuid(), user)
@@ -162,7 +171,7 @@ public class TransactionService implements ITransactionService {
             newAccount.setBalance(newAccount.getBalance().add(dto.amount()));
         } else {
             if (dto.sourceAccountUuid() == null) {
-                throw new InvalidTransactionException("Source account is required for EXPENSE");
+                throw new InvalidArgumentException("Source account is required for EXPENSE");
             }
 
             transaction.getSourceAccount().setBalance(
@@ -194,12 +203,15 @@ public class TransactionService implements ITransactionService {
         Transaction transaction = transactionRepository.findTransByUuidAndUser(transUuid, user)
                 .orElseThrow(() -> new EntityNotFoundException("Transaction with uuid=" + transUuid + " not found"));
 
-        if (dto.amount() == null || dto.amount().compareTo(BigDecimal.ZERO) <= 0) {
+        if (dto.amount() == null) {
+            throw new InvalidArgumentException("Amount is required");
+        }
+        if (dto.amount().compareTo(BigDecimal.ZERO) <= 0) {
             throw new InvalidTransactionException("Amount must be positive");
         }
 
         if (transaction.getType() != TransactionType.TRANSFER) {
-            throw new InvalidTransactionException("Transaction with uuid=" + transUuid + " is not a transfer");
+            throw new InvalidArgumentException("Transaction with uuid=" + transUuid + " is not a transfer");
         }
 
         transaction.getSourceAccount()
@@ -296,7 +308,7 @@ public class TransactionService implements ITransactionService {
                 sourceAccount.setBalance(sourceAccount.getBalance().add(transaction.getAmount()));
                 targetAccount.setBalance(targetAccount.getBalance().subtract(transaction.getAmount()));
             }
-            default -> throw new InvalidTransactionException("Unknown transaction type");
+            default -> throw new InvalidArgumentException("Unknown transaction type");
         }
 
         //EXECUTE
