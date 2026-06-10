@@ -23,13 +23,13 @@ public class JwtService {
     @Value("${JWT_EXPIRATION:10800000}")
     private long jwtExpiration;
 
-    public String generateToken(String username, String role) {
+    public String generateToken(String email, String role) {
         var claims = new HashMap<String, Object>();
         claims.put("role", role);
         return Jwts
                 .builder()
                 .setClaims(claims)
-                .setSubject(username)
+                .setSubject(email)      //principal
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration))
                 .signWith(getSignInKey(), SignatureAlgorithm.ES256)
