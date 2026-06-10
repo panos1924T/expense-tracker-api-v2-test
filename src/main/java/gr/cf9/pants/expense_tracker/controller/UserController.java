@@ -68,6 +68,6 @@ public class UserController {
     public ResponseEntity<UserReadOnlyDTO> getUserByUuid(
             @PathVariable UUID uuid
     ) {
-        return ResponseEntity.ok(userService.getUserByUuid(uuid));
+        return ResponseEntity.ok(userService.getUserByUuidAndDeletedFalse(uuid));
     }
 }
