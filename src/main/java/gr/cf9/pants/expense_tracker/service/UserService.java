@@ -42,7 +42,7 @@ public class UserService implements IUserService{
 
         //VALIDATE
         if (userRepository.existsUserByEmail(userInsertDTO.email())) {
-            throw new EntityAlreadyExistsException("Email already exists: " + userInsertDTO.email());
+            throw new EntityAlreadyExistsException("User", "Email already exists: " + userInsertDTO.email());
         }
 
         //PREPARE
@@ -65,10 +65,10 @@ public class UserService implements IUserService{
 
         //VALIDATE
         User user = userRepository.findUserByUuid(userUuid)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with uuid: " + userUuid));
+                .orElseThrow(() -> new EntityNotFoundException("User", "User not found with uuid: " + userUuid));
 
         if (userRepository.existsUserByEmailAndUuidNot(userUpdateDTO.email(), userUuid)) {
-            throw new EntityAlreadyExistsException("Email already exists! " + userUpdateDTO.email());
+            throw new EntityAlreadyExistsException("User", "Email already exists! " + userUpdateDTO.email());
         }
 
         //PREPARE
@@ -87,7 +87,7 @@ public class UserService implements IUserService{
     @Override
     public void deleteUser(UUID uuid) {
         User user = userRepository.findUserByUuid(uuid)
-                .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + uuid + " not found!"));
+                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + uuid + " not found!"));
 
         user.softDelete(Instant.now());
         userRepository.save(user);
@@ -97,7 +97,7 @@ public class UserService implements IUserService{
     @Transactional(readOnly = true)
     public UserReadOnlyDTO getUserByUuid(UUID uuid) {
         User user = userRepository.findUserByUuid(uuid)
-                .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + uuid + " not found!"));
+                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + uuid + " not found!"));
         return userMapper.toReadOnly(user);
     }
 
@@ -105,7 +105,7 @@ public class UserService implements IUserService{
     @Transactional(readOnly = true)
     public UserReadOnlyDTO getUserByUuidAndDeletedFalse(UUID uuid) {
         User user = userRepository.findUserByUuidAndDeletedFalse(uuid)
-                .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + uuid + " not found!"));
+                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + uuid + " not found!"));
         return userMapper.toReadOnly(user);
     }
 
