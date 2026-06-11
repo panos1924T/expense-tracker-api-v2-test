@@ -16,12 +16,12 @@ public class AuthenticationService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
 
-    public String authenticate(AuthenticationRequestDTO dto) {
+    public AuthenticationResponseDTO authenticate(AuthenticationRequestDTO dto) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(dto.username(), dto.password()));
         User user = (User) authentication.getPrincipal();
-//        String token = jwtService.generateToken(authentication.getName(), user.getRole().getName());
+        String token = jwtService.generateToken(authentication.getName(), "");      // user.getRole().getName()     //TODO CREATE ROLE ENTITY
 
-//        return new AuthenticationResponseDTO(token);
+        return new AuthenticationResponseDTO(token);
     }
 }
