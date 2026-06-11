@@ -9,6 +9,7 @@ import gr.cf9.pants.expense_tracker.validator.UserInsertValidator;
 import gr.cf9.pants.expense_tracker.validator.UserUpdateValidator;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -25,6 +26,7 @@ public class UserController {
     private final IUserService userService;
     private final UserInsertValidator userInsertValidator;
     private final UserUpdateValidator userUpdateValidator;
+    private final ResourcePatternResolver resourcePatternResolver;
 
     @PostMapping("/register")
     public ResponseEntity<UserReadOnlyDTO> register(
@@ -69,5 +71,13 @@ public class UserController {
             @PathVariable UUID uuid
     ) {
         return ResponseEntity.ok(userService.getUserByUuidAndDeletedFalse(uuid));
+    }
+
+    @DeleteMapping("/{uuid}")
+    public ResponseEntity<UserReadOnlyDTO> deleteUserByUuid(
+            @PathVariable UUID uuid
+    ) {
+        UserReadOnlyDTO userReadOnlyDTO = userService.deleteUser(uuid);
+        return ResponseEntity.ok(userReadOnlyDTO);
     }
 }

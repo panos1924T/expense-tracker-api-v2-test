@@ -85,12 +85,14 @@ public class UserService implements IUserService{
 
     @Transactional
     @Override
-    public void deleteUser(UUID uuid) {
+    public UserReadOnlyDTO deleteUser(UUID uuid) {
         User user = userRepository.findUserByUuid(uuid)
                 .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + uuid + " not found!"));
 
         user.softDelete(Instant.now());
         userRepository.save(user);
+
+        return userMapper.toReadOnly(user);
     }
 
     @Override
