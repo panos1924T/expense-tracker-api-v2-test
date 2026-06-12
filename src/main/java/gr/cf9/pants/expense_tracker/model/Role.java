@@ -54,7 +54,7 @@ public class Role {
         capability.getRoles().remove(this);
     }
 
-    public void addUsers(User user) {
+    public void addUser(User user) {
         users.add(user);
         user.setRole(this);
     }
@@ -65,7 +65,7 @@ public class Role {
     }
 
     public void addUsers(Collection<User> users) {
-        users.forEach(this::addUsers);
+        users.forEach(this::addUser);
     }
 
     @Override
