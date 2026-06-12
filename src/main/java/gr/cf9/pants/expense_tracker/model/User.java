@@ -54,7 +54,6 @@ public class User extends AbstractEntity implements UserDetails {
     @OneToMany(mappedBy = "user")
     private Set<Category> categories = new HashSet<>();
 
-    //TODO create role entity
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         Set<GrantedAuthority> grantedAuthorities =  new HashSet<>();

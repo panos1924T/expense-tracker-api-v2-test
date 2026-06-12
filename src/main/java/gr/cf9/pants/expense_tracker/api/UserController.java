@@ -1,4 +1,4 @@
-package gr.cf9.pants.expense_tracker.controller;
+package gr.cf9.pants.expense_tracker.api;
 
 import gr.cf9.pants.expense_tracker.core.exceptions.ValidationException;
 import gr.cf9.pants.expense_tracker.dto.user_dto.UserReadOnlyDTO;

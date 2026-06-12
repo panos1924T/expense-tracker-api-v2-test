@@ -13,10 +13,19 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @EntityGraph(attributePaths = {"role", "role.capabilities"})
     Optional<User> findUserByEmail(String email);
+
+    @EntityGraph(attributePaths = {"role", "role.capabilities"})
+    Optional<User> findUserByEmailAndDeletedFalse(String email);
+
+    @EntityGraph(attributePaths = {"role", "role.capabilities"})
     Optional<User> findUserByUuid(UUID uuid);
+
+    @EntityGraph(attributePaths = {"role", "role.capabilities"})
     Optional<User> findUserByUuidAndDeletedFalse(UUID uuid);
 
     boolean existsUserByEmail(String email);
+
+    @EntityGraph(attributePaths = {"role", "role.capabilities"})
     boolean existsUserByEmailAndUuidNot(String email, UUID uuid);
 
 }
