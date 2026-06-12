@@ -44,6 +44,10 @@ public class User extends AbstractEntity implements UserDetails {
     @Column(nullable = false)
     private boolean active;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "role_id", nullable = false)
+    private Role role;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private Set<Account> accounts = new HashSet<>();
 
@@ -54,9 +58,9 @@ public class User extends AbstractEntity implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         Set<GrantedAuthority> grantedAuthorities =  new HashSet<>();
-//        grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_" + role.getName()));
-//        role.getCapabilities()
-//                .forEach(capability -> grantedAuthorities.add(new SimpleGrantedAuthority(capability.getName())));
+        grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_" + role.getName()));
+        role.getCapabilities()
+                .forEach(capability -> grantedAuthorities.add(new SimpleGrantedAuthority(capability.getName())));
         return grantedAuthorities;
     }
 
