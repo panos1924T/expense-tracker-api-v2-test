@@ -18,7 +18,6 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @EntityListeners(AuditingEntityListener.class)  // +JpaAuditing -> automate auditing for fields: CreatedDate and LastModifiedDate
-@SQLRestriction("deleted = false")
 public abstract class AbstractEntity {
 
     @Id
@@ -37,7 +36,7 @@ public abstract class AbstractEntity {
     private Instant updatedAt;
 
     @Column(nullable = false)
-    private boolean deleted = false;
+    private boolean deleted;
 
     @Column(name = "deleted_at", columnDefinition = "TIMESTAMPTZ")
     private Instant deletedAt;

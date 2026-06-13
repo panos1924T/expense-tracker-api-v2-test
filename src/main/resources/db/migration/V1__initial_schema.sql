@@ -40,7 +40,6 @@ CREATE TABLE users (
     email       VARCHAR(255)    NOT NULL,
     username    VARCHAR(50)     NOT NULL,
     password    VARCHAR(255)    NOT NULL,
-    active      BOOLEAN         NOT NULL DEFAULT TRUE,
     role_id     BIGINT          NOT NULL,
     created_at  TIMESTAMPTZ     NOT NULL,
     updated_at  TIMESTAMPTZ     NOT NULL,
