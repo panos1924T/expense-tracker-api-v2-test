@@ -20,7 +20,7 @@ public class AuthenticationService {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(dto.username(), dto.password()));
         User user = (User) authentication.getPrincipal();
-        String token = jwtService.generateToken(authentication.getName(), "");      // user.getRole().getName()     //TODO CREATE ROLE ENTITY
+        String token = jwtService.generateToken(authentication.getName(), user.getRole().getName());
 
         return new AuthenticationResponseDTO(token);
     }
