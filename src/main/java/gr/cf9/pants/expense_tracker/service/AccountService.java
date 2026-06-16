@@ -82,7 +82,6 @@ public class AccountService implements IAccountService{
     @Override
     public void deleteAccount(UUID accountUuid, UUID userUuid) {
 
-        //VALIDATE
         User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
                 .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + "not found!"));
         Account account = accountRepository.findAccountByUuidAndUser(accountUuid, user)
@@ -96,8 +95,14 @@ public class AccountService implements IAccountService{
             throw new InvalidArgumentException("Account", "Cannot delete default account!");
         }
 
-        //EXECUTE
-        account.softDelete(Instant.now());
+        boolean hasTrans = transactionRepository.existsTransByAccount(account);
+
+        if (hasTrans == true) {
+            account.softDelete(Instant.now());
+        } else {
+            accountRepository.delete(account);
+        }
+
         accountRepository.save(account);
     }
 
