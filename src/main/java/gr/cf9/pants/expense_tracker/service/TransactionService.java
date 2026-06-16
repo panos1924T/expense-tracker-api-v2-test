@@ -38,40 +38,40 @@ public class TransactionService implements ITransactionService {
     @Override
     public TransactionReadOnlyDTO createTransaction(TransactionCreateDTO dto, UUID userUuid) throws InvalidTransactionException{
         //VALIDATE
-        User user = userRepository.findUserByUuid(userUuid)
-                .orElseThrow(() -> new EntityNotFoundException("NOT_FOUND", "User with uuid: " + userUuid + " not found!"));
+        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
+                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
 
         if (dto.amount() == null) {
-            throw new InvalidArgumentException("Amount is required");
+            throw new InvalidArgumentException("Amount", "Amount is required");
         }
         if (dto.amount().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new InvalidTransactionException("Amount must be positive");
+            throw new InvalidTransactionException("Amount", "Amount must be positive");
         }
 
         if (dto.type() == TransactionType.TRANSFER) {
-            throw new InvalidArgumentException("Use /transfer endpoint for transfers");
+            throw new InvalidArgumentException("TransactionType", "Use /transfer endpoint for transfers");
         }
 
         if (dto.categoryUuid() == null) {
-            throw new InvalidArgumentException("Category is required for non-transfer transactions");
+            throw new InvalidArgumentException("Category", "Category is required for non-transfer transactions");
         }
 
         Category category = categoryRepository.findCategoryByUuidAndUserAndDeletedFalse(dto.categoryUuid(), user)
-                .orElseThrow(() -> new EntityNotFoundException("Category with uuid: " + dto.categoryUuid() + " not found!"));
+                .orElseThrow(() -> new EntityNotFoundException("Category", "Category with uuid: " + dto.categoryUuid() + " not found!"));
 
         Account sourceAccount;
         BigDecimal newBalance;
 
         if (dto.type() == TransactionType.INCOME) {
             sourceAccount = accountRepository.findAccountByUserAndDefaultAccountTrue(user)
-                    .orElseThrow(() -> new EntityNotFoundException("Default account not found for user with uuid=" + userUuid));
+                    .orElseThrow(() -> new EntityNotFoundException("Account", "Default account not found for user with uuid=" + userUuid));
 
             newBalance = sourceAccount.getBalance().add(dto.amount());
             sourceAccount.setBalance(newBalance);
 
         } else {
             sourceAccount = accountRepository.findAccountByUuidAndUser(dto.sourceAccountUuid(), user)
-                    .orElseThrow(() -> new EntityNotFoundException("Account with uuid=" + dto.sourceAccountUuid() + " not found"));
+                    .orElseThrow(() -> new EntityNotFoundException("Account", "Account with uuid=" + dto.sourceAccountUuid() + " not found"));
 
             newBalance = sourceAccount.getBalance().subtract(dto.amount());
             sourceAccount.setBalance(newBalance);
@@ -91,21 +91,21 @@ public class TransactionService implements ITransactionService {
     @Override
     public TransactionReadOnlyDTO createTransfer(TransferCreateDTO dto, UUID userUuid) throws InvalidTransactionException{
         //VALIDATE
-        User user = userRepository.findUserByUuid(userUuid)
-                .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + " not found!"));
+        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
+                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
 
         if (dto.amount() == null) {
-            throw new InvalidArgumentException("Amount is required");
+            throw new InvalidArgumentException("Amount", "Amount is required");
         }
         if (dto.amount().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new InvalidTransactionException("Amount must be positive");
+            throw new InvalidTransactionException("Amount", "Amount must be positive");
         }
 
         Account sourceAccount = accountRepository.findAccountByUuidAndUser(dto.sourceAccountUuid(), user)
-                .orElseThrow(() -> new EntityNotFoundException("Account with uuid: " + dto.sourceAccountUuid() + "not found!"));
+                .orElseThrow(() -> new EntityNotFoundException("Account", "Account with uuid: " + dto.sourceAccountUuid() + "not found!"));
 
         Account targetAccount = accountRepository.findAccountByUuidAndUser(dto.targetAccountUuid(), user)
-                .orElseThrow(() -> new EntityNotFoundException("Account with uuid: " + dto.targetAccountUuid() + "not found!"));
+                .orElseThrow(() -> new EntityNotFoundException("Account", "Account with uuid: " + dto.targetAccountUuid() + "not found!"));
 
         //PREPARE
         Transaction transaction = transactionMapper.toEntity(dto, sourceAccount, targetAccount);
@@ -127,10 +127,10 @@ public class TransactionService implements ITransactionService {
     @Override
     public TransactionReadOnlyDTO getTransaction(UUID transUuid, UUID userUuid) {
         //VALIDATE
-        User user = userRepository.findUserByUuid(userUuid)
-                .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + " not found!"));
+        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
+                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
         Transaction transaction = transactionRepository.findTransByUuidAndUser(transUuid, user)
-                .orElseThrow(() -> new EntityNotFoundException("Transaction with uuid: " + transUuid + " not found!"));
+                .orElseThrow(() -> new EntityNotFoundException("Transaction", "Transaction with uuid: " + transUuid + " not found!"));
 
         //RETURN
         return transactionMapper.toReadOnly(transaction);
@@ -141,25 +141,25 @@ public class TransactionService implements ITransactionService {
     public TransactionReadOnlyDTO updateTransaction(UUID transUuid, TransactionUpdateDTO dto, UUID userUuid)
             throws InvalidTransactionException {
 
-        User user = userRepository.findUserByUuid(userUuid)
-                .orElseThrow(() -> new EntityNotFoundException("User with uuid=" + userUuid + " not found"));
+        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
+                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid=" + userUuid + " not found"));
 
         Transaction transaction = transactionRepository.findTransByUuidAndUser(transUuid, user)
-                .orElseThrow(() -> new EntityNotFoundException("Transaction with uuid: " + transUuid + " not found!"));
+                .orElseThrow(() -> new EntityNotFoundException("Transaction", "Transaction with uuid: " + transUuid + " not found!"));
 
         if (dto.amount() == null) {
-            throw new InvalidArgumentException("Amount is required");
+            throw new InvalidArgumentException("Amount", "Amount is required");
         }
         if (dto.amount().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new InvalidTransactionException("Amount must be positive");
+            throw new InvalidTransactionException("Amount", "Amount must be positive");
         }
 
         if (transaction.getType() == TransactionType.TRANSFER || dto.type() == TransactionType.TRANSFER) {
-            throw new InvalidArgumentException("Use /transfers endpoint for transfer transactions");
+            throw new InvalidArgumentException("Transaction", "Use /transfers endpoint for transfer transactions");
         }
 
         Category newCategory = categoryRepository.findCategoryByUuidAndUserAndDeletedFalse(dto.categoryUuid(), user)
-                .orElseThrow(() -> new EntityNotFoundException("Category with uuid=" + dto.categoryUuid() + " not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Category", "Category with uuid=" + dto.categoryUuid() + " not found"));
 
         Account newAccount;
         if (dto.type() == TransactionType.INCOME) {
@@ -167,17 +167,17 @@ public class TransactionService implements ITransactionService {
             transaction.getSourceAccount().setBalance(
                     transaction.getSourceAccount().getBalance().subtract(transaction.getAmount()));
             newAccount = accountRepository.findAccountByUserAndDefaultAccountTrue(user)
-                    .orElseThrow(() -> new EntityNotFoundException("Default account not found"));
+                    .orElseThrow(() -> new EntityNotFoundException("Account", "Default account not found"));
             newAccount.setBalance(newAccount.getBalance().add(dto.amount()));
         } else {
             if (dto.sourceAccountUuid() == null) {
-                throw new InvalidArgumentException("Source account is required for EXPENSE");
+                throw new InvalidArgumentException("Account", "Source account is required for EXPENSE");
             }
 
             transaction.getSourceAccount().setBalance(
                     transaction.getSourceAccount().getBalance().add(transaction.getAmount()));
             newAccount = accountRepository.findAccountByUuidAndUser(dto.sourceAccountUuid(), user)
-                    .orElseThrow(() -> new EntityNotFoundException("Account with uuid=" + dto.sourceAccountUuid() + " not found"));
+                    .orElseThrow(() -> new EntityNotFoundException("Account", "Account with uuid=" + dto.sourceAccountUuid() + " not found"));
             newAccount.setBalance(newAccount.getBalance().subtract(dto.amount()));
         }
 
@@ -197,21 +197,21 @@ public class TransactionService implements ITransactionService {
     public TransactionReadOnlyDTO updateTransfer(UUID transUuid, TransferUpdateDTO dto, UUID userUuid)
             throws InvalidTransactionException {
 
-        User user = userRepository.findUserByUuid(userUuid)
-                .orElseThrow(() -> new EntityNotFoundException("User with uuid=" + userUuid + " not found"));
+        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
+                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid=" + userUuid + " not found"));
 
         Transaction transaction = transactionRepository.findTransByUuidAndUser(transUuid, user)
-                .orElseThrow(() -> new EntityNotFoundException("Transaction with uuid=" + transUuid + " not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Transaction", "Transaction with uuid=" + transUuid + " not found"));
 
         if (dto.amount() == null) {
-            throw new InvalidArgumentException("Amount is required");
+            throw new InvalidArgumentException("Amount", "Amount is required");
         }
         if (dto.amount().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new InvalidTransactionException("Amount must be positive");
+            throw new InvalidTransactionException("Amount", "Amount must be positive");
         }
 
         if (transaction.getType() != TransactionType.TRANSFER) {
-            throw new InvalidArgumentException("Transaction with uuid=" + transUuid + " is not a transfer");
+            throw new InvalidArgumentException("Transaction", "Transaction with uuid=" + transUuid + " is not a transfer");
         }
 
         transaction.getSourceAccount()
@@ -220,13 +220,13 @@ public class TransactionService implements ITransactionService {
                 .setBalance(transaction.getTargetAccount().getBalance().subtract(transaction.getAmount()));
 
         Account newSourceAccount = accountRepository.findAccountByUuidAndUser(dto.sourceAccountUuid(), user)
-                .orElseThrow(() -> new EntityNotFoundException("Source account with uuid=" + dto.sourceAccountUuid() + " not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Account", "Source account with uuid=" + dto.sourceAccountUuid() + " not found"));
 
         Account newTargetAccount = accountRepository.findAccountByUuidAndUser(dto.targetAccountUuid(), user)
-                .orElseThrow(() -> new EntityNotFoundException("Target account with uuid=" + dto.targetAccountUuid() + " not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Account", "Target account with uuid=" + dto.targetAccountUuid() + " not found"));
 
         if (newSourceAccount.getUuid().equals(newTargetAccount.getUuid())) {
-            throw new InvalidTransactionException("Source and target account cannot be the same");
+            throw new InvalidTransactionException("Account", "Source and target account cannot be the same");
         }
 
         newSourceAccount.setBalance(newSourceAccount.getBalance().subtract(dto.amount()));
@@ -245,8 +245,8 @@ public class TransactionService implements ITransactionService {
     @Transactional(readOnly = true)
     public List<TransactionReadOnlyDTO> getAllTransactions(UUID userUuid, Pageable pageable) {
         //VALIDATE
-        User user = userRepository.findUserByUuid(userUuid)
-                .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + " not found!"));
+        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
+                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
 
         //RETURN
         return transactionRepository.findTransByUser(user, pageable)
@@ -260,10 +260,10 @@ public class TransactionService implements ITransactionService {
     @Transactional(readOnly = true)
     public List<TransactionReadOnlyDTO> getTransactionByAccount(UUID accountUuid, UUID userUuid, Pageable pageable) {
         //VALIDATE
-        User user = userRepository.findUserByUuid(userUuid)
-                .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + " not found!"));
+        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
+                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
         Account account = accountRepository.findAccountByUuidAndUser(accountUuid, user)
-                .orElseThrow(() -> new EntityNotFoundException("Account with uuid: " + accountUuid + " not found!"));
+                .orElseThrow(() -> new EntityNotFoundException("Account", "Account with uuid: " + accountUuid + " not found!"));
 
         //RETURN
         return transactionRepository.findTransByUserAndSourceAccount(user, account, pageable)
@@ -277,8 +277,8 @@ public class TransactionService implements ITransactionService {
     @Transactional(readOnly = true)
     public List<TransactionReadOnlyDTO> getTransactionByType(TransactionType type, UUID userUuid, Pageable pageable) {
         //VALIDATE
-        User user = userRepository.findUserByUuid(userUuid)
-                .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + " not found!"));
+        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
+                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
 
         //RETURN
         return transactionRepository.findTransByUserAndType(user, type, pageable)
@@ -292,10 +292,10 @@ public class TransactionService implements ITransactionService {
     @Override
     public void deleteTransaction(UUID transUuid, UUID userUuid) throws InvalidTransactionException {
         //VALIDATE
-        User user = userRepository.findUserByUuid(userUuid)
-                .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + " not found!"));
+        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
+                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
         Transaction transaction = transactionRepository.findTransByUuidAndUser(transUuid, user)
-                .orElseThrow(() -> new EntityNotFoundException("Transaction with uuid: " + transUuid + " not found!"));
+                .orElseThrow(() -> new EntityNotFoundException("Transaction", "Transaction with uuid: " + transUuid + " not found!"));
 
         //PREPARE
         Account sourceAccount = transaction.getSourceAccount();
@@ -308,7 +308,7 @@ public class TransactionService implements ITransactionService {
                 sourceAccount.setBalance(sourceAccount.getBalance().add(transaction.getAmount()));
                 targetAccount.setBalance(targetAccount.getBalance().subtract(transaction.getAmount()));
             }
-            default -> throw new InvalidArgumentException("Unknown transaction type");
+            default -> throw new InvalidArgumentException("Transaction", "Unknown transaction type");
         }
 
         //EXECUTE

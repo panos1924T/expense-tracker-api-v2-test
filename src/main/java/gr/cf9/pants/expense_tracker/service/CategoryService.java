@@ -71,7 +71,7 @@ public class CategoryService implements ICategoryService{
         }
 
         category.setName(dto.name());
-        category.setType(dto.type());
+        category.setType(dto.type());           //TODO Αν έχει expense transactions δεν μπορώ να το κάνω INCOME TYPE
 
         //EXECUTE
         Category updatedCategory = categoryRepository.save(category);
@@ -132,7 +132,7 @@ public class CategoryService implements ICategoryService{
                 .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
 
         //PREPARE
-        List<Category> categories = categoryRepository.findCategoryByUserAndTypeAndDeletedFalse(user, type);
+        List<Category> categories = categoryRepository.findCategoryByUserAndType(user, type);
 
         //EXECUTE & RETURN
         return categories.stream()
