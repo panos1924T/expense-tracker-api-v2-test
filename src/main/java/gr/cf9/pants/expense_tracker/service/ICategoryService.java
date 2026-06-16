@@ -18,6 +18,8 @@ public interface ICategoryService {
 
     CategoryReadOnlyDTO getCategoryByUuid(UUID categoryUuid, UUID userUuid);
 
+    CategoryReadOnlyDTO getActiveCategory(UUID categoryUuid, UUID userUuid);
+
     List<CategoryReadOnlyDTO> getAllCategories(UUID userUuid);
 
     List<CategoryReadOnlyDTO> getCategoryByType(TransactionType type, UUID userUuid);

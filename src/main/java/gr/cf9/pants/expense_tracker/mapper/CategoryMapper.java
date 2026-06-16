@@ -12,11 +12,13 @@ public class CategoryMapper {
 
     public CategoryReadOnlyDTO toReadOnly(Category category) {
         return new CategoryReadOnlyDTO(
-                category.getId(),
+                category.getUuid(),
                 category.getName(),
                 category.getType(),
-                category.getParent() != null ? category.getParent().getId() : null,
-                category.getParent() != null ? category.getParent().getName() : null
+                category.getParent() != null ? category.getParent().getUuid() : null,
+                category.getParent() != null ? category.getParent().getName() : null,
+                category.getParent() == null,
+                category.isDeleted()
         );
     }
 

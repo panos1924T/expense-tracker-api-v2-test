@@ -18,5 +18,7 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
 
     Optional<Account> findAccountByUuidAndUser(UUID uuid, User user);
 
+    Optional<Account> findAccountByUuidAndUserAndDeletedFalse(UUID uuid, User user);
+
     Optional<Account> findAccountByUserAndDefaultAccountTrue(User user);
 }

@@ -26,5 +26,7 @@ public interface ITransactionService {
 
         List<TransactionReadOnlyDTO> getTransactionByType(TransactionType type, UUID userUuid, Pageable pageable);
 
+        List<TransactionReadOnlyDTO> getTransactionByCategory(UUID categoryUuid, UUID userUuid, Pageable pageable);
+
         void deleteTransaction(UUID transUuid, UUID userUuid);
 }

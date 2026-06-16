@@ -48,16 +48,28 @@ public class TransactionService implements ITransactionService {
             throw new InvalidTransactionException("Amount", "Amount must be positive");
         }
 
+        if (dto.type() == null) {
+            throw new InvalidArgumentException("TransactionType", "Transaction type is required");
+        }
+
         if (dto.type() == TransactionType.TRANSFER) {
             throw new InvalidArgumentException("TransactionType", "Use /transfer endpoint for transfers");
         }
 
         if (dto.categoryUuid() == null) {
-            throw new InvalidArgumentException("Category", "Category is required for non-transfer transactions");
+            throw new InvalidArgumentException("Category", "Category is required");
         }
 
         Category category = categoryRepository.findCategoryByUuidAndUserAndDeletedFalse(dto.categoryUuid(), user)
                 .orElseThrow(() -> new EntityNotFoundException("Category", "Category with uuid: " + dto.categoryUuid() + " not found!"));
+
+        if (category.getParent() == null) {
+            throw new InvalidTransactionException("Category", "Parent categories are groups only and cannot be used in transactions");
+        }
+
+        if (category.getType() != dto.type()) {
+            throw new InvalidTransactionException("Category", "Category type must match transaction type");
+        }
 
         Account sourceAccount;
         BigDecimal newBalance;
@@ -70,7 +82,11 @@ public class TransactionService implements ITransactionService {
             sourceAccount.setBalance(newBalance);
 
         } else {
-            sourceAccount = accountRepository.findAccountByUuidAndUser(dto.sourceAccountUuid(), user)
+            if (dto.sourceAccountUuid() == null) {
+                throw new InvalidArgumentException("Account", "Source account is required for EXPENSE transactions");
+            }
+
+            sourceAccount = accountRepository.findAccountByUuidAndUserAndDeletedFalse(dto.sourceAccountUuid(), user)
                     .orElseThrow(() -> new EntityNotFoundException("Account", "Account with uuid=" + dto.sourceAccountUuid() + " not found"));
 
             newBalance = sourceAccount.getBalance().subtract(dto.amount());
@@ -101,10 +117,10 @@ public class TransactionService implements ITransactionService {
             throw new InvalidTransactionException("Amount", "Amount must be positive");
         }
 
-        Account sourceAccount = accountRepository.findAccountByUuidAndUser(dto.sourceAccountUuid(), user)
+        Account sourceAccount = accountRepository.findAccountByUuidAndUserAndDeletedFalse(dto.sourceAccountUuid(), user)
                 .orElseThrow(() -> new EntityNotFoundException("Account", "Account with uuid: " + dto.sourceAccountUuid() + "not found!"));
 
-        Account targetAccount = accountRepository.findAccountByUuidAndUser(dto.targetAccountUuid(), user)
+        Account targetAccount = accountRepository.findAccountByUuidAndUserAndDeletedFalse(dto.targetAccountUuid(), user)
                 .orElseThrow(() -> new EntityNotFoundException("Account", "Account with uuid: " + dto.targetAccountUuid() + "not found!"));
 
         //PREPARE
@@ -154,12 +170,28 @@ public class TransactionService implements ITransactionService {
             throw new InvalidTransactionException("Amount", "Amount must be positive");
         }
 
+        if (dto.type() == null) {
+            throw new InvalidArgumentException("TransactionType", "Transaction type is required");
+        }
+
         if (transaction.getType() == TransactionType.TRANSFER || dto.type() == TransactionType.TRANSFER) {
             throw new InvalidArgumentException("Transaction", "Use /transfers endpoint for transfer transactions");
         }
 
+        if (dto.categoryUuid() == null) {
+            throw new InvalidArgumentException("Category", "Category is required");
+        }
+
         Category newCategory = categoryRepository.findCategoryByUuidAndUserAndDeletedFalse(dto.categoryUuid(), user)
                 .orElseThrow(() -> new EntityNotFoundException("Category", "Category with uuid=" + dto.categoryUuid() + " not found"));
+
+        if (newCategory.getParent() == null) {
+            throw new InvalidTransactionException("Category", "Parent categories are groups only and cannot be used in transactions");
+        }
+
+        if (newCategory.getType() != dto.type()) {
+            throw new InvalidTransactionException("Category", "Category type must match transaction type");
+        }
 
         Account newAccount;
         if (dto.type() == TransactionType.INCOME) {
@@ -219,10 +251,10 @@ public class TransactionService implements ITransactionService {
         transaction.getTargetAccount()
                 .setBalance(transaction.getTargetAccount().getBalance().subtract(transaction.getAmount()));
 
-        Account newSourceAccount = accountRepository.findAccountByUuidAndUser(dto.sourceAccountUuid(), user)
+        Account newSourceAccount = accountRepository.findAccountByUuidAndUserAndDeletedFalse(dto.sourceAccountUuid(), user)
                 .orElseThrow(() -> new EntityNotFoundException("Account", "Source account with uuid=" + dto.sourceAccountUuid() + " not found"));
 
-        Account newTargetAccount = accountRepository.findAccountByUuidAndUser(dto.targetAccountUuid(), user)
+        Account newTargetAccount = accountRepository.findAccountByUuidAndUserAndDeletedFalse(dto.targetAccountUuid(), user)
                 .orElseThrow(() -> new EntityNotFoundException("Account", "Target account with uuid=" + dto.targetAccountUuid() + " not found"));
 
         if (newSourceAccount.getUuid().equals(newTargetAccount.getUuid())) {
@@ -262,7 +294,7 @@ public class TransactionService implements ITransactionService {
         //VALIDATE
         User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
                 .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
-        Account account = accountRepository.findAccountByUuidAndUser(accountUuid, user)
+        Account account = accountRepository.findAccountByUuidAndUserAndDeletedFalse(accountUuid, user)
                 .orElseThrow(() -> new EntityNotFoundException("Account", "Account with uuid: " + accountUuid + " not found!"));
 
         //RETURN
@@ -271,6 +303,31 @@ public class TransactionService implements ITransactionService {
                 .stream()
                 .map(transactionMapper::toReadOnly)
                 .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<TransactionReadOnlyDTO> getTransactionByCategory(UUID categoryUuid, UUID userUuid, Pageable pageable) {
+
+        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
+                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
+
+        Category category = categoryRepository.findCategoryByUuidAndUserAndDeletedFalse(categoryUuid, user)
+                .orElseThrow(() -> new EntityNotFoundException("Category", "Category with uuid: " + categoryUuid + " not found!"));
+
+        if (category.getParent() == null) {
+            return transactionRepository.findTransByUserAndCategoryParent(user, category, pageable)
+                    .getContent()
+                    .stream()
+                    .map(transactionMapper::toReadOnly)
+                    .toList();
+        } else {
+            return transactionRepository.findTransByUserAndCategory(user, category, pageable)
+                    .getContent()
+                    .stream()
+                    .map(transactionMapper::toReadOnly)
+                    .toList();
+        }
     }
 
     @Override

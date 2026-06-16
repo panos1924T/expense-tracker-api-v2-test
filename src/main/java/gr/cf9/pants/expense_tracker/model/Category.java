@@ -18,8 +18,8 @@ import java.util.Set;
 @Table(name = "categories",
         uniqueConstraints = {
                 @UniqueConstraint(
-                        name = "uk_categories_name_user",
-                        columnNames= {"name", "user_id"}
+                        name = "uk_categories_name_user_type_parent",
+                        columnNames = {"name", "user_id", "transaction_type", "parent_id"}
                 )
         }
         )
