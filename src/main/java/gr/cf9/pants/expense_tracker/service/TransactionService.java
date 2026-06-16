@@ -56,7 +56,7 @@ public class TransactionService implements ITransactionService {
             throw new InvalidArgumentException("Category is required for non-transfer transactions");
         }
 
-        Category category = categoryRepository.findCategoryByUuidAndUser(dto.categoryUuid(), user)
+        Category category = categoryRepository.findCategoryByUuidAndUserAndDeletedFalse(dto.categoryUuid(), user)
                 .orElseThrow(() -> new EntityNotFoundException("Category with uuid: " + dto.categoryUuid() + " not found!"));
 
         Account sourceAccount;
@@ -158,7 +158,7 @@ public class TransactionService implements ITransactionService {
             throw new InvalidArgumentException("Use /transfers endpoint for transfer transactions");
         }
 
-        Category newCategory = categoryRepository.findCategoryByUuidAndUser(dto.categoryUuid(), user)
+        Category newCategory = categoryRepository.findCategoryByUuidAndUserAndDeletedFalse(dto.categoryUuid(), user)
                 .orElseThrow(() -> new EntityNotFoundException("Category with uuid=" + dto.categoryUuid() + " not found"));
 
         Account newAccount;

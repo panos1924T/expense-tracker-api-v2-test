@@ -3,7 +3,6 @@ package gr.cf9.pants.expense_tracker.service;
 import gr.cf9.pants.expense_tracker.core.enums.TransactionType;
 import gr.cf9.pants.expense_tracker.core.exceptions.EntityHasTransactionsException;
 import gr.cf9.pants.expense_tracker.core.exceptions.EntityNotFoundException;
-import gr.cf9.pants.expense_tracker.core.exceptions.UnauthorizedException;
 import gr.cf9.pants.expense_tracker.dto.category_dto.CategoryCreateDTO;
 import gr.cf9.pants.expense_tracker.dto.category_dto.CategoryReadOnlyDTO;
 import gr.cf9.pants.expense_tracker.dto.category_dto.CategoryUpdateDTO;
@@ -36,14 +35,14 @@ public class CategoryService implements ICategoryService{
     @Override
     public CategoryReadOnlyDTO createCategory(CategoryCreateDTO dto, UUID userUuid) {
         //VALIDATE
-        User user = userRepository.findUserByUuid(userUuid)
-                .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + " not found!"));
+        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
+                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
 
         //PREPARE
         Category category = categoryMapper.toEntity(dto, user);
         if (dto.parentId() != null) {
             Category parent = categoryRepository.findById(dto.parentId())
-                    .orElseThrow(() -> new EntityNotFoundException("Parent category: " + dto.parentId() + " not found!"));
+                    .orElseThrow(() -> new EntityNotFoundException("Category", "Parent category: " + dto.parentId() + " not found!"));
             category.setParent(parent);
         }
 
@@ -58,16 +57,16 @@ public class CategoryService implements ICategoryService{
     @Override
     public CategoryReadOnlyDTO updateCategory(UUID categoryUuid, CategoryUpdateDTO dto, UUID userUuid) {
         //VALIDATE
-        User user = userRepository.findUserByUuid(userUuid)
-                .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + " not found!"));
-        Category category = categoryRepository.findCategoryByUuidAndUser(categoryUuid, user)
-                .orElseThrow(() -> new EntityNotFoundException("Category with uuid: " + categoryUuid + "not found!"));
+        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
+                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
+        Category category = categoryRepository.findCategoryByUuidAndUserAndDeletedFalse(categoryUuid, user)
+                .orElseThrow(() -> new EntityNotFoundException("Category", "Category with uuid: " + categoryUuid + "not found!"));
 
 
         //PREPARE
         if (dto.parentId() != null) {
             Category parent = categoryRepository.findById(dto.parentId())
-                    .orElseThrow(() -> new EntityNotFoundException("Parent category: " + dto.parentId() + " not found!"));
+                    .orElseThrow(() -> new EntityNotFoundException("Category", "Parent category: " + dto.parentId() + " not found!"));
             category.setParent(parent);
         }
 
@@ -85,13 +84,13 @@ public class CategoryService implements ICategoryService{
     @Override
     public void deleteCategory(UUID categoryUuid, UUID userUuid) {
         //VALIDATE
-        User user = userRepository.findUserByUuid(userUuid)
-                .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + " not found!"));
-        Category category = categoryRepository.findCategoryByUuidAndUser(categoryUuid, user)
-                .orElseThrow(() -> new EntityNotFoundException("Category with uuid: " + categoryUuid + "not found!"));
+        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
+                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
+        Category category = categoryRepository.findCategoryByUuidAndUserAndDeletedFalse(categoryUuid, user)
+                .orElseThrow(() -> new EntityNotFoundException("Category", "Category with uuid: " + categoryUuid + "not found!"));
 
         if (transactionRepository.existsTransByCategory(category)) {
-            throw new EntityHasTransactionsException("Cannot delete entity with existing transactions");
+            throw new EntityHasTransactionsException("Category", "Cannot delete entity with existing transactions");
         }
 
         //EXECUTE
@@ -102,10 +101,10 @@ public class CategoryService implements ICategoryService{
     @Override
     public CategoryReadOnlyDTO getCategoryByUuid(UUID categoryUuid, UUID userUuid) {
         //VALIDATE
-        User user = userRepository.findUserByUuid(userUuid)
-                .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + " not found!"));
-        Category category = categoryRepository.findCategoryByUuidAndUser(categoryUuid, user)
-                .orElseThrow(() -> new EntityNotFoundException("Category with uuid: " + categoryUuid + "not found!"));
+        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
+                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
+        Category category = categoryRepository.findCategoryByUuidAndUserAndDeletedFalse(categoryUuid, user)
+                .orElseThrow(() -> new EntityNotFoundException("Category", "Category with uuid: " + categoryUuid + "not found!"));
 
         //RETURN
         return categoryMapper.toReadOnly(category);
@@ -114,8 +113,8 @@ public class CategoryService implements ICategoryService{
     @Override
     public List<CategoryReadOnlyDTO> getAllCategories(UUID userUuid) {
         //VALIDATE
-        User user = userRepository.findUserByUuid(userUuid)
-                .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + " not found!"));
+        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
+                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
 
         //PREPARE
         List<Category> categories = categoryRepository.findCategoryByUser(user);
@@ -129,11 +128,11 @@ public class CategoryService implements ICategoryService{
     @Override
     public List<CategoryReadOnlyDTO> getCategoryByType(TransactionType type, UUID userUuid) {
         //VALIDATE
-        User user = userRepository.findUserByUuid(userUuid)
-                .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + " not found!"));
+        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
+                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
 
         //PREPARE
-        List<Category> categories = categoryRepository.findCategoryByUserAndType(user, type);
+        List<Category> categories = categoryRepository.findCategoryByUserAndTypeAndDeletedFalse(user, type);
 
         //EXECUTE & RETURN
         return categories.stream()
