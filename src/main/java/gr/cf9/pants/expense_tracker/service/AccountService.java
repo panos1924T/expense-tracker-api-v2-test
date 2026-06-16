@@ -56,16 +56,20 @@ public class AccountService implements IAccountService{
         //VALIDATE
         User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
                 .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + "not found!"));
-        Account account = accountRepository.findAccountByUuidAndUserAndDeletedFalse(accountUuid, user)
+        Account account = accountRepository.findAccountByUuidAndUser(accountUuid, user)
                 .orElseThrow(() -> new EntityNotFoundException("Account", "Account with uuid: " + accountUuid + "not found!"));
 
         if (account.isDefaultAccount() == true) {
             throw new InvalidArgumentException("Account", "Cannot update default account");
         }
 
+        if (account.isDeleted() == true) {
+            throw new InvalidArgumentException("Account", "Account with uuid:" + accountUuid + " is deleted");
+        }
+
         //PREPARE
         account.setName(dto.name());
-        account.setAccountType(dto.accountType());
+        account.setAccountType(dto.accountType());      //TODO same problem with category, if acc has LIQUIDITY trans should it be updated to CREDIT?
 
         //EXECUTE
         Account updatedAccount = accountRepository.save(account);
@@ -81,14 +85,15 @@ public class AccountService implements IAccountService{
         //VALIDATE
         User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
                 .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + "not found!"));
-        Account account = accountRepository.findAccountByUuidAndUserAndDeletedFalse(accountUuid, user)
+        Account account = accountRepository.findAccountByUuidAndUser(accountUuid, user)
                 .orElseThrow(() -> new EntityNotFoundException("Account", "Account with uuid: " + accountUuid + "not found!"));
+
+        if (account.isDeleted() == true) {
+            throw new InvalidArgumentException("Account", "Account with uuid:" + accountUuid + " is already deleted");     //TODO will a deleted account be reversed? If not I should say deleted not archived
+        }
 
         if (account.isDefaultAccount()) {
             throw new InvalidArgumentException("Account", "Cannot delete default account!");
-        }
-        if (transactionRepository.existsTransByAccount(account)) {
-            throw new EntityHasTransactionsException("Transaction", "Cannot delete entity with existing transactions");
         }
 
         //EXECUTE
@@ -133,8 +138,12 @@ public class AccountService implements IAccountService{
         //VALIDATE
         User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
                 .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + "not found!"));
-        Account account = accountRepository.findAccountByUuidAndUserAndDeletedFalse(accountUuid, user)
+        Account account = accountRepository.findAccountByUuidAndUser(accountUuid, user)
                 .orElseThrow(() -> new EntityNotFoundException("Account", "Account with uuid: " + accountUuid + "not found!"));
+
+        if (account.isDeleted() == true) {
+            throw new InvalidArgumentException("Account", "Account with uuid:" + accountUuid + " is deleted");
+        }
 
         //RETURN
         return accountMapper.toReadOnly(account);
