@@ -70,7 +70,7 @@ public class TransactionService implements ITransactionService {
             sourceAccount.setBalance(newBalance);
 
         } else {
-            sourceAccount = accountRepository.findAccountByUuidAndUser(dto.sourceAccountUuid(), user)
+            sourceAccount = accountRepository.findAccountByUuidAndUserAndDeletedFalse(dto.sourceAccountUuid(), user)
                     .orElseThrow(() -> new EntityNotFoundException("Account with uuid=" + dto.sourceAccountUuid() + " not found"));
 
             newBalance = sourceAccount.getBalance().subtract(dto.amount());
@@ -101,10 +101,10 @@ public class TransactionService implements ITransactionService {
             throw new InvalidTransactionException("Amount must be positive");
         }
 
-        Account sourceAccount = accountRepository.findAccountByUuidAndUser(dto.sourceAccountUuid(), user)
+        Account sourceAccount = accountRepository.findAccountByUuidAndUserAndDeletedFalse(dto.sourceAccountUuid(), user)
                 .orElseThrow(() -> new EntityNotFoundException("Account with uuid: " + dto.sourceAccountUuid() + "not found!"));
 
-        Account targetAccount = accountRepository.findAccountByUuidAndUser(dto.targetAccountUuid(), user)
+        Account targetAccount = accountRepository.findAccountByUuidAndUserAndDeletedFalse(dto.targetAccountUuid(), user)
                 .orElseThrow(() -> new EntityNotFoundException("Account with uuid: " + dto.targetAccountUuid() + "not found!"));
 
         //PREPARE
@@ -176,7 +176,7 @@ public class TransactionService implements ITransactionService {
 
             transaction.getSourceAccount().setBalance(
                     transaction.getSourceAccount().getBalance().add(transaction.getAmount()));
-            newAccount = accountRepository.findAccountByUuidAndUser(dto.sourceAccountUuid(), user)
+            newAccount = accountRepository.findAccountByUuidAndUserAndDeletedFalse(dto.sourceAccountUuid(), user)
                     .orElseThrow(() -> new EntityNotFoundException("Account with uuid=" + dto.sourceAccountUuid() + " not found"));
             newAccount.setBalance(newAccount.getBalance().subtract(dto.amount()));
         }
@@ -219,10 +219,10 @@ public class TransactionService implements ITransactionService {
         transaction.getTargetAccount()
                 .setBalance(transaction.getTargetAccount().getBalance().subtract(transaction.getAmount()));
 
-        Account newSourceAccount = accountRepository.findAccountByUuidAndUser(dto.sourceAccountUuid(), user)
+        Account newSourceAccount = accountRepository.findAccountByUuidAndUserAndDeletedFalse(dto.sourceAccountUuid(), user)
                 .orElseThrow(() -> new EntityNotFoundException("Source account with uuid=" + dto.sourceAccountUuid() + " not found"));
 
-        Account newTargetAccount = accountRepository.findAccountByUuidAndUser(dto.targetAccountUuid(), user)
+        Account newTargetAccount = accountRepository.findAccountByUuidAndUserAndDeletedFalse(dto.targetAccountUuid(), user)
                 .orElseThrow(() -> new EntityNotFoundException("Target account with uuid=" + dto.targetAccountUuid() + " not found"));
 
         if (newSourceAccount.getUuid().equals(newTargetAccount.getUuid())) {
@@ -262,7 +262,7 @@ public class TransactionService implements ITransactionService {
         //VALIDATE
         User user = userRepository.findUserByUuid(userUuid)
                 .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + " not found!"));
-        Account account = accountRepository.findAccountByUuidAndUser(accountUuid, user)
+        Account account = accountRepository.findAccountByUuidAndUserAndDeletedFalse(accountUuid, user)
                 .orElseThrow(() -> new EntityNotFoundException("Account with uuid: " + accountUuid + " not found!"));
 
         //RETURN

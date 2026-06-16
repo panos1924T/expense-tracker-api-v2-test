@@ -3,7 +3,6 @@ package gr.cf9.pants.expense_tracker.service;
 import gr.cf9.pants.expense_tracker.core.exceptions.EntityHasTransactionsException;
 import gr.cf9.pants.expense_tracker.core.exceptions.EntityNotFoundException;
 import gr.cf9.pants.expense_tracker.core.exceptions.InvalidArgumentException;
-import gr.cf9.pants.expense_tracker.core.exceptions.UnauthorizedException;
 import gr.cf9.pants.expense_tracker.dto.account_dto.AccountCreateDTO;
 import gr.cf9.pants.expense_tracker.dto.account_dto.AccountReadOnlyDTO;
 import gr.cf9.pants.expense_tracker.dto.account_dto.AccountUpdateDTO;
@@ -13,7 +12,6 @@ import gr.cf9.pants.expense_tracker.model.User;
 import gr.cf9.pants.expense_tracker.repository.AccountRepository;
 import gr.cf9.pants.expense_tracker.repository.TransactionRepository;
 import gr.cf9.pants.expense_tracker.repository.UserRepository;
-import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -38,8 +36,8 @@ public class AccountService implements IAccountService{
     public AccountReadOnlyDTO createAccount(AccountCreateDTO dto, UUID userUuid) {
 
         //VALIDATE
-        User user = userRepository.findUserByUuid(userUuid)
-                .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + "not found!"));
+        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
+                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + "not found!"));
 
         //PREPARE
         Account account = accountMapper.toEntity(dto, user);
@@ -56,13 +54,13 @@ public class AccountService implements IAccountService{
     public AccountReadOnlyDTO updateAccount(UUID accountUuid, AccountUpdateDTO dto, UUID userUuid) {
 
         //VALIDATE
-        User user = userRepository.findUserByUuid(userUuid)
-                .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + "not found!"));
-        Account account = accountRepository.findAccountByUuidAndUser(accountUuid, user)
-                .orElseThrow(() -> new EntityNotFoundException("Account with uuid: " + accountUuid + "not found!"));
+        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
+                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + "not found!"));
+        Account account = accountRepository.findAccountByUuidAndUserAndDeletedFalse(accountUuid, user)
+                .orElseThrow(() -> new EntityNotFoundException("Account", "Account with uuid: " + accountUuid + "not found!"));
 
         if (account.isDefaultAccount() == true) {
-            throw new InvalidArgumentException("Cannot update default account");
+            throw new InvalidArgumentException("Account", "Cannot update default account");
         }
 
         //PREPARE
@@ -81,16 +79,16 @@ public class AccountService implements IAccountService{
     public void deleteAccount(UUID accountUuid, UUID userUuid) {
 
         //VALIDATE
-        User user = userRepository.findUserByUuid(userUuid)
-                .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + "not found!"));
-        Account account = accountRepository.findAccountByUuidAndUser(accountUuid, user)
-                .orElseThrow(() -> new EntityNotFoundException("Account with uuid: " + accountUuid + "not found!"));
+        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
+                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + "not found!"));
+        Account account = accountRepository.findAccountByUuidAndUserAndDeletedFalse(accountUuid, user)
+                .orElseThrow(() -> new EntityNotFoundException("Account", "Account with uuid: " + accountUuid + "not found!"));
 
         if (account.isDefaultAccount()) {
-            throw new InvalidArgumentException("Cannot delete default account!");
+            throw new InvalidArgumentException("Account", "Cannot delete default account!");
         }
         if (transactionRepository.existsTransByAccount(account)) {
-            throw new EntityHasTransactionsException("Cannot delete entity with existing transactions");
+            throw new EntityHasTransactionsException("Transaction", "Cannot delete entity with existing transactions");
         }
 
         //EXECUTE
@@ -102,8 +100,8 @@ public class AccountService implements IAccountService{
     public List<AccountReadOnlyDTO> getAllAccounts(UUID userUuid) {
 
         //VALIDATE
-        User user = userRepository.findUserByUuid(userUuid)
-                .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + "not found!"));
+        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
+                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + "not found!"));
 
         //PREPARE
         List<Account> accounts = accountRepository.findAccountByUser(user);
@@ -115,13 +113,28 @@ public class AccountService implements IAccountService{
     }
 
     @Override
+    public List<AccountReadOnlyDTO> getActiveAccounts(UUID userUuid) {
+        //VALIDATE
+        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
+                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + "not found!"));
+
+        //PREPARE
+        List<Account> accounts = accountRepository.findAccountByUserAndDeletedFalse(user);
+
+        //EXECUTE AND RETURN
+        return accounts.stream()
+                .map(accountMapper::toReadOnly)
+                .toList();
+    }
+
+    @Override
     public AccountReadOnlyDTO getAccount(UUID accountUuid, UUID userUuid) {
 
         //VALIDATE
-        User user = userRepository.findUserByUuid(userUuid)
-                .orElseThrow(() -> new EntityNotFoundException("User with uuid: " + userUuid + "not found!"));
-        Account account = accountRepository.findAccountByUuidAndUser(userUuid, user)
-                .orElseThrow(() -> new EntityNotFoundException("Account with uuid: " + accountUuid + "not found!"));
+        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
+                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + "not found!"));
+        Account account = accountRepository.findAccountByUuidAndUserAndDeletedFalse(accountUuid, user)
+                .orElseThrow(() -> new EntityNotFoundException("Account", "Account with uuid: " + accountUuid + "not found!"));
 
         //RETURN
         return accountMapper.toReadOnly(account);

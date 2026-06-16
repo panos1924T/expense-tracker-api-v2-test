@@ -18,5 +18,7 @@ public interface IAccountService {
 
     List<AccountReadOnlyDTO> getAllAccounts(UUID userUuid);
 
+    List<AccountReadOnlyDTO> getActiveAccounts(UUID userUuid);
+
     AccountReadOnlyDTO getAccount(UUID accountUuid, UUID userUuid);
 }
