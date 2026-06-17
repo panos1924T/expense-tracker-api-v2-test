@@ -16,11 +16,15 @@ public interface ICategoryService {
 
     void deleteCategory(UUID categoryUuid, UUID userUuid);
 
+    CategoryReadOnlyDTO getActiveCategoryByUuid(UUID categoryUuid, UUID userUuid);
+
     CategoryReadOnlyDTO getCategoryByUuid(UUID categoryUuid, UUID userUuid);
 
-    CategoryReadOnlyDTO getActiveCategory(UUID categoryUuid, UUID userUuid);
+    List<CategoryReadOnlyDTO> getActiveCategories(UUID userUuid);
 
     List<CategoryReadOnlyDTO> getAllCategories(UUID userUuid);
 
-    List<CategoryReadOnlyDTO> getCategoryByType(TransactionType type, UUID userUuid);
+    List<CategoryReadOnlyDTO> getActiveCategoriesByType(TransactionType type, UUID userUuid);
+
+    List<CategoryReadOnlyDTO> getCategoriesByType(TransactionType type, UUID userUuid);
 }

@@ -49,7 +49,7 @@ public class CategoryService implements ICategoryService{
         category.setName(name);
 
         if (dto.parentUuid() == null) {
-            if (categoryRepository.existsCategoryByUserAndNameAndTypeAndParentIsNullAndDeletedFalse(
+            if (categoryRepository.existsCategoryByUserAndNameAndTypeAndParentIsNull(
                     user,
                     dto.type(),
                     name
@@ -70,7 +70,7 @@ public class CategoryService implements ICategoryService{
                 throw new InvalidArgumentException("Category", "Child category type must match parent category type");
             }
 
-            if (categoryRepository.existsCategoryByUserAndNameAndTypeAndParentAndDeletedFalse(
+            if (categoryRepository.existsCategoryByUserAndNameAndTypeAndParent(
                     user,
                     dto.type(),
                     name,
@@ -100,8 +100,8 @@ public class CategoryService implements ICategoryService{
         String name = normalizeName(dto.name());
 
         if (category.getParent() == null) {
-            if (!category.getName().equalsIgnoreCase(name)
-                    && categoryRepository.existsCategoryByUserAndNameAndTypeAndParentIsNullAndDeletedFalse(
+            if (!category.getName().equals(name)
+                    && categoryRepository.existsCategoryByUserAndNameAndTypeAndParentIsNull(
                     user,
                     category.getType(),
                     name
@@ -109,8 +109,8 @@ public class CategoryService implements ICategoryService{
                 throw new EntityAlreadyExistsException("Category", "Root category already exists");
             }
         } else {
-            if (!category.getName().equalsIgnoreCase(name)
-                    && categoryRepository.existsCategoryByUserAndNameAndTypeAndParentAndDeletedFalse(
+            if (!category.getName().equals(name)
+                    && categoryRepository.existsCategoryByUserAndNameAndTypeAndParent(
                     user,
                     category.getType(),
                     name,
@@ -142,13 +142,21 @@ public class CategoryService implements ICategoryService{
             throw new InvalidArgumentException("Category", "Cannot delete parent category with active children");
         }
 
-        boolean hasTrans = transactionRepository.existsTransByCategory(category);       //TODO Αν έχει softDeleted Children πρέπει να είναι στο root softDelete
-        if (hasTrans == true) {
-            category.softDelete(Instant.now());
-            categoryRepository.save(category);
-        } else {
-            categoryRepository.delete(category);
-        }
+        category.softDelete(Instant.now());
+        categoryRepository.save(category);      //TODO Αν έχει softDeleted Children πρέπει να είναι στο root softDelete
+
+    }
+
+    @Override
+    public CategoryReadOnlyDTO getActiveCategoryByUuid(UUID categoryUuid, UUID userUuid) {
+        //VALIDATE
+        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
+                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
+        Category category = categoryRepository.findCategoryByUuidAndUserAndDeletedFalse(categoryUuid, user)
+                .orElseThrow(() -> new EntityNotFoundException("Category", "Category with uuid: " + categoryUuid + "not found!"));
+
+        //RETURN
+        return categoryMapper.toReadOnly(category);
     }
 
     @Override
@@ -156,7 +164,7 @@ public class CategoryService implements ICategoryService{
         //VALIDATE
         User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
                 .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
-        Category category = categoryRepository.findCategoryByUuidAndUserAndDeletedFalse(categoryUuid, user)
+        Category category = categoryRepository.findCategoryByUuidAndUser(categoryUuid, user)
                 .orElseThrow(() -> new EntityNotFoundException("Category", "Category with uuid: " + categoryUuid + "not found!"));
 
         //RETURN
@@ -170,7 +178,7 @@ public class CategoryService implements ICategoryService{
                 .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
 
         //PREPARE
-        List<Category> categories = categoryRepository.findCategoryByUserAndDeletedFalse(user);
+        List<Category> categories = categoryRepository.findCategoryByUser(user);
 
         //EXECUTE & RETURN
         return categories.stream()
@@ -179,24 +187,40 @@ public class CategoryService implements ICategoryService{
     }
 
     @Override
-    public CategoryReadOnlyDTO getActiveCategory(UUID categoryUuid, UUID userUuid) {        //TODO λάθος, θέλω να υλοποιήσω να φέρνει όλα τα categories όχι active το κάνω από πάνω
+    public List<CategoryReadOnlyDTO> getActiveCategories(UUID userUuid) {
         User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
                 .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
 
-        Category category = categoryRepository.findCategoryByUuidAndUser(categoryUuid, user)
-                .orElseThrow(() -> new EntityNotFoundException("Category", "Category with uuid: " + categoryUuid + "not found!"));
+        List<Category> categories = categoryRepository.findCategoryByUserAndDeletedFalse(user);
 
-        return categoryMapper.toReadOnly(category);
+        return categories.stream()
+                .map(categoryMapper::toReadOnly)
+                .toList();
     }
 
     @Override
-    public List<CategoryReadOnlyDTO> getCategoryByType(TransactionType type, UUID userUuid) {
+    public List<CategoryReadOnlyDTO> getActiveCategoriesByType(TransactionType type, UUID userUuid) {
         //VALIDATE
         User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
                 .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
 
         //PREPARE
         List<Category> categories = categoryRepository.findCategoryByUserAndTypeAndDeletedFalse(user, type);
+
+        //EXECUTE & RETURN
+        return categories.stream()
+                .map(categoryMapper::toReadOnly)
+                .toList();
+    }
+
+    @Override
+    public List<CategoryReadOnlyDTO> getCategoriesByType(TransactionType type, UUID userUuid) {
+        //VALIDATE
+        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
+                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
+
+        //PREPARE
+        List<Category> categories = categoryRepository.findCategoryByUserAndType(user, type);
 
         //EXECUTE & RETURN
         return categories.stream()

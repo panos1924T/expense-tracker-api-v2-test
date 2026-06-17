@@ -15,9 +15,15 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
 
     List<Category> findCategoryByUserAndTypeAndDeletedFalse(User user, TransactionType type);
 
+    List<Category> findCategoryByUserAndType(User user, TransactionType type);
+
     List<Category> findCategoryByUserAndDeletedFalse(User user);
 
+    List<Category> findCategoryByUser(User user);
+
     Optional<Category> findCategoryByUuidAndUserAndDeletedFalse(UUID uuid, User user);
+
+    Optional<Category> findCategoryByUuidAndUser(UUID Uuid, User user);
 
     List<Category> findCategoryByUserAndParentIsNullAndDeletedFalse(User user);
 
@@ -31,13 +37,13 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
             Category parent
     );
 
-    boolean existsCategoryByUserAndNameAndTypeAndParentIsNullAndDeletedFalse(
+    boolean existsCategoryByUserAndNameAndTypeAndParentIsNull(
             User user,
             TransactionType type,
             String name
     );
 
-    boolean existsCategoryByUserAndNameAndTypeAndParentAndDeletedFalse(
+    boolean existsCategoryByUserAndNameAndTypeAndParent(
             User user,
             TransactionType type,
             String name,
@@ -45,7 +51,4 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
     );
 
     boolean existsCategoryByParentAndDeletedFalse(Category parent);
-
-    //all categories for history or filtering
-    Optional<Category> findCategoryByUuidAndUser(UUID uuid, User user);
 }
