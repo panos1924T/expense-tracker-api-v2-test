@@ -89,7 +89,7 @@ public class AccountService implements IAccountService{
                 .orElseThrow(() -> new EntityNotFoundException("Account", "Account with uuid: " + accountUuid + "not found!"));
 
         if (account.isDeleted() == true) {
-            throw new InvalidArgumentException("Account", "Account with uuid:" + accountUuid + " is already deleted");     //TODO will a deleted account be reversed? If not I should say deleted not archived
+            throw new InvalidArgumentException("Account", "Account with uuid:" + accountUuid + " is already deleted");
         }
 
         if (account.isDefaultAccount()) {
@@ -100,14 +100,7 @@ public class AccountService implements IAccountService{
             throw new InvalidArgumentException("account", "Cannot delete account with non-zero balance");
         }
 
-        boolean hasTrans = transactionRepository.existsTransByAccount(account);
-
-        if (hasTrans == true) {
-            account.softDelete(Instant.now());
-        } else {
-            accountRepository.delete(account);
-        }
-
+        account.softDelete(Instant.now());
         accountRepository.save(account);
     }
 
