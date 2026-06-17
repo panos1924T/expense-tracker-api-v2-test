@@ -56,10 +56,6 @@ public class TransactionService implements ITransactionService {
             throw new InvalidArgumentException("TransactionType", "Use /transfer endpoint for transfers");
         }
 
-        if (dto.categoryUuid() == null) {
-            throw new InvalidArgumentException("Category", "Category is required");
-        }
-
         Category category = categoryRepository.findCategoryByUuidAndUserAndDeletedFalse(dto.categoryUuid(), user)
                 .orElseThrow(() -> new EntityNotFoundException("Category", "Category with uuid: " + dto.categoryUuid() + " not found!"));
 
@@ -195,10 +191,18 @@ public class TransactionService implements ITransactionService {
         }
 
         Account newAccount;
-        if (dto.type() == TransactionType.INCOME) {
 
+        if (transaction.getType() == TransactionType.INCOME) {
             transaction.getSourceAccount().setBalance(
-                    transaction.getSourceAccount().getBalance().subtract(transaction.getAmount()));
+                    transaction.getSourceAccount().getBalance().subtract(transaction.getAmount())
+            );
+        } else {
+            transaction.getSourceAccount().setBalance(
+                    transaction.getSourceAccount().getBalance().add(transaction.getAmount())
+            );
+        }
+
+        if (dto.type() == TransactionType.INCOME) {
             newAccount = accountRepository.findAccountByUserAndDefaultAccountTrue(user)
                     .orElseThrow(() -> new EntityNotFoundException("Account", "Default account not found"));
             newAccount.setBalance(newAccount.getBalance().add(dto.amount()));
@@ -207,8 +211,6 @@ public class TransactionService implements ITransactionService {
                 throw new InvalidArgumentException("Account", "Source account is required for EXPENSE");
             }
 
-            transaction.getSourceAccount().setBalance(
-                    transaction.getSourceAccount().getBalance().add(transaction.getAmount()));
             newAccount = accountRepository.findAccountByUuidAndUserAndDeletedFalse(dto.sourceAccountUuid(), user)
                     .orElseThrow(() -> new EntityNotFoundException("Account", "Account with uuid=" + dto.sourceAccountUuid() + " not found"));
             newAccount.setBalance(newAccount.getBalance().subtract(dto.amount()));
