@@ -143,7 +143,7 @@ public class CategoryService implements ICategoryService{
         }
 
         category.softDelete(Instant.now());
-        categoryRepository.save(category);      //TODO Αν έχει softDeleted Children πρέπει να είναι στο root softDelete
+        categoryRepository.save(category);
 
     }
 
@@ -172,33 +172,6 @@ public class CategoryService implements ICategoryService{
     }
 
     @Override
-    public List<CategoryReadOnlyDTO> getAllCategories(UUID userUuid) {
-        //VALIDATE
-        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
-                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
-
-        //PREPARE
-        List<Category> categories = categoryRepository.findCategoryByUser(user);
-
-        //EXECUTE & RETURN
-        return categories.stream()
-                .map(categoryMapper::toReadOnly)
-                .toList();
-    }
-
-    @Override
-    public List<CategoryReadOnlyDTO> getActiveCategories(UUID userUuid) {
-        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
-                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
-
-        List<Category> categories = categoryRepository.findCategoryByUserAndDeletedFalse(user);
-
-        return categories.stream()
-                .map(categoryMapper::toReadOnly)
-                .toList();
-    }
-
-    @Override
     public List<CategoryReadOnlyDTO> getActiveCategoriesByType(TransactionType type, UUID userUuid) {
         //VALIDATE
         User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
@@ -223,6 +196,33 @@ public class CategoryService implements ICategoryService{
         List<Category> categories = categoryRepository.findCategoryByUserAndType(user, type);
 
         //EXECUTE & RETURN
+        return categories.stream()
+                .map(categoryMapper::toReadOnly)
+                .toList();
+    }
+
+    @Override
+    public List<CategoryReadOnlyDTO> getAllCategories(UUID userUuid) {
+        //VALIDATE
+        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
+                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
+
+        //PREPARE
+        List<Category> categories = categoryRepository.findCategoryByUser(user);
+
+        //EXECUTE & RETURN
+        return categories.stream()
+                .map(categoryMapper::toReadOnly)
+                .toList();
+    }
+
+    @Override
+    public List<CategoryReadOnlyDTO> getActiveCategories(UUID userUuid) {
+        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
+                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
+
+        List<Category> categories = categoryRepository.findCategoryByUserAndDeletedFalse(user);
+
         return categories.stream()
                 .map(categoryMapper::toReadOnly)
                 .toList();
