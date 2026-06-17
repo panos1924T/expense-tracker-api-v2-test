@@ -208,7 +208,7 @@ public class TransactionService implements ITransactionService {
 
             transaction.getSourceAccount().setBalance(
                     transaction.getSourceAccount().getBalance().add(transaction.getAmount()));
-            newAccount = accountRepository.findAccountByUuidAndUser(dto.sourceAccountUuid(), user)
+            newAccount = accountRepository.findAccountByUuidAndUserAndDeletedFalse(dto.sourceAccountUuid(), user)
                     .orElseThrow(() -> new EntityNotFoundException("Account", "Account with uuid=" + dto.sourceAccountUuid() + " not found"));
             newAccount.setBalance(newAccount.getBalance().subtract(dto.amount()));
         }

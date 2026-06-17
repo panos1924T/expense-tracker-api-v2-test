@@ -14,19 +14,19 @@ public interface ITransactionService {
 
         TransactionReadOnlyDTO createTransfer(TransferCreateDTO dto, UUID userUuid);
 
-        TransactionReadOnlyDTO getTransaction(UUID transUuid, UUID userUuid);
-
         TransactionReadOnlyDTO updateTransaction(UUID transUuid, TransactionUpdateDTO dto, UUID userUuid);
 
         TransactionReadOnlyDTO updateTransfer(UUID transUuid, TransferUpdateDTO dto, UUID userUuid);
 
-        List<TransactionReadOnlyDTO> getAllTransactions(UUID userUuid, Pageable pageable);
+        TransactionReadOnlyDTO getTransaction(UUID transUuid, UUID userUuid);
 
         List<TransactionReadOnlyDTO> getTransactionByAccount(UUID accountUuid, UUID userUuid, Pageable pageable);
 
         List<TransactionReadOnlyDTO> getTransactionByType(TransactionType type, UUID userUuid, Pageable pageable);
 
         List<TransactionReadOnlyDTO> getTransactionByCategory(UUID categoryUuid, UUID userUuid, Pageable pageable);
+
+        List<TransactionReadOnlyDTO> getAllTransactions(UUID userUuid, Pageable pageable);
 
         void deleteTransaction(UUID transUuid, UUID userUuid);
 }

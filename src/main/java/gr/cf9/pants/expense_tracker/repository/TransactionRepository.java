@@ -27,8 +27,4 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     Page<Transaction> findTransByUserAndCategoryParent(User user, Category parent, Pageable pageable);
 
     Optional<Transaction> findTransByUuidAndUser(UUID uuid, User user);
-
-    boolean existsTransByAccount(Account account);
-
-    boolean existsTransByCategory(Category category);
 }
