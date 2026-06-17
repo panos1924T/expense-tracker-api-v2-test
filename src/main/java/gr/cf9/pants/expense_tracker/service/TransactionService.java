@@ -301,7 +301,7 @@ public class TransactionService implements ITransactionService {
                 .orElseThrow(() -> new EntityNotFoundException("Account", "Account with uuid: " + accountUuid + " not found!"));
 
         //RETURN
-        return transactionRepository.findTransByUserAndSourceAccount(user, account, pageable)
+        return transactionRepository.findTransByUserAndAccount(user, account, pageable)
                 .getContent()
                 .stream()
                 .map(transactionMapper::toReadOnly)
@@ -350,7 +350,7 @@ public class TransactionService implements ITransactionService {
 
     @Transactional
     @Override
-    public void deleteTransaction(UUID transUuid, UUID userUuid) throws InvalidTransactionException {
+    public void deleteTransaction(UUID transUuid, UUID userUuid) {
         //VALIDATE
         User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
                 .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));

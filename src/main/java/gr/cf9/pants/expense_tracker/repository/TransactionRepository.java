@@ -18,7 +18,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
 
     Page<Transaction> findTransByUser(User user, Pageable pageable);
 
-    Page<Transaction> findTransByUserAndSourceAccount(User user, Account account, Pageable pageable);
+    Page<Transaction> findTransByUserAndAccount(User user, Account account, Pageable pageable);
 
     Page<Transaction> findTransByUserAndType(User user, TransactionType type, Pageable pageable);
 
