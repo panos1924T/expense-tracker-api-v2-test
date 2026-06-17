@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -93,6 +94,10 @@ public class AccountService implements IAccountService{
 
         if (account.isDefaultAccount()) {
             throw new InvalidArgumentException("Account", "Cannot delete default account!");
+        }
+
+        if (account.getBalance().compareTo(BigDecimal.ZERO) != 0) {
+            throw new InvalidArgumentException("account", "Cannot delete account with non-zero balance");
         }
 
         boolean hasTrans = transactionRepository.existsTransByAccount(account);
