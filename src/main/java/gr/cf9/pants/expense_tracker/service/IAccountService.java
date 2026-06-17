@@ -3,7 +3,6 @@ package gr.cf9.pants.expense_tracker.service;
 import gr.cf9.pants.expense_tracker.dto.account_dto.AccountCreateDTO;
 import gr.cf9.pants.expense_tracker.dto.account_dto.AccountReadOnlyDTO;
 import gr.cf9.pants.expense_tracker.dto.account_dto.AccountUpdateDTO;
-import gr.cf9.pants.expense_tracker.model.User;
 
 import java.util.List;
 import java.util.UUID;
@@ -20,5 +19,7 @@ public interface IAccountService {
 
     List<AccountReadOnlyDTO> getActiveAccounts(UUID userUuid);
 
-    AccountReadOnlyDTO getAccount(UUID accountUuid, UUID userUuid);
+    AccountReadOnlyDTO getActiveAccountByUuid(UUID accountUuid, UUID userUuid);
+
+    AccountReadOnlyDTO getAccountByUuid(UUID accountUuid, UUID userUuid);
 }

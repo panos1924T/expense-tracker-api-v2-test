@@ -36,7 +36,7 @@ public class TransactionService implements ITransactionService {
 
     @Transactional
     @Override
-    public TransactionReadOnlyDTO createTransaction(TransactionCreateDTO dto, UUID userUuid) throws InvalidTransactionException{
+    public TransactionReadOnlyDTO createTransaction(TransactionCreateDTO dto, UUID userUuid){
         //VALIDATE
         User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
                 .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
@@ -105,7 +105,7 @@ public class TransactionService implements ITransactionService {
 
     @Transactional
     @Override
-    public TransactionReadOnlyDTO createTransfer(TransferCreateDTO dto, UUID userUuid) throws InvalidTransactionException{
+    public TransactionReadOnlyDTO createTransfer(TransferCreateDTO dto, UUID userUuid){
         //VALIDATE
         User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
                 .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
@@ -141,7 +141,8 @@ public class TransactionService implements ITransactionService {
     }
 
     @Override
-    public TransactionReadOnlyDTO getTransaction(UUID transUuid, UUID userUuid) {
+    @Transactional(readOnly = true)
+    public TransactionReadOnlyDTO getTransactionByUuid(UUID transUuid, UUID userUuid) {
         //VALIDATE
         User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
                 .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));

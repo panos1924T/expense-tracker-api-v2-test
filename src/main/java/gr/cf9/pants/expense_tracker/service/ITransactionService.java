@@ -1,7 +1,6 @@
 package gr.cf9.pants.expense_tracker.service;
 
 import gr.cf9.pants.expense_tracker.core.enums.TransactionType;
-import gr.cf9.pants.expense_tracker.core.exceptions.InvalidTransactionException;
 import gr.cf9.pants.expense_tracker.dto.transaction_dto.*;
 import org.springframework.data.domain.Pageable;
 
@@ -18,7 +17,7 @@ public interface ITransactionService {
 
         TransactionReadOnlyDTO updateTransfer(UUID transUuid, TransferUpdateDTO dto, UUID userUuid);
 
-        TransactionReadOnlyDTO getTransaction(UUID transUuid, UUID userUuid);
+        TransactionReadOnlyDTO getTransactionByUuid(UUID transUuid, UUID userUuid);
 
         List<TransactionReadOnlyDTO> getTransactionByAccount(UUID accountUuid, UUID userUuid, Pageable pageable);
 

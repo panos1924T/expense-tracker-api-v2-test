@@ -105,6 +105,7 @@ public class AccountService implements IAccountService{
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<AccountReadOnlyDTO> getAllAccounts(UUID userUuid) {
 
         //VALIDATE
@@ -121,6 +122,7 @@ public class AccountService implements IAccountService{
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<AccountReadOnlyDTO> getActiveAccounts(UUID userUuid) {
         //VALIDATE
         User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
@@ -136,17 +138,27 @@ public class AccountService implements IAccountService{
     }
 
     @Override
-    public AccountReadOnlyDTO getAccount(UUID accountUuid, UUID userUuid) {
+    @Transactional(readOnly = true)
+    public AccountReadOnlyDTO getActiveAccountByUuid(UUID accountUuid, UUID userUuid) {
 
+        //VALIDATE
+        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
+                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + "not found!"));
+        Account account = accountRepository.findAccountByUuidAndUserAndDeletedFalse(accountUuid, user)
+                .orElseThrow(() -> new EntityNotFoundException("Account", "Account with uuid: " + accountUuid + "not found!"));
+
+        //RETURN
+        return accountMapper.toReadOnly(account);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public AccountReadOnlyDTO getAccountByUuid(UUID accountUuid, UUID userUuid) {
         //VALIDATE
         User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
                 .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + "not found!"));
         Account account = accountRepository.findAccountByUuidAndUser(accountUuid, user)
                 .orElseThrow(() -> new EntityNotFoundException("Account", "Account with uuid: " + accountUuid + "not found!"));
-
-        if (account.isDeleted() == true) {
-            throw new InvalidArgumentException("Account", "Account with uuid:" + accountUuid + " is deleted");
-        }
 
         //RETURN
         return accountMapper.toReadOnly(account);
