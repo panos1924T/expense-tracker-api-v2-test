@@ -1,5 +1,6 @@
 package gr.cf9.pants.expense_tracker.service;
 
+import gr.cf9.pants.expense_tracker.core.enums.AccountType;
 import gr.cf9.pants.expense_tracker.dto.account_dto.AccountCreateDTO;
 import gr.cf9.pants.expense_tracker.dto.account_dto.AccountReadOnlyDTO;
 import gr.cf9.pants.expense_tracker.dto.account_dto.AccountUpdateDTO;
@@ -18,6 +19,10 @@ public interface IAccountService {
     List<AccountReadOnlyDTO> getAllAccounts(UUID userUuid);
 
     List<AccountReadOnlyDTO> getActiveAccounts(UUID userUuid);
+
+    List<AccountReadOnlyDTO> getAccountsByType(UUID userUuid, AccountType accountType);
+
+    List<AccountReadOnlyDTO> getActiveAccountsByType(UUID userUuid, AccountType accountType);
 
     AccountReadOnlyDTO getActiveAccountByUuid(UUID accountUuid, UUID userUuid);
 

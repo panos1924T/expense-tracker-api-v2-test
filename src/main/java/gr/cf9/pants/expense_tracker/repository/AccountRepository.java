@@ -1,5 +1,6 @@
 package gr.cf9.pants.expense_tracker.repository;
 
+import gr.cf9.pants.expense_tracker.core.enums.AccountType;
 import gr.cf9.pants.expense_tracker.model.Account;
 import gr.cf9.pants.expense_tracker.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -15,6 +16,10 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
     List<Account> findAccountByUser(User user);
 
     List<Account> findAccountByUserAndDeletedFalse(User user);
+
+    List<Account> findAccountByUserAndType(User user, AccountType accountType);
+
+    List<Account> findAccountByUserAndTypeAndDeletedFalse(User user, AccountType accountType);
 
     Optional<Account> findAccountByUuidAndUser(UUID uuid, User user);
 
