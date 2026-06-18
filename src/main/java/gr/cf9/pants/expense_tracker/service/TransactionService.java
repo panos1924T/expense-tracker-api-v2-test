@@ -119,6 +119,10 @@ public class TransactionService implements ITransactionService {
         Account targetAccount = accountRepository.findAccountByUuidAndUserAndDeletedFalse(dto.targetAccountUuid(), user)
                 .orElseThrow(() -> new EntityNotFoundException("Account", "Account with uuid: " + dto.targetAccountUuid() + "not found!"));
 
+        if (sourceAccount.getUuid().equals(targetAccount.getUuid())) {
+            throw new InvalidTransactionException("Account", "Source and target account cannot be the same");
+        }
+
         //PREPARE
         Transaction transaction = transactionMapper.toEntity(dto, sourceAccount, targetAccount);
         BigDecimal newSourceBalance;
