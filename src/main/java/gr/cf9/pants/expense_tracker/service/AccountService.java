@@ -65,12 +65,8 @@ public class AccountService implements IAccountService{
             throw new InvalidArgumentException("Account", "Cannot update default account");
         }
 
-        if (account.getAccountType() != dto.accountType()) {
-            throw new InvalidArgumentException("AccountType", "Cannot update to different account type");
-        }
-
         //PREPARE
-        account.setName(dto.name());        //TODO same problem with category, if acc has LIQUIDITY trans should it be updated to CREDIT?
+        account.setName(dto.name());
 
         //EXECUTE
         Account updatedAccount = accountRepository.save(account);
