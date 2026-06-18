@@ -297,7 +297,7 @@ public class TransactionService implements ITransactionService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<TransactionReadOnlyDTO> getTransactionByAccount(UUID accountUuid, UUID userUuid, Pageable pageable) {
+    public List<TransactionReadOnlyDTO> getTransactionByActiveAccount(UUID accountUuid, UUID userUuid, Pageable pageable) {
         //VALIDATE
         User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
                 .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
@@ -312,14 +312,52 @@ public class TransactionService implements ITransactionService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
+    @Override
+    public List<TransactionReadOnlyDTO> getTransactionByAccount(UUID accountUuid, UUID userUuid, Pageable pageable) {
+        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
+                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
+        Account account = accountRepository.findAccountByUuidAndUser(accountUuid, user)
+                .orElseThrow(() -> new EntityNotFoundException("Account", "Account with uuid: " + accountUuid + " not found!"));
+
+        return transactionRepository.findTransByUserAndAccount(user, account, pageable)
+                .getContent()
+                .stream()
+                .map(transactionMapper::toReadOnly)
+                .toList();
+    }
+
     @Override
     @Transactional(readOnly = true)
-    public List<TransactionReadOnlyDTO> getTransactionByCategory(UUID categoryUuid, UUID userUuid, Pageable pageable) {
+    public List<TransactionReadOnlyDTO> getTransactionByActiveCategory(UUID categoryUuid, UUID userUuid, Pageable pageable) {
 
         User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
                 .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
 
         Category category = categoryRepository.findCategoryByUuidAndUserAndDeletedFalse(categoryUuid, user)
+                .orElseThrow(() -> new EntityNotFoundException("Category", "Category with uuid: " + categoryUuid + " not found!"));
+
+        if (category.getParent() == null) {
+            return transactionRepository.findTransByUserAndCategoryParent(user, category, pageable)
+                    .getContent()
+                    .stream()
+                    .map(transactionMapper::toReadOnly)
+                    .toList();
+        } else {
+            return transactionRepository.findTransByUserAndCategory(user, category, pageable)
+                    .getContent()
+                    .stream()
+                    .map(transactionMapper::toReadOnly)
+                    .toList();
+        }
+    }
+
+    @Override
+    public List<TransactionReadOnlyDTO> getTransactionByCategory(UUID categoryUuid, UUID userUuid, Pageable pageable) {
+        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
+                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
+
+        Category category = categoryRepository.findCategoryByUuidAndUser(categoryUuid, user)
                 .orElseThrow(() -> new EntityNotFoundException("Category", "Category with uuid: " + categoryUuid + " not found!"));
 
         if (category.getParent() == null) {

@@ -19,9 +19,13 @@ public interface ITransactionService {
 
         TransactionReadOnlyDTO getTransactionByUuid(UUID transUuid, UUID userUuid);
 
+        List<TransactionReadOnlyDTO> getTransactionByActiveAccount(UUID accountUuid, UUID userUuid, Pageable pageable);
+
         List<TransactionReadOnlyDTO> getTransactionByAccount(UUID accountUuid, UUID userUuid, Pageable pageable);
 
         List<TransactionReadOnlyDTO> getTransactionByType(TransactionType type, UUID userUuid, Pageable pageable);
+
+        List<TransactionReadOnlyDTO> getTransactionByActiveCategory(UUID categoryUuid, UUID userUuid, Pageable pageable);
 
         List<TransactionReadOnlyDTO> getTransactionByCategory(UUID categoryUuid, UUID userUuid, Pageable pageable);
 
