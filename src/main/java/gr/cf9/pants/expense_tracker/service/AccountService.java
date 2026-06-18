@@ -13,6 +13,7 @@ import gr.cf9.pants.expense_tracker.model.User;
 import gr.cf9.pants.expense_tracker.repository.AccountRepository;
 import gr.cf9.pants.expense_tracker.repository.TransactionRepository;
 import gr.cf9.pants.expense_tracker.repository.UserRepository;
+import jakarta.transaction.InvalidTransactionException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -57,20 +58,19 @@ public class AccountService implements IAccountService{
         //VALIDATE
         User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
                 .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
-        Account account = accountRepository.findAccountByUuidAndUser(accountUuid, user)
+        Account account = accountRepository.findAccountByUuidAndUserAndDeletedFalse(accountUuid, user)
                 .orElseThrow(() -> new EntityNotFoundException("Account", "Account with uuid: " + accountUuid + " not found!"));
 
         if (account.isDefaultAccount() == true) {
             throw new InvalidArgumentException("Account", "Cannot update default account");
         }
 
-        if (account.isDeleted() == true) {
-            throw new InvalidArgumentException("Account", "Account with uuid:" + accountUuid + " is deleted");
+        if (account.getAccountType() != dto.accountType()) {
+            throw new InvalidArgumentException("AccountType", "Cannot update to different account type");
         }
 
         //PREPARE
-        account.setName(dto.name());
-        account.setAccountType(dto.accountType());      //TODO same problem with category, if acc has LIQUIDITY trans should it be updated to CREDIT?
+        account.setName(dto.name());        //TODO same problem with category, if acc has LIQUIDITY trans should it be updated to CREDIT?
 
         //EXECUTE
         Account updatedAccount = accountRepository.save(account);
