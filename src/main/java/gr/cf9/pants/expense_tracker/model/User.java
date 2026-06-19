@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.boot.context.properties.bind.Name;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -35,7 +36,7 @@ public class User extends AbstractEntity implements UserDetails {
     @Email
     private String email;
 
-    @Column(nullable = false, length = 21)
+    @Column(name = "display_name", nullable = false, length = 21)
     private String displayName;
 
     @Column(nullable = false)
