@@ -17,9 +17,9 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
 
     List<Account> findAccountByUserAndDeletedFalse(User user);
 
-    List<Account> findAccountByUserAndType(User user, AccountType accountType);
+    List<Account> findAccountByUserAndAccountType(User user, AccountType accountType);
 
-    List<Account> findAccountByUserAndTypeAndDeletedFalse(User user, AccountType accountType);
+    List<Account> findAccountByUserAndAccountTypeAndDeletedFalse(User user, AccountType accountType);
 
     Optional<Account> findAccountByUuidAndUser(UUID uuid, User user);
 

@@ -26,7 +26,7 @@ public class AccountMapper {
         Account account = new Account();
         account.setUser(user);
         account.setName(dto.name());
-        account.setAccountType(AccountType.valueOf(dto.accountType()));
+        account.setAccountType(dto.accountType());
         account.setBalance(
                 dto.initialBalance() != null ? dto.initialBalance() : BigDecimal.ZERO
         );

@@ -1,7 +1,6 @@
 package gr.cf9.pants.expense_tracker.service;
 
 import gr.cf9.pants.expense_tracker.core.enums.AccountType;
-import gr.cf9.pants.expense_tracker.core.exceptions.EntityHasTransactionsException;
 import gr.cf9.pants.expense_tracker.core.exceptions.EntityNotFoundException;
 import gr.cf9.pants.expense_tracker.core.exceptions.InvalidArgumentException;
 import gr.cf9.pants.expense_tracker.dto.account_dto.AccountCreateDTO;
@@ -11,9 +10,7 @@ import gr.cf9.pants.expense_tracker.mapper.AccountMapper;
 import gr.cf9.pants.expense_tracker.model.Account;
 import gr.cf9.pants.expense_tracker.model.User;
 import gr.cf9.pants.expense_tracker.repository.AccountRepository;
-import gr.cf9.pants.expense_tracker.repository.TransactionRepository;
 import gr.cf9.pants.expense_tracker.repository.UserRepository;
-import jakarta.transaction.InvalidTransactionException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -165,7 +162,7 @@ public class AccountService implements IAccountService{
         User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
                 .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + "  not found!"));
 
-        List<Account> accounts = accountRepository.findAccountByUserAndType(user, accountType);
+        List<Account> accounts = accountRepository.findAccountByUserAndAccountType(user, accountType);
 
         return accounts.stream()
                 .map(accountMapper::toReadOnly)
@@ -177,7 +174,7 @@ public class AccountService implements IAccountService{
         User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
                 .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
 
-        List<Account> accounts = accountRepository.findAccountByUserAndTypeAndDeletedFalse(user, accountType);
+        List<Account> accounts = accountRepository.findAccountByUserAndAccountTypeAndDeletedFalse(user, accountType);
 
         return accounts.stream()
                 .map(accountMapper::toReadOnly)

@@ -43,7 +43,7 @@ dependencies {
 	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 
 	implementation("org.flywaydb:flyway-core")
-	runtimeOnly("org.flywaydb:flyway-database-postgresql:12.3.0")
+	runtimeOnly("org.flywaydb:flyway-database-postgresql")
 }
 
 tasks.named('test') {
