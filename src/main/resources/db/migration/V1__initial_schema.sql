@@ -95,7 +95,6 @@ CREATE TABLE categories (
 
     CONSTRAINT pk_categories            PRIMARY KEY (id),
     CONSTRAINT uk_categories_uuid       UNIQUE (uuid),
-    CONSTRAINT uk_categories_name_user  UNIQUE (name, user_id),
     CONSTRAINT fk_categories_user
                         FOREIGN KEY (user_id) REFERENCES users (id)
                         ON DELETE RESTRICT,
