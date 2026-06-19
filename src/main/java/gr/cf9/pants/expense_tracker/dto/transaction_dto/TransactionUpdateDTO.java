@@ -22,7 +22,9 @@ public record TransactionUpdateDTO(
         @Size(max = 255)
         String description,
 
+        @NotNull
         UUID sourceAccountUuid,
+
         @NotNull
         UUID categoryUuid
 ) {}
