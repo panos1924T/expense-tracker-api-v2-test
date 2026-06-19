@@ -6,7 +6,7 @@ public record UserUpdateDTO(
 
         @NotNull
         @Size(min = 3, max = 21)
-        String username,
+        String displayName,
 
         @NotNull
         @Email

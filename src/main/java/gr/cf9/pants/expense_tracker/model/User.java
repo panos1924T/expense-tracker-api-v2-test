@@ -35,8 +35,8 @@ public class User extends AbstractEntity implements UserDetails {
     @Email
     private String email;
 
-    @Column(nullable = false, length = 50)
-    private String username;
+    @Column(nullable = false, length = 21)
+    private String displayName;
 
     @Column(nullable = false)
     private String password;
@@ -58,6 +58,11 @@ public class User extends AbstractEntity implements UserDetails {
         role.getCapabilities()
                 .forEach(capability -> grantedAuthorities.add(new SimpleGrantedAuthority(capability.getName())));
         return grantedAuthorities;
+    }
+
+    @Override
+    public String getUsername() {
+        return email;
     }
 
     @Override

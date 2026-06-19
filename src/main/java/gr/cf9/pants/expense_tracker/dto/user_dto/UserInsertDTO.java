@@ -13,7 +13,7 @@ public record UserInsertDTO(
 
         @NotNull
         @Size(min = 3, max = 21)
-        String username,
+        String displayName,
 
         @NotNull
         @Pattern(regexp = "(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&+=])^.{8,}$")

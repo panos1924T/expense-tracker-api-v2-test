@@ -11,14 +11,14 @@ public class UserMapper {
     public UserReadOnlyDTO toReadOnly(User user) {
         return new UserReadOnlyDTO(
                 user.getUuid(),
-                user.getUsername(),
-                user.getEmail()
+                user.getEmail(),
+                user.getDisplayName()
         );
     }
 
     public User toEntity(UserInsertDTO dto, String hashedPassword) {
         User user = new User();
-        user.setUsername(dto.username());
+        user.setDisplayName(dto.displayName());
         user.setEmail(dto.email());
         user.setPassword(hashedPassword);
         return user;

@@ -72,7 +72,7 @@ public class UserService implements IUserService{
         }
 
         //PREPARE
-        user.setUsername(userUpdateDTO.username());
+        user.setDisplayName(userUpdateDTO.displayName());
         user.setEmail(userUpdateDTO.email());
         user.setPassword(passwordEncoder.encode(userUpdateDTO.password()));
 
