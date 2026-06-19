@@ -3,6 +3,7 @@ package gr.cf9.pants.expense_tracker.api;
 import gr.cf9.pants.expense_tracker.authentication.AuthenticationService;
 import gr.cf9.pants.expense_tracker.dto.AuthenticationRequestDTO;
 import gr.cf9.pants.expense_tracker.dto.AuthenticationResponseDTO;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,7 +19,7 @@ public class AuthRestController {
     private final AuthenticationService authenticationService;
 
     @PostMapping("/authenticate")
-    public ResponseEntity<AuthenticationResponseDTO> authenticate(@RequestBody AuthenticationRequestDTO dto) {
+    public ResponseEntity<AuthenticationResponseDTO> authenticate(@Valid @RequestBody AuthenticationRequestDTO dto) {
         AuthenticationResponseDTO responseDTO = authenticationService.authenticate(dto);
         return ResponseEntity.ok(responseDTO);
     }
