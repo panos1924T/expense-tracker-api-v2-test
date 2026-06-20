@@ -62,6 +62,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/users/*").permitAll()
                         .requestMatchers(HttpMethod.PUT, "/api/v1/users/*").permitAll()
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/users/*").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/*").permitAll()
                         .requestMatchers(
                                 "/swagger-ui.html",        // The old Swagger UI HTML (if used)
                                 "/swagger-ui/**",          // All Swagger UI resources (JS, CSS, etc.)

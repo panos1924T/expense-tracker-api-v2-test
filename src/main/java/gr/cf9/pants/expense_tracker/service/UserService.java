@@ -17,6 +17,7 @@ import gr.cf9.pants.expense_tracker.repository.CategoryRepository;
 import gr.cf9.pants.expense_tracker.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -87,6 +88,7 @@ public class UserService implements IUserService{
         return userMapper.toReadOnly(updatedUser);
     }
 
+    @PreAuthorize("hasAuthority('DEACTIVATE_CITIZEN')")
     @Transactional
     @Override
     public UserReadOnlyDTO deleteUser(UUID uuid) {
@@ -99,6 +101,7 @@ public class UserService implements IUserService{
         return userMapper.toReadOnly(user);
     }
 
+    @PreAuthorize("hasAuthority('VIEW_ALL_CITIZENS')")
     @Override
     @Transactional(readOnly = true)
     public UserReadOnlyDTO getUserByUuid(UUID uuid) {
@@ -107,6 +110,7 @@ public class UserService implements IUserService{
         return userMapper.toReadOnly(user);
     }
 
+    @PreAuthorize("hasAuthority('VIEW_ALL_CITIZENS') or #uuid == authentication.principal.uuid")
     @Override
     @Transactional(readOnly = true)
     public UserReadOnlyDTO getUserByUuidAndDeletedFalse(UUID uuid) {
