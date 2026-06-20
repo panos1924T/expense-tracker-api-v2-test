@@ -36,6 +36,7 @@ public class TransactionMapper {
 
     public Transaction toEntity(TransactionCreateDTO dto, Account sourceAccount, Category category) {
         Transaction transaction = new Transaction();
+        transaction.setUser(sourceAccount.getUser());
         transaction.setSourceAccount(sourceAccount);
         transaction.setCategory(category);
         transaction.setType(dto.type());
@@ -47,6 +48,7 @@ public class TransactionMapper {
 
     public Transaction toEntity(TransferCreateDTO dto, Account sourceAccount, Account targetAccount) {
         Transaction transaction = new Transaction();
+        transaction.setUser(sourceAccount.getUser());
         transaction.setSourceAccount(sourceAccount);
         transaction.setTargetAccount(targetAccount);
         transaction.setType(TransactionType.TRANSFER);

@@ -113,6 +113,7 @@ CREATE TABLE transactions (
     transaction_type    VARCHAR(50)     NOT NULL,
     amount              DECIMAL(19,4)   NOT NULL,
     description         VARCHAR(255)            ,
+    user_id             BIGINT          NOT NULL,
     source_account_id   BIGINT          NOT NULL,
     target_account_id   BIGINT                  ,
     category_id         BIGINT                  ,
@@ -123,6 +124,9 @@ CREATE TABLE transactions (
 
     CONSTRAINT pk_transactions          PRIMARY KEY (id),
     CONSTRAINT uk_transactions_uuid     UNIQUE (uuid),
+    CONSTRAINT fk_transactions_user
+        FOREIGN KEY (user_id) REFERENCES users (id)
+            ON DELETE SET NULL
     CONSTRAINT fk_transactions_source_account
                                         FOREIGN KEY (source_account_id) REFERENCES accounts (id)
                                         ON DELETE RESTRICT,
