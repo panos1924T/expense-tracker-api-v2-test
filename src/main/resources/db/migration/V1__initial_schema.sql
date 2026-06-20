@@ -125,8 +125,8 @@ CREATE TABLE transactions (
     CONSTRAINT pk_transactions          PRIMARY KEY (id),
     CONSTRAINT uk_transactions_uuid     UNIQUE (uuid),
     CONSTRAINT fk_transactions_user
-        FOREIGN KEY (user_id) REFERENCES users (id)
-            ON DELETE SET NULL
+                                        FOREIGN KEY (user_id) REFERENCES users (id)
+                                        ON DELETE RESTRICT,
     CONSTRAINT fk_transactions_source_account
                                         FOREIGN KEY (source_account_id) REFERENCES accounts (id)
                                         ON DELETE RESTRICT,
@@ -135,7 +135,9 @@ CREATE TABLE transactions (
                                         ON DELETE RESTRICT,
     CONSTRAINT fk_transactions_category
                                         FOREIGN KEY (category_id) REFERENCES categories (id)
-                                        ON DELETE SET NULL
+                                        ON DELETE RESTRICT
+    CONSTRAINT chk_transaction_category_required
+                                        CHECK (transaction_type = 'TRANSFER' OR category_id IS NOT NULL);
 );
 
 CREATE UNIQUE INDEX uk_categories_name_user_type_parent_null

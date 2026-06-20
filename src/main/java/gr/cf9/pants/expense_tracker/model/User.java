@@ -46,7 +46,7 @@ public class User extends AbstractEntity implements UserDetails {
     @JoinColumn(name = "role_id", nullable = false)
     private Role role;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private Set<Account> accounts = new HashSet<>();
 
     @OneToMany(mappedBy = "user")

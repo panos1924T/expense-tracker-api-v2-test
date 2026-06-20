@@ -15,14 +15,7 @@ import java.util.Set;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "categories",
-        uniqueConstraints = {
-                @UniqueConstraint(
-                        name = "uk_categories_name_user_type_parent",
-                        columnNames = {"name", "user_id", "transaction_type", "parent_id"}
-                )
-        }
-        )
+@Table(name = "categories")
 public class Category extends AbstractEntity {
 
     @Column(nullable = false, length = 50)
