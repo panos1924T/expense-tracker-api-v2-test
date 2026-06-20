@@ -8,6 +8,8 @@ import gr.cf9.pants.expense_tracker.model.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -18,13 +20,28 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
 
     Page<Transaction> findTransByUser(User user, Pageable pageable);
 
-    Page<Transaction> findTransByUserAndAccount(User user, Account account, Pageable pageable);
+    @Query("SELECT t FROM Transaction t " +
+            "WHERE t.user = :user " +
+            "AND (t.sourceAccount = :account OR t.targetAccount = :account)")
+    Page<Transaction> findTransByUserAndAccount(
+            @Param("user") User user,
+            @Param("account") Account account,
+            Pageable pageable
+    );
 
     Page<Transaction> findTransByUserAndType(User user, TransactionType type, Pageable pageable);
 
     Page<Transaction> findTransByUserAndCategory(User user, Category category, Pageable pageable);
 
-    Page<Transaction> findTransByUserAndCategoryParent(User user, Category parent, Pageable pageable);
+
+    @Query("SELECT t FROM Transaction t " +
+            "WHERE t.user = :user " +
+            "AND t.category.parent = :parent")
+    Page<Transaction> findTransByUserAndCategoryParent(
+            @Param("user") User user,
+            @Param("parent") Category parent,
+            Pageable pageable
+    );
 
     Optional<Transaction> findTransByUuidAndUser(UUID uuid, User user);
 }
