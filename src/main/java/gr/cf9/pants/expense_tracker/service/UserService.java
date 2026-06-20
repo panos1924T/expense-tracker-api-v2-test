@@ -10,6 +10,7 @@ import gr.cf9.pants.expense_tracker.dto.user_dto.UserUpdateDTO;
 import gr.cf9.pants.expense_tracker.mapper.UserMapper;
 import gr.cf9.pants.expense_tracker.model.Account;
 import gr.cf9.pants.expense_tracker.model.Category;
+import gr.cf9.pants.expense_tracker.model.Role;
 import gr.cf9.pants.expense_tracker.model.User;
 import gr.cf9.pants.expense_tracker.repository.AccountRepository;
 import gr.cf9.pants.expense_tracker.repository.CategoryRepository;
@@ -46,8 +47,11 @@ public class UserService implements IUserService{
         }
 
         //PREPARE
+        Role citizenRole = new Role();
+        citizenRole.setId(2L);
         String hashedPassword = passwordEncoder.encode(userInsertDTO.password());
         User user = userMapper.toEntity(userInsertDTO, hashedPassword);
+        user.setRole(citizenRole);
 
         //EXECUTE
         User savedUser = userRepository.save(user);
