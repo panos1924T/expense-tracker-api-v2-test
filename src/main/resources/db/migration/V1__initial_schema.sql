@@ -135,9 +135,9 @@ CREATE TABLE transactions (
                                         ON DELETE RESTRICT,
     CONSTRAINT fk_transactions_category
                                         FOREIGN KEY (category_id) REFERENCES categories (id)
-                                        ON DELETE RESTRICT
+                                        ON DELETE RESTRICT,
     CONSTRAINT chk_transaction_category_required
-                                        CHECK (transaction_type = 'TRANSFER' OR category_id IS NOT NULL);
+                                        CHECK (transaction_type = 'TRANSFER' OR category_id IS NOT NULL)
 );
 
 CREATE UNIQUE INDEX uk_categories_name_user_type_parent_null

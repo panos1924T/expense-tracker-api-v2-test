@@ -26,7 +26,6 @@ public class UserController {
     private final IUserService userService;
     private final UserInsertValidator userInsertValidator;
     private final UserUpdateValidator userUpdateValidator;
-    private final ResourcePatternResolver resourcePatternResolver;
 
     @PostMapping("/register")
     public ResponseEntity<UserReadOnlyDTO> register(
