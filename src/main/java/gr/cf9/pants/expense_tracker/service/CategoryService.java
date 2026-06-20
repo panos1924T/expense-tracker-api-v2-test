@@ -51,8 +51,8 @@ public class CategoryService implements ICategoryService{
         if (dto.parentUuid() == null) {
             if (categoryRepository.existsCategoryByUserAndNameAndTypeAndParentIsNull(
                     user,
-                    dto.type(),
-                    name
+                    name,
+                    dto.type()
             )) {
                 throw new EntityAlreadyExistsException("Category", "Root category already exists");
             }
@@ -72,8 +72,8 @@ public class CategoryService implements ICategoryService{
 
             if (categoryRepository.existsCategoryByUserAndNameAndTypeAndParent(
                     user,
-                    dto.type(),
                     name,
+                    dto.type(),
                     parent
             )) {
                 throw new EntityAlreadyExistsException("Category", "Child category already exists under this parent");
@@ -103,8 +103,8 @@ public class CategoryService implements ICategoryService{
             if (!category.getName().equals(name)
                     && categoryRepository.existsCategoryByUserAndNameAndTypeAndParentIsNull(
                     user,
-                    category.getType(),
-                    name
+                    name,
+                    category.getType()
             )) {
                 throw new EntityAlreadyExistsException("Category", "Root category already exists");
             }
@@ -112,8 +112,8 @@ public class CategoryService implements ICategoryService{
             if (!category.getName().equals(name)
                     && categoryRepository.existsCategoryByUserAndNameAndTypeAndParent(
                     user,
-                    category.getType(),
                     name,
+                    category.getType(),
                     category.getParent()
             )) {
                 throw new EntityAlreadyExistsException("Category", "Child category already exists under this parent");

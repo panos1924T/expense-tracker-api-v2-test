@@ -39,14 +39,14 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
 
     boolean existsCategoryByUserAndNameAndTypeAndParentIsNull(
             User user,
-            TransactionType type,
-            String name
+            String name,
+            TransactionType type
     );
 
     boolean existsCategoryByUserAndNameAndTypeAndParent(
             User user,
-            TransactionType type,
             String name,
+            TransactionType type,
             Category parent
     );
 
