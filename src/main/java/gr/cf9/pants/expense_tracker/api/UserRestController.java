@@ -9,7 +9,6 @@ import gr.cf9.pants.expense_tracker.validator.UserInsertValidator;
 import gr.cf9.pants.expense_tracker.validator.UserUpdateValidator;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -24,7 +23,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
-public class UserController {
+public class UserRestController {
 
     private final IUserService userService;
     private final UserInsertValidator userInsertValidator;
