@@ -5,5 +5,5 @@ import java.util.UUID;
 public record UserReadOnlyDTO(
         UUID uuid,
         String email,
-        String username
+        String displayName
 ) {}

@@ -54,6 +54,7 @@ public class UserService implements IUserService{
             new CategorySeed("Business", TransactionType.INCOME),
             new CategorySeed("Investment", TransactionType.INCOME)
     );
+    //TODO figure out what to do with parent and child categories
 
     @Transactional
     @Override
@@ -83,6 +84,7 @@ public class UserService implements IUserService{
 
     @PreAuthorize("hasAuthority('EDIT_CITIZEN') or " +
             "(hasAuthority('EDIT_ONLY_CITIZEN') and #userUuid == authentication.principal.uuid)")
+    //TODO Create EDIT_ONLY_CITIZEN role
     @Transactional
     @Override
     public UserReadOnlyDTO updateUser(UUID userUuid, UserUpdateDTO userUpdateDTO) {

@@ -83,7 +83,7 @@ public class UserController {
         return ResponseEntity.ok(userReadOnlyDTO);
     }
 
-    @GetMapping("/all-users-list")
+    @GetMapping
     public ResponseEntity<Page<UserReadOnlyDTO>> getAllUsers(
             @PageableDefault(size = 10, sort = "email") Pageable pageable
     ) {
@@ -91,7 +91,7 @@ public class UserController {
         return ResponseEntity.ok(usersPaginated);
     }
 
-    @GetMapping("/users-list")
+    @GetMapping("/active")
     public ResponseEntity<Page<UserReadOnlyDTO>> getAllUsersDeletedFalse(
             @PageableDefault(size = 10, sort = "email") Pageable pageable
     ) {
