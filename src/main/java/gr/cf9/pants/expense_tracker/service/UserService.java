@@ -40,6 +40,21 @@ public class UserService implements IUserService{
     private final CategoryRepository categoryRepository;
     private final AccountRepository accountRepository;
 
+    private record CategorySeed(String name, TransactionType type) {}
+
+    private static final List<CategorySeed> DEFAULT_CATEGORIES = List.of(
+            new CategorySeed("Personal", TransactionType.EXPENSE),
+            new CategorySeed("Home", TransactionType.EXPENSE),
+            new CategorySeed("Buys", TransactionType.EXPENSE),
+            new CategorySeed("Transportation", TransactionType.EXPENSE),
+            new CategorySeed("Other", TransactionType.EXPENSE),
+            new CategorySeed("Bills", TransactionType.EXPENSE),
+
+            new CategorySeed("Salary", TransactionType.INCOME),
+            new CategorySeed("Business", TransactionType.INCOME),
+            new CategorySeed("Investment", TransactionType.INCOME)
+    );
+
     @Transactional
     @Override
     public UserReadOnlyDTO saveUser(UserInsertDTO userInsertDTO) {
@@ -66,12 +81,14 @@ public class UserService implements IUserService{
         return userMapper.toReadOnly(savedUser);
     }
 
+    @PreAuthorize("hasAuthority('EDIT_CITIZEN') or " +
+            "(hasAuthority('EDIT_ONLY_CITIZEN') and #userUuid == authentication.principal.uuid)")
     @Transactional
     @Override
     public UserReadOnlyDTO updateUser(UUID userUuid, UserUpdateDTO userUpdateDTO) {
 
         //VALIDATE
-        User user = userRepository.findUserByUuid(userUuid)
+        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
                 .orElseThrow(() -> new EntityNotFoundException("User", "User not found with uuid: " + userUuid));
 
         if (userRepository.existsUserByEmailAndUuidNot(userUpdateDTO.email(), userUuid)) {
@@ -95,7 +112,7 @@ public class UserService implements IUserService{
     @Transactional
     @Override
     public UserReadOnlyDTO deleteUser(UUID uuid) {
-        User user = userRepository.findUserByUuid(uuid)
+        User user = userRepository.findUserByUuidAndDeletedFalse(uuid)
                 .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + uuid + " not found!"));
 
         user.softDelete(Instant.now());
@@ -114,7 +131,7 @@ public class UserService implements IUserService{
     }
 
     @PreAuthorize("hasAuthority('VIEW_CITIZEN') or " +
-            "hasAuthority('VIEW_ONLY_CITIZEN') and #uuid == authentication.principal.uuid")
+            "(hasAuthority('VIEW_ONLY_CITIZEN') and #uuid == authentication.principal.uuid)")
     @Override
     @Transactional(readOnly = true)
     public UserReadOnlyDTO getUserByUuidAndDeletedFalse(UUID uuid) {
@@ -150,55 +167,16 @@ public class UserService implements IUserService{
     }
 
     private void createDefaultCategories(User user) {
-
-        //Default categories for expenses
-        Category personal = new Category();
-        personal.setUser(user);
-        personal.setName("Personal");
-        personal.setType(TransactionType.EXPENSE);
-
-        Category home = new Category();
-        home.setUser(user);
-        home.setName("Home");
-        home.setType(TransactionType.EXPENSE);
-
-        Category buys = new Category();
-        buys.setUser(user);
-        buys.setName("Buys");
-        buys.setType(TransactionType.EXPENSE);
-
-        Category trans = new Category();
-        trans.setUser(user);
-        trans.setName("Transportation");
-        trans.setType(TransactionType.EXPENSE);
-
-        Category other = new Category();
-        other.setUser(user);
-        other.setName("Other");
-        other.setType(TransactionType.EXPENSE);
-
-        Category bills = new Category();
-        bills.setUser(user);
-        bills.setName("Bills");
-        bills.setType(TransactionType.EXPENSE);
-
-        //Default categories for income
-        Category salary = new Category();
-        salary.setUser(user);
-        salary.setName("Salary");
-        salary.setType(TransactionType.INCOME);
-
-        Category business = new Category();
-        business.setUser(user);
-        business.setName("Business");
-        business.setType(TransactionType.INCOME);
-
-        Category invest = new Category();
-        invest.setUser(user);
-        invest.setName("Investment");
-        invest.setType(TransactionType.INCOME);
-
-        categoryRepository.saveAll(List.of(personal,home,buys,trans,other,bills,salary,business,invest));
+        List<Category> categories = DEFAULT_CATEGORIES.stream()
+            .map(seed -> {
+                Category c = new Category();
+                c.setUser(user);
+                c.setName(seed.name());
+                c.setType(seed.type());
+                return c;
+        })
+        .toList();
+        categoryRepository.saveAll(categories);
     }
 
     private void createDefaultCashAccount(User user) {
