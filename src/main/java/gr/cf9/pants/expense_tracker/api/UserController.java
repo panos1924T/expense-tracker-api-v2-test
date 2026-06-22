@@ -10,6 +10,9 @@ import gr.cf9.pants.expense_tracker.validator.UserUpdateValidator;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.support.ResourcePatternResolver;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -78,5 +81,21 @@ public class UserController {
     ) {
         UserReadOnlyDTO userReadOnlyDTO = userService.deleteUser(uuid);
         return ResponseEntity.ok(userReadOnlyDTO);
+    }
+
+    @GetMapping("/all-users-list")
+    public ResponseEntity<Page<UserReadOnlyDTO>> getAllUsers(
+            Pageable pageable
+    ) {
+        Page<UserReadOnlyDTO> usersPaginated = userService.getAllUsers(pageable);
+        return ResponseEntity.ok(usersPaginated);
+    }
+
+    @GetMapping("/users-list")
+    public ResponseEntity<Page<UserReadOnlyDTO>> getAllUsersDeletedFalse(
+            Pageable pageable
+    ) {
+        Page<UserReadOnlyDTO> usersPaginated = userService.getAllUsersDeletedFalse(pageable);
+        return ResponseEntity.ok(usersPaginated);
     }
 }

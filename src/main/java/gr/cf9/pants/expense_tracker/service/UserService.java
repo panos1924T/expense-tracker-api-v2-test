@@ -17,6 +17,8 @@ import gr.cf9.pants.expense_tracker.repository.CategoryRepository;
 import gr.cf9.pants.expense_tracker.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -88,7 +90,8 @@ public class UserService implements IUserService{
         return userMapper.toReadOnly(updatedUser);
     }
 
-    @PreAuthorize("hasAuthority('DEACTIVATE_CITIZEN')")
+    @PreAuthorize("hasAuthority('DEACTIVATE_CITIZEN') or " +
+            "(hasAuthority('DEACTIVATE_ONLY_CITIZEN') and #uuid == authentication.principal.uuid)")
     @Transactional
     @Override
     public UserReadOnlyDTO deleteUser(UUID uuid) {
@@ -101,7 +104,7 @@ public class UserService implements IUserService{
         return userMapper.toReadOnly(user);
     }
 
-    @PreAuthorize("hasAuthority('VIEW_ALL_CITIZENS')")
+    @PreAuthorize("hasAuthority('VIEW_CITIZEN')")
     @Override
     @Transactional(readOnly = true)
     public UserReadOnlyDTO getUserByUuid(UUID uuid) {
@@ -110,13 +113,34 @@ public class UserService implements IUserService{
         return userMapper.toReadOnly(user);
     }
 
-    @PreAuthorize("hasAuthority('VIEW_ALL_CITIZENS') or #uuid == authentication.principal.uuid")
+    @PreAuthorize("hasAuthority('VIEW_CITIZEN') or " +
+            "hasAuthority('VIEW_ONLY_CITIZEN') and #uuid == authentication.principal.uuid")
     @Override
     @Transactional(readOnly = true)
     public UserReadOnlyDTO getUserByUuidAndDeletedFalse(UUID uuid) {
         User user = userRepository.findUserByUuidAndDeletedFalse(uuid)
                 .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + uuid + " not found!"));
         return userMapper.toReadOnly(user);
+    }
+
+    @PreAuthorize("hasAuthority('VIEW_CITIZENS')")
+    @Transactional(readOnly = true)
+    @Override
+    public Page<UserReadOnlyDTO> getAllUsers(Pageable pageable) {
+        Page<User> usersPage = userRepository.findAll(pageable);
+        log.debug("Get paginated returned successfully page={} and size={}", usersPage.getNumber(), usersPage.getSize());
+
+        return usersPage.map(userMapper::toReadOnly);
+    }
+
+    @Transactional(readOnly = true)
+    @PreAuthorize("hasAuthority('VIEW_CITIZENS')")
+    @Override
+    public Page<UserReadOnlyDTO> getAllUsersDeletedFalse(Pageable pageable) {
+        Page<User> usersPage = userRepository.findAllUsersByDeletedFalse(pageable);
+        log.debug("Get paginated returned successfully page={} and size={}", usersPage.getNumber(), usersPage.getSize());
+
+        return usersPage.map(userMapper::toReadOnly);
     }
 
     @Override
