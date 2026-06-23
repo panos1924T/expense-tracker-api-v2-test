@@ -37,245 +37,51 @@ public class TransactionService implements ITransactionService {
     @Transactional
     @Override
     public TransactionReadOnlyDTO createTransaction(TransactionCreateDTO dto, UUID userUuid){
-        //VALIDATE
+
         User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
                 .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
 
-        if (dto.amount() == null) {
-            throw new InvalidArgumentException("Amount", "Amount is required");
+        if (dto.amount() == null || dto.amount().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new InvalidTransactionException("Amount", "Amount must be a positive number");
         }
-        if (dto.amount().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new InvalidTransactionException("Amount", "Amount must be positive");
-        }
-
         if (dto.type() == null) {
             throw new InvalidArgumentException("TransactionType", "Transaction type is required");
         }
 
-        if (dto.type() == TransactionType.TRANSFER) {
-            throw new InvalidArgumentException("TransactionType", "Use /transfer endpoint for transfers");
+        Transaction transaction = transactionMapper.toEntity(dto, user);
+
+        switch (dto.type()) {
+            case INCOME -> processIncome(transaction, dto.categoryUuid(), dto.amount(), user);
+            case EXPENSE -> processExpense(transaction, dto.categoryUuid(), dto.sourceAccountUuid(), dto.amount(), user);
+            case TRANSFER -> processTransfer(transaction, dto.sourceAccountUuid(), dto.targetAccountUuid(), dto.amount(), user);
         }
-
-        Category category = categoryRepository.findCategoryByUuidAndUserAndDeletedFalse(dto.categoryUuid(), user)
-                .orElseThrow(() -> new EntityNotFoundException("Category", "Category with uuid: " + dto.categoryUuid() + " not found!"));
-
-        if (category.getParent() == null) {
-            throw new InvalidTransactionException("Category", "Parent categories are groups only and cannot be used in transactions");
-        }
-
-        if (category.getType() != dto.type()) {
-            throw new InvalidTransactionException("Category", "Category type must match transaction type");
-        }
-
-        Account sourceAccount;
-        BigDecimal newBalance;
-
-        if (dto.type() == TransactionType.INCOME) {
-            sourceAccount = accountRepository.findAccountByUserAndDefaultAccountTrue(user)
-                    .orElseThrow(() -> new EntityNotFoundException("Account", "Default account not found for user with uuid=" + userUuid));
-
-            newBalance = sourceAccount.getBalance().add(dto.amount());
-            sourceAccount.setBalance(newBalance);
-
-        } else {
-            if (dto.sourceAccountUuid() == null) {
-                throw new InvalidArgumentException("Account", "Source account is required for EXPENSE transactions");
-            }
-
-            sourceAccount = accountRepository.findAccountByUuidAndUserAndDeletedFalse(dto.sourceAccountUuid(), user)
-                    .orElseThrow(() -> new EntityNotFoundException("Account", "Account with uuid=" + dto.sourceAccountUuid() + " not found"));
-
-            newBalance = sourceAccount.getBalance().subtract(dto.amount());
-            sourceAccount.setBalance(newBalance);
-        }
-
-        //PREPARE
-        Transaction transaction = transactionMapper.toEntity(dto, sourceAccount, category);
-
-        //EXECUTE
-        transactionRepository.save(transaction);
-
-        //RETURN
-        return transactionMapper.toReadOnly(transaction);
-    }
-
-    @Transactional
-    @Override
-    public TransactionReadOnlyDTO createTransfer(TransferCreateDTO dto, UUID userUuid){
-        //VALIDATE
-        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
-                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
-
-        if (dto.amount() == null) {
-            throw new InvalidArgumentException("Amount", "Amount is required");
-        }
-        if (dto.amount().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new InvalidTransactionException("Amount", "Amount must be positive");
-        }
-
-        Account sourceAccount = accountRepository.findAccountByUuidAndUserAndDeletedFalse(dto.sourceAccountUuid(), user)
-                .orElseThrow(() -> new EntityNotFoundException("Account", "Account with uuid: " + dto.sourceAccountUuid() + "not found!"));
-
-        Account targetAccount = accountRepository.findAccountByUuidAndUserAndDeletedFalse(dto.targetAccountUuid(), user)
-                .orElseThrow(() -> new EntityNotFoundException("Account", "Account with uuid: " + dto.targetAccountUuid() + "not found!"));
-
-        if (sourceAccount.getUuid().equals(targetAccount.getUuid())) {
-            throw new InvalidTransactionException("Account", "Source and target account cannot be the same");
-        }
-
-        //PREPARE
-        Transaction transaction = transactionMapper.toEntity(dto, sourceAccount, targetAccount);
-        BigDecimal newSourceBalance;
-        BigDecimal newTargetBalance;
-
-        newSourceBalance = sourceAccount.getBalance().subtract(dto.amount());
-        newTargetBalance = targetAccount.getBalance().add(dto.amount());
-
-        //EXECUTE
-        sourceAccount.setBalance(newSourceBalance);
-        targetAccount.setBalance(newTargetBalance);
-        transactionRepository.save(transaction);
-
-        //RETURN
-        return transactionMapper.toReadOnly(transaction);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public TransactionReadOnlyDTO getTransactionByUuid(UUID transUuid, UUID userUuid) {
-        //VALIDATE
-        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
-                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
-        Transaction transaction = transactionRepository.findTransByUuidAndUser(transUuid, user)
-                .orElseThrow(() -> new EntityNotFoundException("Transaction", "Transaction with uuid: " + transUuid + " not found!"));
-
-        //RETURN
-        return transactionMapper.toReadOnly(transaction);
-    }
-
-    @Transactional
-    @Override
-    public TransactionReadOnlyDTO updateTransaction(UUID transUuid, TransactionUpdateDTO dto, UUID userUuid)
-            throws InvalidTransactionException {
-
-        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
-                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid=" + userUuid + " not found"));
-
-        Transaction transaction = transactionRepository.findTransByUuidAndUser(transUuid, user)
-                .orElseThrow(() -> new EntityNotFoundException("Transaction", "Transaction with uuid: " + transUuid + " not found!"));
-
-        if (dto.amount() == null) {
-            throw new InvalidArgumentException("Amount", "Amount is required");
-        }
-        if (dto.amount().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new InvalidTransactionException("Amount", "Amount must be positive");
-        }
-
-        if (dto.type() == null) {
-            throw new InvalidArgumentException("TransactionType", "Transaction type is required");
-        }
-
-        if (transaction.getType() == TransactionType.TRANSFER || dto.type() == TransactionType.TRANSFER) {
-            throw new InvalidArgumentException("Transaction", "Use /transfers endpoint for transfer transactions");
-        }
-
-        if (dto.categoryUuid() == null) {
-            throw new InvalidArgumentException("Category", "Category is required");
-        }
-
-        Category newCategory = categoryRepository.findCategoryByUuidAndUserAndDeletedFalse(dto.categoryUuid(), user)
-                .orElseThrow(() -> new EntityNotFoundException("Category", "Category with uuid=" + dto.categoryUuid() + " not found"));
-
-        if (newCategory.getParent() == null) {
-            throw new InvalidTransactionException("Category", "Parent categories are groups only and cannot be used in transactions");
-        }
-
-        if (newCategory.getType() != dto.type()) {
-            throw new InvalidTransactionException("Category", "Category type must match transaction type");
-        }
-
-        Account newAccount;
-
-        if (transaction.getType() == TransactionType.INCOME) {
-            transaction.getSourceAccount().setBalance(
-                    transaction.getSourceAccount().getBalance().subtract(transaction.getAmount())
-            );
-        } else {
-            transaction.getSourceAccount().setBalance(
-                    transaction.getSourceAccount().getBalance().add(transaction.getAmount())
-            );
-        }
-
-        if (dto.type() == TransactionType.INCOME) {
-            newAccount = accountRepository.findAccountByUserAndDefaultAccountTrue(user)
-                    .orElseThrow(() -> new EntityNotFoundException("Account", "Default account not found"));
-            newAccount.setBalance(newAccount.getBalance().add(dto.amount()));
-        } else {
-            if (dto.sourceAccountUuid() == null) {
-                throw new InvalidArgumentException("Account", "Source account is required for EXPENSE");
-            }
-
-            newAccount = accountRepository.findAccountByUuidAndUserAndDeletedFalse(dto.sourceAccountUuid(), user)
-                    .orElseThrow(() -> new EntityNotFoundException("Account", "Account with uuid=" + dto.sourceAccountUuid() + " not found"));
-            newAccount.setBalance(newAccount.getBalance().subtract(dto.amount()));
-        }
-
-
-        transaction.setAmount(dto.amount());
-        transaction.setType(dto.type());
-        transaction.setSourceAccount(newAccount);
-        transaction.setCategory(newCategory);
-        transaction.setTransactionDate(dto.transactionDate());
-        transaction.setDescription(dto.description());
 
         return transactionMapper.toReadOnly(transactionRepository.save(transaction));
     }
 
     @Transactional
     @Override
-    public TransactionReadOnlyDTO updateTransfer(UUID transUuid, TransferUpdateDTO dto, UUID userUuid)
-            throws InvalidTransactionException {
+    public TransactionReadOnlyDTO updateTransaction(UUID transUuid, TransactionUpdateDTO dto, UUID userUuid) {
 
         User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
                 .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid=" + userUuid + " not found"));
 
         Transaction transaction = transactionRepository.findTransByUuidAndUser(transUuid, user)
-                .orElseThrow(() -> new EntityNotFoundException("Transaction", "Transaction with uuid=" + transUuid + " not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Transaction", "Transaction with uuid: " + transUuid + " not found!"));
 
-        if (dto.amount() == null) {
-            throw new InvalidArgumentException("Amount", "Amount is required");
-        }
-        if (dto.amount().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new InvalidTransactionException("Amount", "Amount must be positive");
+        if (dto.amount() == null || dto.amount().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new InvalidTransactionException("Amount", "Amount must be a positive number");
         }
 
-        if (transaction.getType() != TransactionType.TRANSFER) {
-            throw new InvalidArgumentException("Transaction", "Transaction with uuid=" + transUuid + " is not a transfer");
+        revertTransactionEffect(transaction);
+
+        transactionMapper.updateEntity(transaction, dto);
+
+        switch (transaction.getType()) {
+            case INCOME -> processIncome(transaction, dto.categoryUuid(), dto.amount(), user);
+            case EXPENSE -> processExpense(transaction, dto.categoryUuid(), dto.sourceAccountUuid(), dto.amount(), user);
+            case TRANSFER -> processTransfer(transaction, dto.sourceAccountUuid(), dto.targetAccountUuid(), dto.amount(), user);
         }
-
-        transaction.getSourceAccount()
-                .setBalance(transaction.getSourceAccount().getBalance().add(transaction.getAmount()));
-        transaction.getTargetAccount()
-                .setBalance(transaction.getTargetAccount().getBalance().subtract(transaction.getAmount()));
-
-        Account newSourceAccount = accountRepository.findAccountByUuidAndUserAndDeletedFalse(dto.sourceAccountUuid(), user)
-                .orElseThrow(() -> new EntityNotFoundException("Account", "Source account with uuid=" + dto.sourceAccountUuid() + " not found"));
-
-        Account newTargetAccount = accountRepository.findAccountByUuidAndUserAndDeletedFalse(dto.targetAccountUuid(), user)
-                .orElseThrow(() -> new EntityNotFoundException("Account", "Target account with uuid=" + dto.targetAccountUuid() + " not found"));
-
-        if (newSourceAccount.getUuid().equals(newTargetAccount.getUuid())) {
-            throw new InvalidTransactionException("Account", "Source and target account cannot be the same");
-        }
-
-        newSourceAccount.setBalance(newSourceAccount.getBalance().subtract(dto.amount()));
-        newTargetAccount.setBalance(newTargetAccount.getBalance().add(dto.amount()));
-
-        transaction.setAmount(dto.amount());
-        transaction.setSourceAccount(newSourceAccount);
-        transaction.setTargetAccount(newTargetAccount);
-        transaction.setTransactionDate(dto.transactionDate());
-        transaction.setDescription(dto.description());
 
         return transactionMapper.toReadOnly(transactionRepository.save(transaction));
     }
@@ -293,6 +99,19 @@ public class TransactionService implements ITransactionService {
                 .stream()
                 .map(transactionMapper::toReadOnly)
                 .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public TransactionReadOnlyDTO getTransactionByUuid(UUID transUuid, UUID userUuid) {
+        //VALIDATE
+        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
+                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
+        Transaction transaction = transactionRepository.findTransByUuidAndUser(transUuid, user)
+                .orElseThrow(() -> new EntityNotFoundException("Transaction", "Transaction with uuid: " + transUuid + " not found!"));
+
+        //RETURN
+        return transactionMapper.toReadOnly(transaction);
     }
 
     @Override
@@ -337,19 +156,17 @@ public class TransactionService implements ITransactionService {
         Category category = categoryRepository.findCategoryByUuidAndUserAndDeletedFalse(categoryUuid, user)
                 .orElseThrow(() -> new EntityNotFoundException("Category", "Category with uuid: " + categoryUuid + " not found!"));
 
-        if (category.getParent() == null) {
-            return transactionRepository.findTransByUserAndCategoryParent(user, category, pageable)
-                    .getContent()
-                    .stream()
-                    .map(transactionMapper::toReadOnly)
-                    .toList();
-        } else {
-            return transactionRepository.findTransByUserAndCategory(user, category, pageable)
-                    .getContent()
-                    .stream()
-                    .map(transactionMapper::toReadOnly)
-                    .toList();
-        }
+        return (category.getParent() == null) ?
+                transactionRepository.findTransByUserAndCategory_Parent(user, category, pageable)
+                        .getContent()
+                        .stream()
+                        .map(transactionMapper::toReadOnly)
+                        .toList() :
+                transactionRepository.findTransByUserAndCategory(user, category, pageable)
+                        .getContent()
+                        .stream()
+                        .map(transactionMapper::toReadOnly)
+                        .toList();
     }
 
     @Override
@@ -360,19 +177,17 @@ public class TransactionService implements ITransactionService {
         Category category = categoryRepository.findCategoryByUuidAndUser(categoryUuid, user)
                 .orElseThrow(() -> new EntityNotFoundException("Category", "Category with uuid: " + categoryUuid + " not found!"));
 
-        if (category.getParent() == null) {
-            return transactionRepository.findTransByUserAndCategoryParent(user, category, pageable)
-                    .getContent()
-                    .stream()
-                    .map(transactionMapper::toReadOnly)
-                    .toList();
-        } else {
-            return transactionRepository.findTransByUserAndCategory(user, category, pageable)
-                    .getContent()
-                    .stream()
-                    .map(transactionMapper::toReadOnly)
-                    .toList();
-        }
+        return (category.getParent() == null) ?
+                transactionRepository.findTransByUserAndCategory_Parent(user, category, pageable)
+                        .getContent()
+                        .stream()
+                        .map(transactionMapper::toReadOnly)
+                        .toList() :
+                transactionRepository.findTransByUserAndCategory(user, category, pageable)
+                        .getContent()
+                        .stream()
+                        .map(transactionMapper::toReadOnly)
+                        .toList();
     }
 
     @Override
@@ -398,23 +213,119 @@ public class TransactionService implements ITransactionService {
                 .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
         Transaction transaction = transactionRepository.findTransByUuidAndUser(transUuid, user)
                 .orElseThrow(() -> new EntityNotFoundException("Transaction", "Transaction with uuid: " + transUuid + " not found!"));
+        if (transaction.isDeleted()) throw new InvalidArgumentException("Transaction", "Transaction is already deleted");
 
         //PREPARE
-        Account sourceAccount = transaction.getSourceAccount();
-        Account targetAccount = transaction.getTargetAccount();
-
-        switch (transaction.getType()) {
-            case INCOME -> sourceAccount.setBalance(sourceAccount.getBalance().subtract(transaction.getAmount()));
-            case EXPENSE -> sourceAccount.setBalance(sourceAccount.getBalance().add(transaction.getAmount()));
-            case TRANSFER -> {
-                sourceAccount.setBalance(sourceAccount.getBalance().add(transaction.getAmount()));
-                targetAccount.setBalance(targetAccount.getBalance().subtract(transaction.getAmount()));
-            }
-            default -> throw new InvalidArgumentException("Transaction", "Unknown transaction type");
-        }
+        revertTransactionEffect(transaction);
 
         //EXECUTE
         transaction.softDelete(Instant.now());
         transactionRepository.save(transaction);
+    }
+
+    private void processIncome(Transaction transaction, UUID categoryUuid, BigDecimal amount, User user) {
+        if (categoryUuid == null) throw new InvalidArgumentException("Category", "Category is required for income transactions");
+
+        Category category;
+        if (transaction.getCategory() != null && transaction.getCategory().getUuid().equals(categoryUuid)) {
+            category = transaction.getCategory();
+        } else {
+            category = categoryRepository.findCategoryByUuidAndUserAndTypeAndDeletedFalse(categoryUuid, user, transaction.getType())
+                    .orElseThrow(() -> new EntityNotFoundException("Category", "Category with uuid=" + categoryUuid + " not found"));
+            if (category.getParent() == null) throw new InvalidTransactionException("Category", "Parent categories cannot have transactions");
+            if (category.getType() != TransactionType.INCOME) throw new InvalidTransactionException("Category", "Category must be type INCOME");
+        }
+
+        Account defaultAccount;
+        if (transaction.getSourceAccount() != null) {
+            defaultAccount = transaction.getSourceAccount();
+        } else {
+            defaultAccount = accountRepository.findAccountByUserAndDefaultAccountTrue(user)
+                    .orElseThrow(() -> new EntityNotFoundException("Account", "Default account not found"));
+        }
+
+        defaultAccount.setBalance(defaultAccount.getBalance().add(amount));
+
+        transaction.setCategory(category);
+        transaction.setSourceAccount(defaultAccount);
+        transaction.setTargetAccount(null);
+    }
+
+    private void processExpense(Transaction transaction, UUID categoryUuid, UUID sourceAccountUuid, BigDecimal amount, User user) {
+
+        if (categoryUuid == null) throw new InvalidArgumentException("Category", "Category is required for expense transactions");
+        Category category;
+        if (transaction.getCategory() != null && transaction.getCategory().getUuid().equals(categoryUuid)) {
+            category = transaction.getCategory();
+        } else {
+            category = categoryRepository.findCategoryByUuidAndUserAndDeletedFalse(categoryUuid, user)
+                    .orElseThrow(() -> new EntityNotFoundException("Category", "Category with uuid=" + categoryUuid + " not found"));
+
+            if (category.getParent() == null) {
+                throw new InvalidTransactionException("Category", "Transactions are not allowed in parent categories");
+            }
+            if (category.getType() != TransactionType.EXPENSE) {
+                throw new InvalidTransactionException("Category", "Category must be type EXPENSE");
+            }
+        }
+
+        if (sourceAccountUuid == null) throw new InvalidArgumentException("Account", "Source account is required for expense transactions");
+        Account sourceAccount;
+        if (transaction.getSourceAccount() != null && transaction.getSourceAccount().getUuid().equals(sourceAccountUuid)) {
+            sourceAccount = transaction.getSourceAccount();
+        } else {
+            sourceAccount = accountRepository.findAccountByUuidAndUserAndDeletedFalse(sourceAccountUuid, user)
+                    .orElseThrow(() -> new EntityNotFoundException("Account", "Account with uuid=" + sourceAccountUuid + " not found"));
+        }
+
+        sourceAccount.setBalance(sourceAccount.getBalance().subtract(amount));
+
+        transaction.setCategory(category);
+        transaction.setSourceAccount(sourceAccount);
+        transaction.setTargetAccount(null);
+    }
+
+    private void processTransfer(Transaction transaction, UUID sourceAccountUuid, UUID targetAccountUuid, BigDecimal amount, User user) {
+        if (sourceAccountUuid == null || targetAccountUuid == null) throw new InvalidArgumentException("Account", "Both source and target accounts are required for transfers");
+
+        if (sourceAccountUuid.equals(targetAccountUuid)) throw new InvalidTransactionException("Account", "Source and target account cannot be the same");
+
+        Account sourceAccount;
+        if (transaction.getSourceAccount() != null && transaction.getSourceAccount().getUuid().equals(sourceAccountUuid)) {
+            sourceAccount = transaction.getSourceAccount();
+        } else {
+            sourceAccount = accountRepository.findAccountByUuidAndUserAndDeletedFalse(sourceAccountUuid, user)
+                    .orElseThrow(() -> new EntityNotFoundException("Account", "Source account with uuid=" + sourceAccountUuid + " not found"));
+        }
+
+        Account targetAccount;
+        if (transaction.getTargetAccount() != null && transaction.getTargetAccount().getUuid().equals(targetAccountUuid)) {
+            targetAccount = transaction.getTargetAccount();
+        } else {
+            targetAccount = accountRepository.findAccountByUuidAndUserAndDeletedFalse(targetAccountUuid, user)
+                    .orElseThrow(() -> new EntityNotFoundException("Account", "Target account with uuid=" + targetAccountUuid + " not found"));
+        }
+
+        sourceAccount.setBalance(sourceAccount.getBalance().subtract(amount));
+        targetAccount.setBalance(targetAccount.getBalance().add(amount));
+
+        transaction.setCategory(null);
+        transaction.setSourceAccount(sourceAccount);
+        transaction.setTargetAccount(targetAccount);
+    }
+
+    private void revertTransactionEffect(Transaction transaction) {
+        Account source = transaction.getSourceAccount();
+        Account target = transaction.getTargetAccount();
+        BigDecimal amount = transaction.getAmount();
+
+        switch (transaction.getType()) {
+            case INCOME -> source.setBalance(source.getBalance().subtract(amount));
+            case EXPENSE -> source.setBalance(source.getBalance().add(amount));
+            case TRANSFER -> {
+                source.setBalance(source.getBalance().add(amount));
+                target.setBalance(target.getBalance().subtract(amount));
+            }
+        }
     }
 }

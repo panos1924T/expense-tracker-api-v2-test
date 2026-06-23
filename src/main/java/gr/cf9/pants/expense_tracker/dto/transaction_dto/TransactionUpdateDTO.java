@@ -10,21 +10,19 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 public record TransactionUpdateDTO(
-        @NotNull @Positive
-        BigDecimal amount,
-
-        @NotNull
-        TransactionType type,
 
         @NotNull
         LocalDate transactionDate,
 
+        @NotNull @Positive
+        BigDecimal amount,
+
         @Size(max = 255)
         String description,
 
-        @NotNull
         UUID sourceAccountUuid,
 
-        @NotNull
+        UUID targetAccountUuid,
+
         UUID categoryUuid
 ) {}

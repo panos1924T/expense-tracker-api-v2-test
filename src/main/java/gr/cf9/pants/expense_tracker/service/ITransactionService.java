@@ -11,11 +11,7 @@ public interface ITransactionService {
 
         TransactionReadOnlyDTO createTransaction(TransactionCreateDTO dto, UUID userUuid);
 
-        TransactionReadOnlyDTO createTransfer(TransferCreateDTO dto, UUID userUuid);
-
         TransactionReadOnlyDTO updateTransaction(UUID transUuid, TransactionUpdateDTO dto, UUID userUuid);
-
-        TransactionReadOnlyDTO updateTransfer(UUID transUuid, TransferUpdateDTO dto, UUID userUuid);
 
         TransactionReadOnlyDTO getTransactionByUuid(UUID transUuid, UUID userUuid);
 

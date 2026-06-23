@@ -14,7 +14,7 @@ public class AccountMapper {
 
     public AccountReadOnlyDTO toReadOnly(Account account) {
         return new AccountReadOnlyDTO(
-                account.getId(),
+                account.getUuid(),
                 account.getName(),
                 account.getAccountType().name(),
                 account.getBalance(),

@@ -25,6 +25,10 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
 
     Optional<Category> findCategoryByUuidAndUser(UUID Uuid, User user);
 
+    Optional<Category> findCategoryByUuidAndUserAndTypeAndDeletedFalse(
+            UUID uuid, User user, TransactionType transactionType
+    );
+
     List<Category> findCategoryByUserAndParentIsNullAndDeletedFalse(User user);
 
     List<Category> findCategoryByUserAndTypeAndParentIsNullAndDeletedFalse(User user, TransactionType type);

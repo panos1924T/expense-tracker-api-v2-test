@@ -37,7 +37,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     @Query("SELECT t FROM Transaction t " +
             "WHERE t.user = :user " +
             "AND t.category.parent = :parent")
-    Page<Transaction> findTransByUserAndCategoryParent(
+    Page<Transaction> findTransByUserAndCategory_Parent(
             @Param("user") User user,
             @Param("parent") Category parent,
             Pageable pageable

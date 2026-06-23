@@ -12,10 +12,7 @@ import java.util.UUID;
 public record TransactionCreateDTO(
 
         @NotNull
-        UUID sourceAccountUuid,
-
-        @NotNull
-        UUID categoryUuid,
+        LocalDate transactionDate,
 
         @NotNull
         TransactionType type,
@@ -24,9 +21,12 @@ public record TransactionCreateDTO(
         @Positive
         BigDecimal amount,
 
-        @NotNull
-        LocalDate transactionDate,
-
         @Size(max = 255)
-        String description
+        String description,
+
+        UUID categoryUuid,
+
+        UUID sourceAccountUuid,
+
+        UUID targetAccountUuid
 ) {}

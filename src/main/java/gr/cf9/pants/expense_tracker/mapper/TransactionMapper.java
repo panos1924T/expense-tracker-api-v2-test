@@ -3,6 +3,7 @@ package gr.cf9.pants.expense_tracker.mapper;
 import gr.cf9.pants.expense_tracker.core.enums.TransactionType;
 import gr.cf9.pants.expense_tracker.dto.transaction_dto.TransactionCreateDTO;
 import gr.cf9.pants.expense_tracker.dto.transaction_dto.TransactionReadOnlyDTO;
+import gr.cf9.pants.expense_tracker.dto.transaction_dto.TransactionUpdateDTO;
 import gr.cf9.pants.expense_tracker.dto.transaction_dto.TransferCreateDTO;
 import gr.cf9.pants.expense_tracker.model.Account;
 import gr.cf9.pants.expense_tracker.model.Category;
@@ -34,11 +35,9 @@ public class TransactionMapper {
         );
     }
 
-    public Transaction toEntity(TransactionCreateDTO dto, Account sourceAccount, Category category) {
+    public Transaction toEntity(TransactionCreateDTO dto,User user) {
         Transaction transaction = new Transaction();
-        transaction.setUser(sourceAccount.getUser());
-        transaction.setSourceAccount(sourceAccount);
-        transaction.setCategory(category);
+        transaction.setUser(user);
         transaction.setType(dto.type());
         transaction.setTransactionDate(dto.transactionDate());
         transaction.setAmount(dto.amount());
@@ -46,15 +45,9 @@ public class TransactionMapper {
         return transaction;
     }
 
-    public Transaction toEntity(TransferCreateDTO dto, Account sourceAccount, Account targetAccount) {
-        Transaction transaction = new Transaction();
-        transaction.setUser(sourceAccount.getUser());
-        transaction.setSourceAccount(sourceAccount);
-        transaction.setTargetAccount(targetAccount);
-        transaction.setType(TransactionType.TRANSFER);
-        transaction.setTransactionDate(dto.transactionDate());
-        transaction.setAmount(dto.amount());
-        transaction.setDescription(dto.description());
-        return transaction;
+    public void updateEntity(Transaction transaction, TransactionUpdateDTO updateDTO) {
+        transaction.setTransactionDate(updateDTO.transactionDate());
+        transaction.setAmount(updateDTO.amount());
+        transaction.setDescription(updateDTO.description());
     }
 }
