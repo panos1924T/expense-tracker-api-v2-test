@@ -67,13 +67,6 @@ public class UserRestController {
         return ResponseEntity.ok(userReadOnlyDTO);
     }
 
-    @GetMapping("/{uuid}")
-    public ResponseEntity<UserReadOnlyDTO> getUserByUuid(
-            @PathVariable UUID uuid
-    ) {
-        return ResponseEntity.ok(userService.getUserByUuidAndDeletedFalse(uuid));
-    }
-
     @DeleteMapping("/{uuid}")
     public ResponseEntity<UserReadOnlyDTO> deleteUserByUuid(
             @PathVariable UUID uuid
@@ -82,19 +75,27 @@ public class UserRestController {
         return ResponseEntity.ok(userReadOnlyDTO);
     }
 
-    @GetMapping
-    public ResponseEntity<Page<UserReadOnlyDTO>> getAllUsers(
-            @PageableDefault(size = 10, sort = "email") Pageable pageable
+    @GetMapping("/{uuid}")
+    public ResponseEntity<UserReadOnlyDTO> getUserByUuid(
+            @PathVariable UUID uuid,
+            @RequestParam(defaultValue = "false") boolean includeDeleted
     ) {
-        Page<UserReadOnlyDTO> usersPaginated = userService.getAllUsers(pageable);
-        return ResponseEntity.ok(usersPaginated);
+        UserReadOnlyDTO userReadOnlyDTO = includeDeleted ?
+                userService.getUserByUuid(uuid) :
+                userService.getUserByUuidAndDeletedFalse(uuid);
+
+        return ResponseEntity.ok(userReadOnlyDTO);
     }
 
     @GetMapping
-    public ResponseEntity<Page<UserReadOnlyDTO>> getAllUsersDeletedFalse(
+    public ResponseEntity<Page<UserReadOnlyDTO>> getAllUsers(
+            @RequestParam(defaultValue = "false") boolean includeDeleted,
             @PageableDefault(size = 10, sort = "email") Pageable pageable
     ) {
-        Page<UserReadOnlyDTO> usersPaginated = userService.getAllUsersDeletedFalse(pageable);
+        Page<UserReadOnlyDTO> usersPaginated = includeDeleted ?
+                userService.getAllUsers(pageable) :
+                userService.getAllUsersDeletedFalse(pageable);
+
         return ResponseEntity.ok(usersPaginated);
     }
 }
