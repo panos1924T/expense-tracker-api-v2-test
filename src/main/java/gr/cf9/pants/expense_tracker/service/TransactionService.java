@@ -2,6 +2,7 @@ package gr.cf9.pants.expense_tracker.service;
 
 import gr.cf9.pants.expense_tracker.core.enums.TransactionType;
 import gr.cf9.pants.expense_tracker.core.exceptions.*;
+import gr.cf9.pants.expense_tracker.core.filters.TransactionFilters;
 import gr.cf9.pants.expense_tracker.dto.transaction_dto.*;
 import gr.cf9.pants.expense_tracker.mapper.TransactionMapper;
 import gr.cf9.pants.expense_tracker.model.Account;
@@ -12,8 +13,10 @@ import gr.cf9.pants.expense_tracker.repository.AccountRepository;
 import gr.cf9.pants.expense_tracker.repository.CategoryRepository;
 import gr.cf9.pants.expense_tracker.repository.TransactionRepository;
 import gr.cf9.pants.expense_tracker.repository.UserRepository;
+import gr.cf9.pants.expense_tracker.specification.TransactionSpecification;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -86,112 +89,112 @@ public class TransactionService implements ITransactionService {
         return transactionMapper.toReadOnly(transactionRepository.save(transaction));
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public List<TransactionReadOnlyDTO> getAllTransactions(UUID userUuid, Pageable pageable) {
-        //VALIDATE
-        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
-                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
+//    @Override
+//    @Transactional(readOnly = true)
+//    public List<TransactionReadOnlyDTO> getAllTransactions(UUID userUuid, Pageable pageable) {
+//        //VALIDATE
+//        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
+//                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
+//
+//        //RETURN
+//        return transactionRepository.findTransByUser(user, pageable)
+//                .getContent()
+//                .stream()
+//                .map(transactionMapper::toReadOnly)
+//                .toList();
+//    }
+//
+//    @Override
+//    @Transactional(readOnly = true)
+//    public TransactionReadOnlyDTO getTransactionByUuid(UUID transUuid, UUID userUuid) {
+//        //VALIDATE
+//        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
+//                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
+//        Transaction transaction = transactionRepository.findTransByUuidAndUser(transUuid, user)
+//                .orElseThrow(() -> new EntityNotFoundException("Transaction", "Transaction with uuid: " + transUuid + " not found!"));
+//
+//        //RETURN
+//        return transactionMapper.toReadOnly(transaction);
+//    }
 
-        //RETURN
-        return transactionRepository.findTransByUser(user, pageable)
-                .getContent()
-                .stream()
-                .map(transactionMapper::toReadOnly)
-                .toList();
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public TransactionReadOnlyDTO getTransactionByUuid(UUID transUuid, UUID userUuid) {
-        //VALIDATE
-        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
-                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
-        Transaction transaction = transactionRepository.findTransByUuidAndUser(transUuid, user)
-                .orElseThrow(() -> new EntityNotFoundException("Transaction", "Transaction with uuid: " + transUuid + " not found!"));
-
-        //RETURN
-        return transactionMapper.toReadOnly(transaction);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<TransactionReadOnlyDTO> getTransactionByActiveAccount(UUID accountUuid, UUID userUuid, Pageable pageable) {
-        //VALIDATE
-        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
-                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
-        Account account = accountRepository.findAccountByUuidAndUserAndDeletedFalse(accountUuid, user)
-                .orElseThrow(() -> new EntityNotFoundException("Account", "Account with uuid: " + accountUuid + " not found!"));
-
-        //RETURN
-        return transactionRepository.findTransByUserAndAccount(user, account, pageable)
-                .getContent()
-                .stream()
-                .map(transactionMapper::toReadOnly)
-                .toList();
-    }
-
-    @Transactional(readOnly = true)
-    @Override
-    public List<TransactionReadOnlyDTO> getTransactionByAccount(UUID accountUuid, UUID userUuid, Pageable pageable) {
-        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
-                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
-        Account account = accountRepository.findAccountByUuidAndUser(accountUuid, user)
-                .orElseThrow(() -> new EntityNotFoundException("Account", "Account with uuid: " + accountUuid + " not found!"));
-
-        return transactionRepository.findTransByUserAndAccount(user, account, pageable)
-                .getContent()
-                .stream()
-                .map(transactionMapper::toReadOnly)
-                .toList();
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<TransactionReadOnlyDTO> getTransactionByActiveCategory(UUID categoryUuid, UUID userUuid, Pageable pageable) {
-
-        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
-                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
-
-        Category category = categoryRepository.findCategoryByUuidAndUserAndDeletedFalse(categoryUuid, user)
-                .orElseThrow(() -> new EntityNotFoundException("Category", "Category with uuid: " + categoryUuid + " not found!"));
-
-        return transactionRepository.findTransByUserAndCategoryOrChildCategory(user, category, pageable)
-                .getContent()
-                .stream()
-                .map(transactionMapper::toReadOnly)
-                .toList();
-    }
-
-    @Override
-    public List<TransactionReadOnlyDTO> getTransactionByCategory(UUID categoryUuid, UUID userUuid, Pageable pageable) {
-        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
-                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
-
-        Category category = categoryRepository.findCategoryByUuidAndUser(categoryUuid, user)
-                .orElseThrow(() -> new EntityNotFoundException("Category", "Category with uuid: " + categoryUuid + " not found!"));
-
-        return transactionRepository.findTransByUserAndCategoryOrChildCategory(user, category, pageable)
-                .getContent()
-                .stream()
-                .map(transactionMapper::toReadOnly)
-                .toList();
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<TransactionReadOnlyDTO> getTransactionByType(TransactionType type, UUID userUuid, Pageable pageable) {
-        //VALIDATE
-        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
-                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
-
-        //RETURN
-        return transactionRepository.findTransByUserAndType(user, type, pageable)
-                .getContent()
-                .stream()
-                .map(transactionMapper::toReadOnly)
-                .toList();
-    }
+//    @Override
+//    @Transactional(readOnly = true)
+//    public List<TransactionReadOnlyDTO> getTransactionByActiveAccount(UUID accountUuid, UUID userUuid, Pageable pageable) {
+//        //VALIDATE
+//        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
+//                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
+//        Account account = accountRepository.findAccountByUuidAndUserAndDeletedFalse(accountUuid, user)
+//                .orElseThrow(() -> new EntityNotFoundException("Account", "Account with uuid: " + accountUuid + " not found!"));
+//
+//        //RETURN
+//        return transactionRepository.findTransByUserAndAccount(user, account, pageable)
+//                .getContent()
+//                .stream()
+//                .map(transactionMapper::toReadOnly)
+//                .toList();
+//    }
+//
+//    @Transactional(readOnly = true)
+//    @Override
+//    public List<TransactionReadOnlyDTO> getTransactionByAccount(UUID accountUuid, UUID userUuid, Pageable pageable) {
+//        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
+//                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
+//        Account account = accountRepository.findAccountByUuidAndUser(accountUuid, user)
+//                .orElseThrow(() -> new EntityNotFoundException("Account", "Account with uuid: " + accountUuid + " not found!"));
+//
+//        return transactionRepository.findTransByUserAndAccount(user, account, pageable)
+//                .getContent()
+//                .stream()
+//                .map(transactionMapper::toReadOnly)
+//                .toList();
+//    }
+//
+//    @Override
+//    @Transactional(readOnly = true)
+//    public List<TransactionReadOnlyDTO> getTransactionByActiveCategory(UUID categoryUuid, UUID userUuid, Pageable pageable) {
+//
+//        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
+//                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
+//
+//        Category category = categoryRepository.findCategoryByUuidAndUserAndDeletedFalse(categoryUuid, user)
+//                .orElseThrow(() -> new EntityNotFoundException("Category", "Category with uuid: " + categoryUuid + " not found!"));
+//
+//        return transactionRepository.findTransByUserAndCategoryOrChildCategory(user, category, pageable)
+//                .getContent()
+//                .stream()
+//                .map(transactionMapper::toReadOnly)
+//                .toList();
+//    }
+//
+//    @Override
+//    public List<TransactionReadOnlyDTO> getTransactionByCategory(UUID categoryUuid, UUID userUuid, Pageable pageable) {
+//        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
+//                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
+//
+//        Category category = categoryRepository.findCategoryByUuidAndUser(categoryUuid, user)
+//                .orElseThrow(() -> new EntityNotFoundException("Category", "Category with uuid: " + categoryUuid + " not found!"));
+//
+//        return transactionRepository.findTransByUserAndCategoryOrChildCategory(user, category, pageable)
+//                .getContent()
+//                .stream()
+//                .map(transactionMapper::toReadOnly)
+//                .toList();
+//    }
+//
+//    @Override
+//    @Transactional(readOnly = true)
+//    public List<TransactionReadOnlyDTO> getTransactionByType(TransactionType type, UUID userUuid, Pageable pageable) {
+//        //VALIDATE
+//        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
+//                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
+//
+//        //RETURN
+//        return transactionRepository.findTransByUserAndType(user, type, pageable)
+//                .getContent()
+//                .stream()
+//                .map(transactionMapper::toReadOnly)
+//                .toList();
+//    }
 
     @Transactional
     @Override
@@ -209,6 +212,16 @@ public class TransactionService implements ITransactionService {
         //EXECUTE
         transaction.softDelete(Instant.now());
         transactionRepository.save(transaction);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<TransactionReadOnlyDTO> getFilteredTransactions(User user, TransactionFilters filters, Pageable pageable) {
+
+        var specification = TransactionSpecification.build(filters, user);
+
+        return transactionRepository.findAll(specification, pageable)
+                .map(transactionMapper::toReadOnly);
     }
 
     private void processIncome(Transaction transaction, UUID categoryUuid, BigDecimal amount, User user) {

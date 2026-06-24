@@ -37,7 +37,10 @@ public class TransactionSpecification {
 
     private static Specification<Transaction> hasCategory(UUID categoryUuid) {
         return (root, query, cb) -> categoryUuid == null ? cb.conjunction() :
-                cb.equal(root.get("category").get("uuid"), categoryUuid);
+                cb.or(
+                        cb.equal(root.get("category").get("uuid"), categoryUuid),
+                        cb.equal(root.get("category").get("parent").get("uuid"), categoryUuid)
+                );
     }
 
     private static Specification<Transaction> involvesAccount(UUID accountUuid) {
