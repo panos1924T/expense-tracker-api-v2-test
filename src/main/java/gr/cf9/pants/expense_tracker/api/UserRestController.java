@@ -29,7 +29,7 @@ public class UserRestController {
     private final UserInsertValidator userInsertValidator;
     private final UserUpdateValidator userUpdateValidator;
 
-    @PostMapping("/register")
+    @PostMapping
     public ResponseEntity<UserReadOnlyDTO> register(
             @Valid @RequestBody UserInsertDTO userInsertDTO,
             BindingResult bindingResult) {
@@ -90,7 +90,7 @@ public class UserRestController {
         return ResponseEntity.ok(usersPaginated);
     }
 
-    @GetMapping("/active")
+    @GetMapping
     public ResponseEntity<Page<UserReadOnlyDTO>> getAllUsersDeletedFalse(
             @PageableDefault(size = 10, sort = "email") Pageable pageable
     ) {
