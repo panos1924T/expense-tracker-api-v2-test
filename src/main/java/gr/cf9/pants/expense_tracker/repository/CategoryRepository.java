@@ -55,4 +55,8 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
     );
 
     boolean existsCategoryByParentAndDeletedFalse(Category parent);
+
+    boolean existsCategoryByUserAndNameAndTypeAndParentIsNullAndUuidNot(User user, String name, TransactionType type, UUID uuid);
+
+    boolean existsCategoryByUserAndNameAndTypeAndParentAndUuidNot(User user, String name, TransactionType type, Category parent, UUID uuid);
 }

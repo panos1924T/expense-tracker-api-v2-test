@@ -26,4 +26,12 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
     Optional<Account> findAccountByUuidAndUserAndDeletedFalse(UUID uuid, User user);
 
     Optional<Account> findAccountByUserAndDefaultAccountTrue(User user);
+
+    boolean existsAccountByUserAndNameAndDeletedFalse(User user, String name);
+
+    boolean existsAccountByUserAndNameAndUuidNotAndDeletedFalse(User user, String name, UUID uuid);
+
+    boolean existsAccountByUserAndDefaultAccountTrue(User user);
+
+    boolean existsAccountByUuidAndUserAndDeletedFalse(UUID uuid, User user);
 }

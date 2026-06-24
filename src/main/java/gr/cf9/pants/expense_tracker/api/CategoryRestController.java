@@ -1,6 +1,7 @@
 package gr.cf9.pants.expense_tracker.api;
 
 import gr.cf9.pants.expense_tracker.core.enums.TransactionType;
+import gr.cf9.pants.expense_tracker.core.exceptions.ValidationException;
 import gr.cf9.pants.expense_tracker.dto.category_dto.CategoryCreateDTO;
 import gr.cf9.pants.expense_tracker.dto.category_dto.CategoryReadOnlyDTO;
 import gr.cf9.pants.expense_tracker.dto.category_dto.CategoryUpdateDTO;
@@ -8,12 +9,15 @@ import gr.cf9.pants.expense_tracker.dto.transaction_dto.TransactionReadOnlyDTO;
 import gr.cf9.pants.expense_tracker.model.User;
 import gr.cf9.pants.expense_tracker.service.ICategoryService;
 import gr.cf9.pants.expense_tracker.service.ITransactionService;
+import gr.cf9.pants.expense_tracker.validator.CategoryInsertValidator;
+import gr.cf9.pants.expense_tracker.validator.CategoryUpdateValidator;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -28,11 +32,19 @@ public class CategoryRestController {
 
     private final ICategoryService categoryService;
     private final ITransactionService transactionService;
+    private final CategoryInsertValidator insertValidator;
+    private final CategoryUpdateValidator updateValidator;
 
     @PostMapping
     public ResponseEntity<CategoryReadOnlyDTO> createCategory(
             @Valid @RequestBody CategoryCreateDTO dto,
+            BindingResult bindingResult,
             @AuthenticationPrincipal User principal) {
+
+        insertValidator.validate(dto, bindingResult);
+        if (bindingResult.hasErrors()) {
+            throw new ValidationException("Category", "Invalid category data", bindingResult);
+        }
 
         CategoryReadOnlyDTO created = categoryService.createCategory(dto, principal.getUuid());
         URI location = ServletUriComponentsBuilder
@@ -48,7 +60,13 @@ public class CategoryRestController {
     public ResponseEntity<CategoryReadOnlyDTO> updateCategory(
             @PathVariable UUID uuid,
             @Valid @RequestBody CategoryUpdateDTO dto,
+            BindingResult bindingResult,
             @AuthenticationPrincipal User principal) {
+
+        updateValidator.validate(uuid, dto, bindingResult);
+        if (bindingResult.hasErrors()) {
+            throw new ValidationException("Category", "Invalid category data", bindingResult);
+        }
 
         return ResponseEntity.ok(categoryService.updateCategory(uuid, dto, principal.getUuid()));
     }

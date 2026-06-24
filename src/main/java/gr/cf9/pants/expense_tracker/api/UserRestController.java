@@ -30,7 +30,7 @@ public class UserRestController {
     private final UserUpdateValidator userUpdateValidator;
 
     @PostMapping
-    public ResponseEntity<UserReadOnlyDTO> register(
+    public ResponseEntity<UserReadOnlyDTO> saveUser(
             @Valid @RequestBody UserInsertDTO userInsertDTO,
             BindingResult bindingResult) {
 

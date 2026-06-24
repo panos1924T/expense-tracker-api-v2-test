@@ -1,15 +1,19 @@
 package gr.cf9.pants.expense_tracker.api;
 
 import gr.cf9.pants.expense_tracker.core.enums.TransactionType;
+import gr.cf9.pants.expense_tracker.core.exceptions.ValidationException;
 import gr.cf9.pants.expense_tracker.dto.transaction_dto.*;
 import gr.cf9.pants.expense_tracker.model.User;
 import gr.cf9.pants.expense_tracker.service.ITransactionService;
+import gr.cf9.pants.expense_tracker.validator.TransactionInsertValidator;
+import gr.cf9.pants.expense_tracker.validator.TransactionUpdateValidator;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -23,12 +27,19 @@ import java.util.UUID;
 public class TransactionRestController {
 
     private final ITransactionService transactionService;
+    private final TransactionInsertValidator insertValidator;
+    private final TransactionUpdateValidator updateValidator;
 
-    // 1. ΔΗΜΙΟΥΡΓΙΑ (Έσοδο / Έξοδο / Μεταφορά)
     @PostMapping
     public ResponseEntity<TransactionReadOnlyDTO> createTransaction(
             @Valid @RequestBody TransactionCreateDTO dto,
+            BindingResult bindingResult,
             @AuthenticationPrincipal User principal) {
+
+        insertValidator.validate(dto, bindingResult);
+        if (bindingResult.hasErrors()) {
+            throw new ValidationException("Transaction", "Invalid transaction data", bindingResult);
+        }
 
         TransactionReadOnlyDTO created = transactionService.createTransaction(dto, principal.getUuid());
         URI location = ServletUriComponentsBuilder
@@ -40,17 +51,21 @@ public class TransactionRestController {
         return ResponseEntity.created(location).body(created);
     }
 
-    // 2. ΟΛΙΚΗ ΕΝΗΜΕΡΩΣΗ (Έσοδο / Έξοδο / Μεταφορά - Χωρίς αλλαγή τύπου)
     @PutMapping("/{uuid}")
     public ResponseEntity<TransactionReadOnlyDTO> updateTransaction(
             @PathVariable UUID uuid,
             @Valid @RequestBody TransactionUpdateDTO dto,
+            BindingResult bindingResult,
             @AuthenticationPrincipal User principal) {
+
+        updateValidator.validate(uuid, dto, bindingResult);
+        if (bindingResult.hasErrors()) {
+            throw new ValidationException("Transaction", "Invalid transaction data", bindingResult);
+        }
 
         return ResponseEntity.ok(transactionService.updateTransaction(uuid, dto, principal.getUuid()));
     }
 
-    // 3. ΔΙΑΓΡΑΦΗ (Κάνει αυτόματο rollback στα accounts)
     @DeleteMapping("/{uuid}")
     public ResponseEntity<Void> deleteTransaction(
             @PathVariable UUID uuid,
@@ -60,7 +75,6 @@ public class TransactionRestController {
         return ResponseEntity.noContent().build();
     }
 
-    // 4. ΜΕΜΟΝΩΜΕΝΗ ΑΝΑΓΝΩΣΗ
     @GetMapping("/{uuid}")
     public ResponseEntity<TransactionReadOnlyDTO> getTransaction(
             @PathVariable UUID uuid,
@@ -69,7 +83,6 @@ public class TransactionRestController {
         return ResponseEntity.ok(transactionService.getTransactionByUuid(uuid, principal.getUuid()));
     }
 
-    // 5. ΑΝΑΖΗΤΗΣΗ & ΦΙΛΤΡΑ (π.χ. ?type=TRANSFER ή ?type=EXPENSE)
     @GetMapping
     public ResponseEntity<List<TransactionReadOnlyDTO>> getTransactions(
             @RequestParam(required = false) TransactionType type,
