@@ -48,7 +48,11 @@ public class CategorySpecification {
     }
 
     private static Specification<Category> hasParentUuid(UUID parentUuid) {
-        return (root, query, cb) -> parentUuid == null ? cb.conjunction() :
-                cb.equal(root.get("parent").get("uuid"), parentUuid);
+        return (root, query, cb) -> {
+            if (parentUuid == null) return cb.conjunction();
+
+            var parentJoin = root.join("parent", jakarta.persistence.criteria.JoinType.LEFT);
+            return cb.equal(parentJoin.get("uuid"), parentUuid);
+        };
     }
 }
