@@ -3,16 +3,23 @@ package gr.cf9.pants.expense_tracker.service;
 import gr.cf9.pants.expense_tracker.core.enums.AccountType;
 import gr.cf9.pants.expense_tracker.core.exceptions.EntityNotFoundException;
 import gr.cf9.pants.expense_tracker.core.exceptions.InvalidArgumentException;
+import gr.cf9.pants.expense_tracker.core.filters.AccountFilters;
+import gr.cf9.pants.expense_tracker.core.filters.CategoryFilters;
 import gr.cf9.pants.expense_tracker.dto.account_dto.AccountCreateDTO;
 import gr.cf9.pants.expense_tracker.dto.account_dto.AccountReadOnlyDTO;
 import gr.cf9.pants.expense_tracker.dto.account_dto.AccountUpdateDTO;
+import gr.cf9.pants.expense_tracker.dto.category_dto.CategoryReadOnlyDTO;
 import gr.cf9.pants.expense_tracker.mapper.AccountMapper;
 import gr.cf9.pants.expense_tracker.model.Account;
 import gr.cf9.pants.expense_tracker.model.User;
 import gr.cf9.pants.expense_tracker.repository.AccountRepository;
 import gr.cf9.pants.expense_tracker.repository.UserRepository;
+import gr.cf9.pants.expense_tracker.specification.AccountSpecification;
+import gr.cf9.pants.expense_tracker.specification.CategorySpecification;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -97,87 +104,96 @@ public class AccountService implements IAccountService{
         accountRepository.save(account);
     }
 
-    @Override
     @Transactional(readOnly = true)
-    public List<AccountReadOnlyDTO> getAllAccounts(UUID userUuid) {
-
-        //VALIDATE
-        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
-                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
-
-        //PREPARE
-        List<Account> accounts = accountRepository.findAccountByUser(user);
-
-        //EXECUTE AND RETURN
-        return accounts.stream()
-                .map(accountMapper::toReadOnly)
-                .toList();
-    }
-
     @Override
-    @Transactional(readOnly = true)
-    public List<AccountReadOnlyDTO> getActiveAccounts(UUID userUuid) {
-        //VALIDATE
-        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
-                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
+    public Page<AccountReadOnlyDTO> getFilteredAndPaginatedAccounts(User user, AccountFilters filters, Pageable pageable) {
+        var specification = AccountSpecification.build(filters, user);
 
-        //PREPARE
-        List<Account> accounts = accountRepository.findAccountByUserAndDeletedFalse(user);
-
-        //EXECUTE AND RETURN
-        return accounts.stream()
-                .map(accountMapper::toReadOnly)
-                .toList();
+        return accountRepository.findAll(specification, pageable)
+                .map(accountMapper::toReadOnly);
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public AccountReadOnlyDTO getActiveAccountByUuid(UUID accountUuid, UUID userUuid) {
-
-        //VALIDATE
-        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
-                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
-        Account account = accountRepository.findAccountByUuidAndUserAndDeletedFalse(accountUuid, user)
-                .orElseThrow(() -> new EntityNotFoundException("Account", "Account with uuid: " + accountUuid + " not found!"));
-
-        //RETURN
-        return accountMapper.toReadOnly(account);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public AccountReadOnlyDTO getAccountByUuid(UUID accountUuid, UUID userUuid) {
-        //VALIDATE
-        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
-                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
-        Account account = accountRepository.findAccountByUuidAndUser(accountUuid, user)
-                .orElseThrow(() -> new EntityNotFoundException("Account", "Account with uuid: " + accountUuid + " not found!"));
-
-        //RETURN
-        return accountMapper.toReadOnly(account);
-    }
-
-    @Override
-    public List<AccountReadOnlyDTO> getAccountsByType(UUID userUuid, AccountType accountType) {
-        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
-                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + "  not found!"));
-
-        List<Account> accounts = accountRepository.findAccountByUserAndAccountType(user, accountType);
-
-        return accounts.stream()
-                .map(accountMapper::toReadOnly)
-                .toList();
-    }
-
-    @Override
-    public List<AccountReadOnlyDTO> getActiveAccountsByType(UUID userUuid, AccountType accountType) {
-        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
-                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
-
-        List<Account> accounts = accountRepository.findAccountByUserAndAccountTypeAndDeletedFalse(user, accountType);
-
-        return accounts.stream()
-                .map(accountMapper::toReadOnly)
-                .toList();
-    }
+    //    @Override
+//    @Transactional(readOnly = true)
+//    public List<AccountReadOnlyDTO> getAllAccounts(UUID userUuid) {
+//
+//        //VALIDATE
+//        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
+//                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
+//
+//        //PREPARE
+//        List<Account> accounts = accountRepository.findAccountByUser(user);
+//
+//        //EXECUTE AND RETURN
+//        return accounts.stream()
+//                .map(accountMapper::toReadOnly)
+//                .toList();
+//    }
+//
+//    @Override
+//    @Transactional(readOnly = true)
+//    public List<AccountReadOnlyDTO> getActiveAccounts(UUID userUuid) {
+//        //VALIDATE
+//        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
+//                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
+//
+//        //PREPARE
+//        List<Account> accounts = accountRepository.findAccountByUserAndDeletedFalse(user);
+//
+//        //EXECUTE AND RETURN
+//        return accounts.stream()
+//                .map(accountMapper::toReadOnly)
+//                .toList();
+//    }
+//
+//    @Override
+//    @Transactional(readOnly = true)
+//    public AccountReadOnlyDTO getActiveAccountByUuid(UUID accountUuid, UUID userUuid) {
+//
+//        //VALIDATE
+//        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
+//                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
+//        Account account = accountRepository.findAccountByUuidAndUserAndDeletedFalse(accountUuid, user)
+//                .orElseThrow(() -> new EntityNotFoundException("Account", "Account with uuid: " + accountUuid + " not found!"));
+//
+//        //RETURN
+//        return accountMapper.toReadOnly(account);
+//    }
+//
+//    @Override
+//    @Transactional(readOnly = true)
+//    public AccountReadOnlyDTO getAccountByUuid(UUID accountUuid, UUID userUuid) {
+//        //VALIDATE
+//        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
+//                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
+//        Account account = accountRepository.findAccountByUuidAndUser(accountUuid, user)
+//                .orElseThrow(() -> new EntityNotFoundException("Account", "Account with uuid: " + accountUuid + " not found!"));
+//
+//        //RETURN
+//        return accountMapper.toReadOnly(account);
+//    }
+//
+//    @Override
+//    public List<AccountReadOnlyDTO> getAccountsByType(UUID userUuid, AccountType accountType) {
+//        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
+//                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + "  not found!"));
+//
+//        List<Account> accounts = accountRepository.findAccountByUserAndAccountType(user, accountType);
+//
+//        return accounts.stream()
+//                .map(accountMapper::toReadOnly)
+//                .toList();
+//    }
+//
+//    @Override
+//    public List<AccountReadOnlyDTO> getActiveAccountsByType(UUID userUuid, AccountType accountType) {
+//        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
+//                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
+//
+//        List<Account> accounts = accountRepository.findAccountByUserAndAccountTypeAndDeletedFalse(user, accountType);
+//
+//        return accounts.stream()
+//                .map(accountMapper::toReadOnly)
+//                .toList();
+//    }
 }

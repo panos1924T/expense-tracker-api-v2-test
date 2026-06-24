@@ -1,6 +1,7 @@
 package gr.cf9.pants.expense_tracker.api;
 
 import gr.cf9.pants.expense_tracker.core.exceptions.ValidationException;
+import gr.cf9.pants.expense_tracker.core.filters.AccountFilters;
 import gr.cf9.pants.expense_tracker.dto.account_dto.AccountCreateDTO;
 import gr.cf9.pants.expense_tracker.dto.account_dto.AccountReadOnlyDTO;
 import gr.cf9.pants.expense_tracker.dto.account_dto.AccountUpdateDTO;
@@ -12,7 +13,9 @@ import gr.cf9.pants.expense_tracker.validator.AccountInsertValidator;
 import gr.cf9.pants.expense_tracker.validator.AccountUpdateValidator;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -82,42 +85,52 @@ public class AccountRestController {
         return ResponseEntity.noContent().build();
     }
 
-    // 4. ΜΕΜΟΝΩΜΕΝΗ ΑΝΑΓΝΩΣΗ
-    @GetMapping("/{uuid}")
-    public ResponseEntity<AccountReadOnlyDTO> getAccount(
-            @PathVariable UUID uuid,
-            @RequestParam(defaultValue = "false") boolean includeDeleted,
-            @AuthenticationPrincipal User principal) {
-
-        AccountReadOnlyDTO account = includeDeleted ?
-                accountService.getAccountByUuid(uuid, principal.getUuid()) :
-                accountService.getActiveAccountByUuid(uuid, principal.getUuid());
-        return ResponseEntity.ok(account);
-    }
-
-    // 5. ΑΝΑΓΝΩΣΗ ΛΙΣΤΑΣ
     @GetMapping
-    public ResponseEntity<List<AccountReadOnlyDTO>> getAccounts(
-            @RequestParam(defaultValue = "false") boolean includeDeleted,
-            @AuthenticationPrincipal User principal) {
-
-        List<AccountReadOnlyDTO> accounts = includeDeleted ?
-                accountService.getAllAccounts(principal.getUuid()) :
-                accountService.getActiveAccounts(principal.getUuid());
-        return ResponseEntity.ok(accounts);
+    public ResponseEntity<Page<AccountReadOnlyDTO>> getAccounts(
+            @AuthenticationPrincipal User principal,
+            @ModelAttribute AccountFilters filters,
+            @PageableDefault(sort = "name", direction = Sort.Direction.ASC) Pageable pageable
+    ) {
+        Page<AccountReadOnlyDTO> accountsPage = accountService.getFilteredAndPaginatedAccounts(principal, filters, pageable);
+        return ResponseEntity.ok(accountsPage);
     }
 
-    // 6. NESTED GET: Συναλλαγές του συγκεκριμένου λογαριασμού
-    @GetMapping("/{accountUuid}/transactions")
-    public ResponseEntity<List<TransactionReadOnlyDTO>> getAccountTransactions(
-            @PathVariable UUID accountUuid,
-            @RequestParam(defaultValue = "false") boolean includeDeleted,
-            @PageableDefault(size = 20) Pageable pageable,
-            @AuthenticationPrincipal User principal) {
-
-        List<TransactionReadOnlyDTO> transactions = includeDeleted ?
-                transactionService.getTransactionByAccount(accountUuid, principal.getUuid(), pageable) :
-                transactionService.getTransactionByActiveAccount(accountUuid, principal.getUuid(), pageable);
-        return ResponseEntity.ok(transactions);
-    }
+//    // 4. ΜΕΜΟΝΩΜΕΝΗ ΑΝΑΓΝΩΣΗ
+//    @GetMapping("/{uuid}")
+//    public ResponseEntity<AccountReadOnlyDTO> getAccount(
+//            @PathVariable UUID uuid,
+//            @RequestParam(defaultValue = "false") boolean includeDeleted,
+//            @AuthenticationPrincipal User principal) {
+//
+//        AccountReadOnlyDTO account = includeDeleted ?
+//                accountService.getAccountByUuid(uuid, principal.getUuid()) :
+//                accountService.getActiveAccountByUuid(uuid, principal.getUuid());
+//        return ResponseEntity.ok(account);
+//    }
+//
+//    // 5. ΑΝΑΓΝΩΣΗ ΛΙΣΤΑΣ
+//    @GetMapping
+//    public ResponseEntity<List<AccountReadOnlyDTO>> getAccounts(
+//            @RequestParam(defaultValue = "false") boolean includeDeleted,
+//            @AuthenticationPrincipal User principal) {
+//
+//        List<AccountReadOnlyDTO> accounts = includeDeleted ?
+//                accountService.getAllAccounts(principal.getUuid()) :
+//                accountService.getActiveAccounts(principal.getUuid());
+//        return ResponseEntity.ok(accounts);
+//    }
+//
+//     6. NESTED GET: Συναλλαγές του συγκεκριμένου λογαριασμού
+//    @GetMapping("/{accountUuid}/transactions")
+//    public ResponseEntity<List<TransactionReadOnlyDTO>> getAccountTransactions(
+//            @PathVariable UUID accountUuid,
+//            @RequestParam(defaultValue = "false") boolean includeDeleted,
+//            @PageableDefault(size = 20) Pageable pageable,
+//            @AuthenticationPrincipal User principal) {
+//
+//        List<TransactionReadOnlyDTO> transactions = includeDeleted ?
+//                transactionService.getTransactionByAccount(accountUuid, principal.getUuid(), pageable) :
+//                transactionService.getTransactionByActiveAccount(accountUuid, principal.getUuid(), pageable);
+//        return ResponseEntity.ok(transactions);
+//    }
 }
