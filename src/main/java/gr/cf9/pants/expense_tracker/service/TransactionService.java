@@ -156,17 +156,11 @@ public class TransactionService implements ITransactionService {
         Category category = categoryRepository.findCategoryByUuidAndUserAndDeletedFalse(categoryUuid, user)
                 .orElseThrow(() -> new EntityNotFoundException("Category", "Category with uuid: " + categoryUuid + " not found!"));
 
-        return (category.getParent() == null) ?
-                transactionRepository.findTransByUserAndCategory_Parent(user, category, pageable)
-                        .getContent()
-                        .stream()
-                        .map(transactionMapper::toReadOnly)
-                        .toList() :
-                transactionRepository.findTransByUserAndCategory(user, category, pageable)
-                        .getContent()
-                        .stream()
-                        .map(transactionMapper::toReadOnly)
-                        .toList();
+        return transactionRepository.findTransByUserAndCategoryOrChildCategory(user, category, pageable)
+                .getContent()
+                .stream()
+                .map(transactionMapper::toReadOnly)
+                .toList();
     }
 
     @Override
@@ -177,17 +171,11 @@ public class TransactionService implements ITransactionService {
         Category category = categoryRepository.findCategoryByUuidAndUser(categoryUuid, user)
                 .orElseThrow(() -> new EntityNotFoundException("Category", "Category with uuid: " + categoryUuid + " not found!"));
 
-        return (category.getParent() == null) ?
-                transactionRepository.findTransByUserAndCategory_Parent(user, category, pageable)
-                        .getContent()
-                        .stream()
-                        .map(transactionMapper::toReadOnly)
-                        .toList() :
-                transactionRepository.findTransByUserAndCategory(user, category, pageable)
-                        .getContent()
-                        .stream()
-                        .map(transactionMapper::toReadOnly)
-                        .toList();
+        return transactionRepository.findTransByUserAndCategoryOrChildCategory(user, category, pageable)
+                .getContent()
+                .stream()
+                .map(transactionMapper::toReadOnly)
+                .toList();
     }
 
     @Override
@@ -232,7 +220,6 @@ public class TransactionService implements ITransactionService {
         } else {
             category = categoryRepository.findCategoryByUuidAndUserAndTypeAndDeletedFalse(categoryUuid, user, transaction.getType())
                     .orElseThrow(() -> new EntityNotFoundException("Category", "Category with uuid=" + categoryUuid + " not found"));
-            if (category.getParent() == null) throw new InvalidTransactionException("Category", "Parent categories cannot have transactions");
             if (category.getType() != TransactionType.INCOME) throw new InvalidTransactionException("Category", "Category must be type INCOME");
         }
 
@@ -260,10 +247,6 @@ public class TransactionService implements ITransactionService {
         } else {
             category = categoryRepository.findCategoryByUuidAndUserAndDeletedFalse(categoryUuid, user)
                     .orElseThrow(() -> new EntityNotFoundException("Category", "Category with uuid=" + categoryUuid + " not found"));
-
-            if (category.getParent() == null) {
-                throw new InvalidTransactionException("Category", "Transactions are not allowed in parent categories");
-            }
             if (category.getType() != TransactionType.EXPENSE) {
                 throw new InvalidTransactionException("Category", "Category must be type EXPENSE");
             }

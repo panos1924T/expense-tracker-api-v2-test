@@ -43,5 +43,15 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
             Pageable pageable
     );
 
+    @Query("""
+    SELECT t FROM Transaction t
+    WHERE t.user = :user
+      AND (t.category = :category OR t.category.parent = :category)
+    ORDER BY t.transactionDate DESC
+    """)
+    Page<Transaction> findTransByUserAndCategoryOrChildCategory(
+            User user, Category category, Pageable pageable
+    );
+
     Optional<Transaction> findTransByUuidAndUser(UUID uuid, User user);
 }
