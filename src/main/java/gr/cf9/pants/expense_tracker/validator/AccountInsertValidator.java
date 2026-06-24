@@ -25,6 +25,11 @@ public class AccountInsertValidator implements Validator {
         AccountCreateDTO dto = (AccountCreateDTO) target;
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
+        if (dto.name() == null || dto.name().trim().isBlank()) {
+            errors.rejectValue("name", "field.required", "Account name is required");
+            return;
+        }
+
         if (accountRepository.existsAccountByUserAndNameAndDeletedFalse(user, dto.name().trim())) {
             errors.rejectValue("name", "account.name.exists", "Account name already exists");
         }

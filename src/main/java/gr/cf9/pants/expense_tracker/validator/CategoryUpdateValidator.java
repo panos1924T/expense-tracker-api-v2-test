@@ -20,12 +20,17 @@ public class CategoryUpdateValidator {
     public void validate(UUID categoryUuid, CategoryUpdateDTO dto, Errors errors) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        var catOpt = categoryRepository.findCategoryByUuidAndUserAndDeletedFalse(categoryUuid, user);
-        if (catOpt.isEmpty()) {
+        var categoryOptional = categoryRepository.findCategoryByUuidAndUserAndDeletedFalse(categoryUuid, user);
+        if (categoryOptional.isEmpty()) {
             errors.rejectValue("name", "category.notFound", "Category with uuid=" + categoryUuid + " not found");
             return;
         }
-        Category category = catOpt.get();
+        if (dto.name() == null || dto.name().trim().isBlank()) {
+            errors.rejectValue("name", "field.required", "Category name is required");
+            return;
+        }
+
+        Category category = categoryOptional.get();
         String newName = dto.name().trim().toLowerCase();
 
         if (category.getParent() == null) {

@@ -23,8 +23,13 @@ public class CategoryInsertValidator implements Validator {
     public void validate(Object target, Errors errors) {
         CategoryCreateDTO dto = (CategoryCreateDTO) target;
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        String name = dto.name().trim().toLowerCase();
 
+        if (dto.name() == null || dto.name().trim().isBlank()) {
+            errors.rejectValue("name", "field.required", "Category name is required");
+            return;
+        }
+
+        String name = dto.name().trim().toLowerCase();
         if (dto.parentUuid() == null) {
             if (categoryRepository.existsCategoryByUserAndNameAndTypeAndParentIsNull(user, name, dto.type())) {
                 errors.rejectValue("name", "category.root.exists", "Parent category already exists");

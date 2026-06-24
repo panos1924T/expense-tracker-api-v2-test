@@ -19,6 +19,11 @@ public class AccountUpdateValidator {
     public void validate(UUID accountUuid, AccountUpdateDTO dto, Errors errors) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
+        if (dto.name() == null || dto.name().trim().isBlank()) {
+            errors.rejectValue("name", "field.required", "Account name is required");
+            return;
+        }
+
         if (accountRepository.existsAccountByUserAndNameAndUuidNotAndDeletedFalse(user, dto.name().trim(), accountUuid)) {
             errors.rejectValue("name", "account.name.exists", "Account name is taken from another account");
         }
