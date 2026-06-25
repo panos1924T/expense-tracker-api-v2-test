@@ -4,6 +4,7 @@ import gr.cf9.pants.expense_tracker.dto.ErrorResponseDTO;
 import gr.cf9.pants.expense_tracker.dto.ValidationErrorResponseDTO;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.MessageSource;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,11 +17,18 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 @RestControllerAdvice
 @Slf4j
 public class ErrorHandler {
+
+    private final MessageSource messageSource;
+
+    public ErrorHandler(MessageSource messageSource) {
+        this.messageSource = messageSource;
+    }
 
     @ExceptionHandler(ValidationException.class)
     public ResponseEntity<ValidationErrorResponseDTO> handleValidation(ValidationException e) {
@@ -30,7 +38,13 @@ public class ErrorHandler {
 
         Map<String, String> errors = new HashMap<>();
         for (FieldError fieldError : bindingResult.getFieldErrors()) {
-            errors.put(fieldError.getField(), fieldError.getDefaultMessage());
+            String message = messageSource.getMessage(
+                    fieldError.getCodes()[0],
+                    fieldError.getArguments(),
+                    fieldError.getDefaultMessage(),
+                    Locale.ENGLISH
+            );
+            errors.put(fieldError.getField(), message);
         }
 
         return ResponseEntity
