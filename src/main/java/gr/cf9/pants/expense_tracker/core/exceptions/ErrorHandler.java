@@ -1,6 +1,5 @@
-package gr.cf9.pants.expense_tracker.core.filters;
+package gr.cf9.pants.expense_tracker.core.exceptions;
 
-import gr.cf9.pants.expense_tracker.core.exceptions.*;
 import gr.cf9.pants.expense_tracker.dto.ErrorResponseDTO;
 import gr.cf9.pants.expense_tracker.dto.ValidationErrorResponseDTO;
 import jakarta.servlet.http.HttpServletRequest;

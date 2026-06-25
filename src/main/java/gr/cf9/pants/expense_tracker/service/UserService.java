@@ -26,7 +26,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -41,19 +40,19 @@ public class UserService implements IUserService{
     private final CategoryRepository categoryRepository;
     private final AccountRepository accountRepository;
 
-    private record ParentCategorySeed(String name, TransactionType type, List<String> children) {}
+    private record ParentCategorySeed(String name, TransactionType type) {}
 
     private static final List<ParentCategorySeed> DEFAULT_CATEGORIES = List.of(
-            new ParentCategorySeed("Personal",       TransactionType.EXPENSE, List.of("Entertainment")),
-            new ParentCategorySeed("Home",           TransactionType.EXPENSE, List.of("Supermarket")),
-            new ParentCategorySeed("Buys",           TransactionType.EXPENSE, List.of("Clothes")),
-            new ParentCategorySeed("Transportation", TransactionType.EXPENSE, List.of("Fuel", "Public Transport")),
-            new ParentCategorySeed("Bills",          TransactionType.EXPENSE, List.of("Rent" ,"Electricity", "Water", "Internet")),
-            new ParentCategorySeed("Other",          TransactionType.EXPENSE, List.of("Gifts")),
+            new ParentCategorySeed("Personal",       TransactionType.EXPENSE),
+            new ParentCategorySeed("Home",           TransactionType.EXPENSE),
+            new ParentCategorySeed("Buys",           TransactionType.EXPENSE),
+            new ParentCategorySeed("Transportation", TransactionType.EXPENSE),
+            new ParentCategorySeed("Bills",          TransactionType.EXPENSE),
+            new ParentCategorySeed("Other",          TransactionType.EXPENSE),
 
-            new ParentCategorySeed("Salary",         TransactionType.INCOME,  List.of("Full-time", "Part-time")),
-            new ParentCategorySeed("Business",       TransactionType.INCOME,  List.of("Freelance")),
-            new ParentCategorySeed("Investment",     TransactionType.INCOME,  List.of("Dividends"))
+            new ParentCategorySeed("Salary",         TransactionType.INCOME),
+            new ParentCategorySeed("Business",       TransactionType.INCOME),
+            new ParentCategorySeed("Investment",     TransactionType.INCOME)
     );
 
     @Transactional
@@ -169,31 +168,17 @@ public class UserService implements IUserService{
     }
 
     private void createDefaultCategories(User user) {
-
-        List<Category> parents = DEFAULT_CATEGORIES.stream()
-                .map(seed -> buildCategory(seed.name(), seed.type(), user, null))
+        List<Category> categories = DEFAULT_CATEGORIES.stream()
+                .map(seed -> {
+                    Category c = new Category();
+                    c.setUser(user);
+                    c.setName(seed.name());
+                    c.setType(seed.type());
+                    return c;
+                })
                 .toList();
-        List<Category> savedParents = categoryRepository.saveAll(parents);
 
-        List<Category> children = new ArrayList<>();
-        for (int i = 0; i < DEFAULT_CATEGORIES.size(); i++) {
-            Category parent = savedParents.get(i);
-            ParentCategorySeed seed = DEFAULT_CATEGORIES.get(i);
-
-            seed.children().forEach(childName ->
-                    children.add(buildCategory(childName, seed.type(), user, parent))
-            );
-        }
-        categoryRepository.saveAll(children);
-    }
-
-    private Category buildCategory(String name, TransactionType type, User user, Category parent) {
-        Category c = new Category();
-        c.setName(name);
-        c.setType(type);
-        c.setUser(user);
-        c.setParent(parent);
-        return c;
+        categoryRepository.saveAll(categories);
     }
 
     private void createDefaultCashAccount(User user) {
