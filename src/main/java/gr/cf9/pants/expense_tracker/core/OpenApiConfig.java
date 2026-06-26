@@ -52,7 +52,7 @@ public class OpenApiConfig {
     }
 
     /*
-        Automatically injects 401 and 403 responses into every secured operation's
+        Automatically injects 401 response into every secured operation's
         Swagger documentation, so we don't repeat @ApiResponse annotations everywhere.
     */
     @Bean
@@ -63,8 +63,7 @@ public class OpenApiConfig {
 
             if (isSecured) {
                 operation.getResponses()
-                        .addApiResponse("401", new ApiResponse().description("Unauthorized - JWT token is missing or invalid"))
-                        .addApiResponse("403", new ApiResponse().description("Forbidden - You don't have permission to access this resource"));
+                        .addApiResponse("401", new ApiResponse().description("Unauthorized - JWT token is missing or invalid"));
             }
             return operation;
         };

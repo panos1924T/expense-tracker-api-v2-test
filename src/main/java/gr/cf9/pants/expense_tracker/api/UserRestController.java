@@ -35,6 +35,7 @@ public class UserRestController {
     private final UserInsertValidator userInsertValidator;
     private final UserUpdateValidator userUpdateValidator;
 
+
     @Operation(summary="Create a User", description="Creates a new User")
     @ApiResponses({
             @ApiResponse(
@@ -66,11 +67,14 @@ public class UserRestController {
                 .body(userReadOnlyDTO);
     }
 
+
+
     @Operation(summary="Update a User", description="Updates an existing User")
     @ApiResponses({
             @ApiResponse(responseCode="200", description="OK", content=@Content(schema=@Schema(implementation=UserReadOnlyDTO.class))),
             @ApiResponse(responseCode="400", description="Validation error"),
-            @ApiResponse(responseCode="404", description="Not found")
+            @ApiResponse(responseCode="404", description="Not found"),
+            @ApiResponse(responseCode="403", description="Forbidden")
     })
     @SecurityRequirement(name = "Bearer Authentication")
     @PutMapping("/{uuid}")
@@ -88,10 +92,13 @@ public class UserRestController {
         return ResponseEntity.ok(userReadOnlyDTO);
     }
 
+
+
     @Operation(summary="Delete a User", description="Deletes a User (soft delete)")
     @ApiResponses({
             @ApiResponse(responseCode="200", description="OK", content=@Content(schema=@Schema(implementation=UserReadOnlyDTO.class))),
-            @ApiResponse(responseCode="404", description="Not found")
+            @ApiResponse(responseCode="404", description="Not found"),
+            @ApiResponse(responseCode="403", description="Forbidden")
     })
     @SecurityRequirement(name = "Bearer Authentication")
     @DeleteMapping("/{uuid}")
@@ -102,10 +109,13 @@ public class UserRestController {
         return ResponseEntity.ok(userReadOnlyDTO);
     }
 
+
+
     @Operation(summary="Get a User", description="Returns a User by UUID")
     @ApiResponses({
             @ApiResponse(responseCode="200", description="OK", content=@Content(schema=@Schema(implementation=UserReadOnlyDTO.class))),
-            @ApiResponse(responseCode="404", description="Not found")
+            @ApiResponse(responseCode="404", description="Not found"),
+            @ApiResponse(responseCode="403", description="Forbidden")
     })
     @SecurityRequirement(name = "Bearer Authentication")
     @GetMapping("/{uuid}")
@@ -120,9 +130,12 @@ public class UserRestController {
         return ResponseEntity.ok(userReadOnlyDTO);
     }
 
+
+
     @Operation(summary="List Users", description="Returns paginated Users")
     @ApiResponses({
             @ApiResponse(responseCode="200", description="OK", content=@Content(schema=@Schema(implementation=org.springframework.data.domain.Page.class))),
+            @ApiResponse(responseCode="403", description="Forbidden")
     })
     @SecurityRequirement(name = "Bearer Authentication")
     @GetMapping
