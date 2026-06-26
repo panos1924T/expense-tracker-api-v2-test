@@ -83,7 +83,6 @@ public class UserService implements IUserService{
 
     @PreAuthorize("hasAuthority('EDIT_CITIZEN') or " +
             "(hasAuthority('EDIT_ONLY_CITIZEN') and #userUuid == authentication.principal.uuid)")
-    //TODO Create EDIT_ONLY_CITIZEN role
     @Transactional
     @Override
     public UserReadOnlyDTO updateUser(UUID userUuid, UserUpdateDTO userUpdateDTO) {

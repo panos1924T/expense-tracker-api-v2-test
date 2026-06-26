@@ -62,10 +62,12 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(req -> req
                         .requestMatchers(HttpMethod.POST, "/api/v1/users").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/users/*").permitAll()
-                        .requestMatchers(HttpMethod.PUT, "/api/v1/users/*").permitAll()
-                        .requestMatchers(HttpMethod.DELETE, "/api/v1/users/*").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/*").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/users").hasAuthority("VIEW_CITIZENS")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/users/*").hasAnyAuthority("VIEW_CITIZEN", "VIEW_ONLY_CITIZEN")
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/users/*").hasAuthority("EDIT_ONLY_CITIZEN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/users/*").hasAnyAuthority("DEACTIVATE_CITIZEN", "DEACTIVATE_ONLY_CITIZEN")
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/users/*").hasAuthority("ACTIVATE_CITIZEN")
                         .requestMatchers(
                                 "/swagger-ui.html",        // The old Swagger UI HTML (if used)
                                 "/swagger-ui/**",          // All Swagger UI resources (JS, CSS, etc.)
