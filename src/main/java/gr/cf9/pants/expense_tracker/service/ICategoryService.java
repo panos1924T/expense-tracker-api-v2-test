@@ -4,7 +4,6 @@ import gr.cf9.pants.expense_tracker.core.filters.CategoryFilters;
 import gr.cf9.pants.expense_tracker.dto.category_dto.CategoryCreateDTO;
 import gr.cf9.pants.expense_tracker.dto.category_dto.CategoryReadOnlyDTO;
 import gr.cf9.pants.expense_tracker.dto.category_dto.CategoryUpdateDTO;
-import gr.cf9.pants.expense_tracker.model.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -30,5 +29,5 @@ public interface ICategoryService {
 //
 //    List<CategoryReadOnlyDTO> getCategoriesByType(TransactionType type, UUID userUuid);
 
-    Page<CategoryReadOnlyDTO> getFilteredPaginatedCategories(User user, CategoryFilters filters, Pageable pageable);
+    Page<CategoryReadOnlyDTO> getFilteredPaginatedCategories(UUID userUuid, CategoryFilters filters, Pageable pageable);
 }

@@ -102,7 +102,7 @@ public class TransactionRestController {
             @ModelAttribute TransactionFilters filters,
             @PageableDefault(sort = "transactionDate", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        Page<TransactionReadOnlyDTO> transactionsPage = transactionService.getFilteredTransactions(principal, filters, pageable);
+        Page<TransactionReadOnlyDTO> transactionsPage = transactionService.getFilteredTransactions(principal.getUuid(), filters, pageable);
         return ResponseEntity.ok(transactionsPage);
     }
 }

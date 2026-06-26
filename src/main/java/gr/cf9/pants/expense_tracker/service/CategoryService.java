@@ -1,6 +1,5 @@
 package gr.cf9.pants.expense_tracker.service;
 
-import gr.cf9.pants.expense_tracker.core.enums.TransactionType;
 import gr.cf9.pants.expense_tracker.core.exceptions.EntityAlreadyExistsException;
 import gr.cf9.pants.expense_tracker.core.exceptions.EntityNotFoundException;
 import gr.cf9.pants.expense_tracker.core.exceptions.InvalidArgumentException;
@@ -19,12 +18,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -236,7 +233,10 @@ public class CategoryService implements ICategoryService{
 
     @Transactional(readOnly = true)
     @Override
-    public Page<CategoryReadOnlyDTO> getFilteredPaginatedCategories(User user, CategoryFilters filters, Pageable pageable) {
+    public Page<CategoryReadOnlyDTO> getFilteredPaginatedCategories(UUID userUuid, CategoryFilters filters, Pageable pageable) {
+        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
+                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid=" + userUuid + " not found"));
+
         var specification = CategorySpecification.build(filters, user);
 
         return categoryRepository.findAll(specification, pageable)

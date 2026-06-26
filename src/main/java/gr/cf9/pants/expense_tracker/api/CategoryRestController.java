@@ -86,7 +86,7 @@ public class CategoryRestController {
             @ModelAttribute CategoryFilters filters,
             @PageableDefault(sort = "type", direction = Sort.Direction.ASC) Pageable pageable
     ) {
-        Page<CategoryReadOnlyDTO> categoriesPage = categoryService.getFilteredPaginatedCategories(principal, filters, pageable);
+        Page<CategoryReadOnlyDTO> categoriesPage = categoryService.getFilteredPaginatedCategories(principal.getUuid(), filters, pageable);
         return ResponseEntity.ok(categoriesPage);
     }
 

@@ -106,7 +106,10 @@ public class AccountService implements IAccountService{
 
     @Transactional(readOnly = true)
     @Override
-    public Page<AccountReadOnlyDTO> getFilteredAndPaginatedAccounts(User user, AccountFilters filters, Pageable pageable) {
+    public Page<AccountReadOnlyDTO> getFilteredAndPaginatedAccounts(UUID userUuid, AccountFilters filters, Pageable pageable) {
+        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
+                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid=" + userUuid + " not found"));
+
         var specification = AccountSpecification.build(filters, user);
 
         return accountRepository.findAll(specification, pageable)

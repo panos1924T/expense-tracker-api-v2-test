@@ -33,5 +33,5 @@ public interface ITransactionService {
 
         void deleteTransaction(UUID transUuid, UUID userUuid);
 
-        Page<TransactionReadOnlyDTO> getFilteredTransactions(User user, TransactionFilters filters, Pageable pageable);
+        Page<TransactionReadOnlyDTO> getFilteredTransactions(UUID userUuid, TransactionFilters filters, Pageable pageable);
 }

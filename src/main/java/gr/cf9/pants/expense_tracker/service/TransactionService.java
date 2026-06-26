@@ -216,7 +216,9 @@ public class TransactionService implements ITransactionService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<TransactionReadOnlyDTO> getFilteredTransactions(User user, TransactionFilters filters, Pageable pageable) {
+    public Page<TransactionReadOnlyDTO> getFilteredTransactions(UUID userUuid, TransactionFilters filters, Pageable pageable) {
+        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
+                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
 
         var specification = TransactionSpecification.build(filters, user);
 

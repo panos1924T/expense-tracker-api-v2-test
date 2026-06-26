@@ -89,7 +89,7 @@ public class AccountRestController {
             @ModelAttribute AccountFilters filters,
             @PageableDefault(sort = "name", direction = Sort.Direction.ASC) Pageable pageable
     ) {
-        Page<AccountReadOnlyDTO> accountsPage = accountService.getFilteredAndPaginatedAccounts(principal, filters, pageable);
+        Page<AccountReadOnlyDTO> accountsPage = accountService.getFilteredAndPaginatedAccounts(principal.getUuid(), filters, pageable);
         return ResponseEntity.ok(accountsPage);
     }
 

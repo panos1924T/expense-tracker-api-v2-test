@@ -30,5 +30,5 @@ public interface IAccountService {
 
     AccountReadOnlyDTO getAccountByUuid(UUID accountUuid, UUID userUuid);
 
-    Page<AccountReadOnlyDTO> getFilteredAndPaginatedAccounts(User user, AccountFilters filters, Pageable pageable);
+    Page<AccountReadOnlyDTO> getFilteredAndPaginatedAccounts(UUID userUuid, AccountFilters filters, Pageable pageable);
 }
