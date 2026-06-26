@@ -10,6 +10,12 @@ import gr.cf9.pants.expense_tracker.service.IAccountService;
 import gr.cf9.pants.expense_tracker.service.ITransactionService;
 import gr.cf9.pants.expense_tracker.validator.AccountInsertValidator;
 import gr.cf9.pants.expense_tracker.validator.AccountUpdateValidator;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -28,6 +34,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/accounts")
 @RequiredArgsConstructor
+@SecurityRequirement(name = "Bearer Authentication")
 public class AccountRestController {
 
     private final IAccountService accountService;
@@ -35,7 +42,11 @@ public class AccountRestController {
     private final AccountInsertValidator insertValidator;
     private final AccountUpdateValidator updateValidator;
 
-    // 1. ΔΗΜΙΟΥΡΓΙΑ ΛΟΓΑΡΙΑΣΜΟΥ
+    @Operation(summary="Create an Account", description="Creates a new Account")
+    @ApiResponses({
+            @ApiResponse(responseCode="201", description="Created", content=@Content(schema=@Schema(implementation=AccountReadOnlyDTO.class))),
+            @ApiResponse(responseCode="400", description="Validation error")
+    })
     @PostMapping
     public ResponseEntity<AccountReadOnlyDTO> createAccount(
             @Valid @RequestBody AccountCreateDTO dto,
@@ -57,7 +68,12 @@ public class AccountRestController {
         return ResponseEntity.created(location).body(created);
     }
 
-    // 2. ΕΝΗΜΕΡΩΣΗ ΛΟΓΑΡΙΑΣΜΟΥ
+    @Operation(summary="Update an Account", description="Updates an existing Account")
+    @ApiResponses({
+            @ApiResponse(responseCode="200", description="OK", content=@Content(schema=@Schema(implementation=AccountReadOnlyDTO.class))),
+            @ApiResponse(responseCode="400", description="Validation error"),
+            @ApiResponse(responseCode="404", description="Not found")
+    })
     @PutMapping("/{uuid}")
     public ResponseEntity<AccountReadOnlyDTO> updateAccount(
             @PathVariable UUID uuid,
@@ -73,7 +89,11 @@ public class AccountRestController {
         return ResponseEntity.ok(accountService.updateAccount(uuid, dto, principal.getUuid()));
     }
 
-    // 3. ΔΙΑΓΡΑΦΗ (SOFT DELETE)
+    @Operation(summary="Delete an Account", description="Deletes an Account")
+    @ApiResponses({
+            @ApiResponse(responseCode="204", description="No Content"),
+            @ApiResponse(responseCode="404", description="Not found")
+    })
     @DeleteMapping("/{uuid}")
     public ResponseEntity<Void> deleteAccount(
             @PathVariable UUID uuid,
@@ -83,6 +103,10 @@ public class AccountRestController {
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(summary="List Accounts", description="Returns paginated Accounts")
+    @ApiResponses({
+            @ApiResponse(responseCode="200", description="OK", content=@Content(schema=@Schema(implementation=org.springframework.data.domain.Page.class)))
+    })
     @GetMapping
     public ResponseEntity<Page<AccountReadOnlyDTO>> getFilteredPaginatedAccounts(
             @AuthenticationPrincipal User principal,
@@ -93,6 +117,11 @@ public class AccountRestController {
         return ResponseEntity.ok(accountsPage);
     }
 
+    @Operation(summary="Get an Account", description="Returns an Account by UUID")
+    @ApiResponses({
+            @ApiResponse(responseCode="200", description="OK", content=@Content(schema=@Schema(implementation=AccountReadOnlyDTO.class))),
+            @ApiResponse(responseCode="404", description="Not found")
+    })
     @GetMapping("/{uuid}")
     public ResponseEntity<AccountReadOnlyDTO> getAccount(
             @PathVariable UUID uuid,

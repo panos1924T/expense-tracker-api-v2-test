@@ -7,6 +7,12 @@ import gr.cf9.pants.expense_tracker.model.User;
 import gr.cf9.pants.expense_tracker.service.ITransactionService;
 import gr.cf9.pants.expense_tracker.validator.TransactionInsertValidator;
 import gr.cf9.pants.expense_tracker.validator.TransactionUpdateValidator;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -25,12 +31,19 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/transactions")
 @RequiredArgsConstructor
+@SecurityRequirement(name = "Bearer Authentication")
 public class TransactionRestController {
 
     private final ITransactionService transactionService;
     private final TransactionInsertValidator insertValidator;
     private final TransactionUpdateValidator updateValidator;
 
+
+    @Operation(summary="Create a Transaction", description="Creates a new Transaction")
+    @ApiResponses({
+            @ApiResponse(responseCode="201", description="Created", content=@Content(schema=@Schema(implementation=TransactionReadOnlyDTO.class))),
+            @ApiResponse(responseCode="400", description="Validation error")
+    })
     @PostMapping
     public ResponseEntity<TransactionReadOnlyDTO> createTransaction(
             @Valid @RequestBody TransactionCreateDTO dto,
@@ -52,6 +65,12 @@ public class TransactionRestController {
         return ResponseEntity.created(location).body(created);
     }
 
+    @Operation(summary="Update a Transaction", description="Updates an existing Transaction")
+    @ApiResponses({
+            @ApiResponse(responseCode="200", description="OK", content=@Content(schema=@Schema(implementation=TransactionReadOnlyDTO.class))),
+            @ApiResponse(responseCode="400", description="Validation error"),
+            @ApiResponse(responseCode="404", description="Not found")
+    })
     @PutMapping("/{uuid}")
     public ResponseEntity<TransactionReadOnlyDTO> updateTransaction(
             @PathVariable UUID uuid,
@@ -67,6 +86,11 @@ public class TransactionRestController {
         return ResponseEntity.ok(transactionService.updateTransaction(uuid, dto, principal.getUuid()));
     }
 
+    @Operation(summary="Delete a Transaction", description="Deletes a Transaction")
+    @ApiResponses({
+            @ApiResponse(responseCode="204", description="No Content"),
+            @ApiResponse(responseCode="404", description="Not found")
+    })
     @DeleteMapping("/{uuid}")
     public ResponseEntity<Void> deleteTransaction(
             @PathVariable UUID uuid,
@@ -76,6 +100,11 @@ public class TransactionRestController {
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(summary="Get a Transaction", description="Returns a Transaction by UUID")
+    @ApiResponses({
+            @ApiResponse(responseCode="200", description="OK", content=@Content(schema=@Schema(implementation=TransactionReadOnlyDTO.class))),
+            @ApiResponse(responseCode="404", description="Not found")
+    })
     @GetMapping("/{uuid}")
     public ResponseEntity<TransactionReadOnlyDTO> getTransaction(
             @PathVariable UUID uuid,
@@ -96,6 +125,10 @@ public class TransactionRestController {
 //        return ResponseEntity.ok(transactions);
 //    }
 
+    @Operation(summary="List Transactions", description="Returns paginated Transactions")
+    @ApiResponses({
+            @ApiResponse(responseCode="200", description="OK", content=@Content(schema=@Schema(implementation=org.springframework.data.domain.Page.class))),
+    })
     @GetMapping
     public ResponseEntity<Page<TransactionReadOnlyDTO>> getFilteredPaginatedTransactions(
             @AuthenticationPrincipal User principal,

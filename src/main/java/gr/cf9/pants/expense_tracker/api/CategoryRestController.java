@@ -10,6 +10,12 @@ import gr.cf9.pants.expense_tracker.service.ICategoryService;
 import gr.cf9.pants.expense_tracker.service.ITransactionService;
 import gr.cf9.pants.expense_tracker.validator.CategoryInsertValidator;
 import gr.cf9.pants.expense_tracker.validator.CategoryUpdateValidator;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -28,6 +34,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/categories")
 @RequiredArgsConstructor
+@SecurityRequirement(name = "Bearer Authentication")
 public class CategoryRestController {
 
     private final ICategoryService categoryService;
@@ -35,6 +42,11 @@ public class CategoryRestController {
     private final CategoryInsertValidator insertValidator;
     private final CategoryUpdateValidator updateValidator;
 
+    @Operation(summary="Create a Category", description="Creates a new Category")
+    @ApiResponses({
+            @ApiResponse(responseCode="201", description="Created", content=@Content(schema=@Schema(implementation=CategoryReadOnlyDTO.class))),
+            @ApiResponse(responseCode="400", description="Validation error")
+    })
     @PostMapping
     public ResponseEntity<CategoryReadOnlyDTO> createCategory(
             @Valid @RequestBody CategoryCreateDTO dto,
@@ -56,6 +68,12 @@ public class CategoryRestController {
         return ResponseEntity.created(location).body(created);
     }
 
+    @Operation(summary="Update a Category", description="Updates an existing Category")
+    @ApiResponses({
+            @ApiResponse(responseCode="200", description="OK", content=@Content(schema=@Schema(implementation=CategoryReadOnlyDTO.class))),
+            @ApiResponse(responseCode="400", description="Validation error"),
+            @ApiResponse(responseCode="404", description="Not found")
+    })
     @PutMapping("/{uuid}")
     public ResponseEntity<CategoryReadOnlyDTO> updateCategory(
             @PathVariable UUID uuid,
@@ -71,6 +89,11 @@ public class CategoryRestController {
         return ResponseEntity.ok(categoryService.updateCategory(uuid, dto, principal.getUuid()));
     }
 
+    @Operation(summary="Delete a Category", description="Deletes a Category")
+    @ApiResponses({
+            @ApiResponse(responseCode="204", description="No Content"),
+            @ApiResponse(responseCode="404", description="Not found")
+    })
     @DeleteMapping("/{uuid}")
     public ResponseEntity<Void> deleteCategory(
             @PathVariable UUID uuid,
@@ -80,6 +103,10 @@ public class CategoryRestController {
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(summary="List Categories", description="Returns paginated Categories")
+    @ApiResponses({
+            @ApiResponse(responseCode="200", description="OK", content=@Content(schema=@Schema(implementation=org.springframework.data.domain.Page.class))),
+    })
     @GetMapping
     public ResponseEntity<Page<CategoryReadOnlyDTO>> getFilteredPaginatedCategories(
             @AuthenticationPrincipal User principal,
@@ -90,6 +117,11 @@ public class CategoryRestController {
         return ResponseEntity.ok(categoriesPage);
     }
 
+    @Operation(summary="Get a Category", description="Returns a Category by UUID")
+    @ApiResponses({
+            @ApiResponse(responseCode="200", description="OK", content=@Content(schema=@Schema(implementation=CategoryReadOnlyDTO.class))),
+            @ApiResponse(responseCode="404", description="Not found")
+    })
     @GetMapping("/{uuid}")
     public ResponseEntity<CategoryReadOnlyDTO> getCategory(
             @PathVariable UUID uuid,
