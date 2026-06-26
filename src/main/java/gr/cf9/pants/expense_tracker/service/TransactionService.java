@@ -104,18 +104,18 @@ public class TransactionService implements ITransactionService {
 //                .toList();
 //    }
 //
-//    @Override
-//    @Transactional(readOnly = true)
-//    public TransactionReadOnlyDTO getTransactionByUuid(UUID transUuid, UUID userUuid) {
-//        //VALIDATE
-//        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
-//                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
-//        Transaction transaction = transactionRepository.findTransByUuidAndUser(transUuid, user)
-//                .orElseThrow(() -> new EntityNotFoundException("Transaction", "Transaction with uuid: " + transUuid + " not found!"));
-//
-//        //RETURN
-//        return transactionMapper.toReadOnly(transaction);
-//    }
+    @Override
+    @Transactional(readOnly = true)
+    public TransactionReadOnlyDTO getTransactionByUuid(UUID transUuid, UUID userUuid) {
+        //VALIDATE
+        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
+                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
+        Transaction transaction = transactionRepository.findTransByUuidAndUser(transUuid, user)
+                .orElseThrow(() -> new EntityNotFoundException("Transaction", "Transaction with uuid: " + transUuid + " not found!"));
+
+        //RETURN
+        return transactionMapper.toReadOnly(transaction);
+    }
 
 //    @Override
 //    @Transactional(readOnly = true)

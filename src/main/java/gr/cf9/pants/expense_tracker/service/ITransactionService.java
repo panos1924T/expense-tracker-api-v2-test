@@ -17,7 +17,7 @@ public interface ITransactionService {
 
         TransactionReadOnlyDTO updateTransaction(UUID transUuid, TransactionUpdateDTO dto, UUID userUuid);
 
-//        TransactionReadOnlyDTO getTransactionByUuid(UUID transUuid, UUID userUuid);
+        TransactionReadOnlyDTO getTransactionByUuid(UUID transUuid, UUID userUuid);
 //
 //        List<TransactionReadOnlyDTO> getTransactionByActiveAccount(UUID accountUuid, UUID userUuid, Pageable pageable);
 //

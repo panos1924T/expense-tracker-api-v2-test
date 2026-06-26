@@ -5,7 +5,6 @@ import gr.cf9.pants.expense_tracker.core.filters.AccountFilters;
 import gr.cf9.pants.expense_tracker.dto.account_dto.AccountCreateDTO;
 import gr.cf9.pants.expense_tracker.dto.account_dto.AccountReadOnlyDTO;
 import gr.cf9.pants.expense_tracker.dto.account_dto.AccountUpdateDTO;
-import gr.cf9.pants.expense_tracker.dto.transaction_dto.TransactionReadOnlyDTO;
 import gr.cf9.pants.expense_tracker.model.User;
 import gr.cf9.pants.expense_tracker.service.IAccountService;
 import gr.cf9.pants.expense_tracker.service.ITransactionService;
@@ -24,7 +23,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -86,7 +84,7 @@ public class AccountRestController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<AccountReadOnlyDTO>> getAccounts(
+    public ResponseEntity<Page<AccountReadOnlyDTO>> getFilteredPaginatedAccounts(
             @AuthenticationPrincipal User principal,
             @ModelAttribute AccountFilters filters,
             @PageableDefault(sort = "name", direction = Sort.Direction.ASC) Pageable pageable
@@ -95,22 +93,21 @@ public class AccountRestController {
         return ResponseEntity.ok(accountsPage);
     }
 
-//    // 4. ΜΕΜΟΝΩΜΕΝΗ ΑΝΑΓΝΩΣΗ
-//    @GetMapping("/{uuid}")
-//    public ResponseEntity<AccountReadOnlyDTO> getAccount(
-//            @PathVariable UUID uuid,
-//            @RequestParam(defaultValue = "false") boolean includeDeleted,
-//            @AuthenticationPrincipal User principal) {
-//
-//        AccountReadOnlyDTO account = includeDeleted ?
-//                accountService.getAccountByUuid(uuid, principal.getUuid()) :
-//                accountService.getActiveAccountByUuid(uuid, principal.getUuid());
-//        return ResponseEntity.ok(account);
-//    }
+    @GetMapping("/{uuid}")
+    public ResponseEntity<AccountReadOnlyDTO> getAccount(
+            @PathVariable UUID uuid,
+            @RequestParam(defaultValue = "false") boolean includeDeleted,
+            @AuthenticationPrincipal User principal) {
+
+        AccountReadOnlyDTO account = includeDeleted ?
+                accountService.getAccountByUuid(uuid, principal.getUuid()) :
+                accountService.getActiveAccountByUuid(uuid, principal.getUuid());
+        return ResponseEntity.ok(account);
+    }
 //
 //    // 5. ΑΝΑΓΝΩΣΗ ΛΙΣΤΑΣ
 //    @GetMapping
-//    public ResponseEntity<List<AccountReadOnlyDTO>> getAccounts(
+//    public ResponseEntity<List<AccountReadOnlyDTO>> getFilteredPaginatedAccounts(
 //            @RequestParam(defaultValue = "false") boolean includeDeleted,
 //            @AuthenticationPrincipal User principal) {
 //

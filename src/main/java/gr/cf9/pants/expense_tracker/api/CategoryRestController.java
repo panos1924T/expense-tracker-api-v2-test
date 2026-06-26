@@ -1,12 +1,10 @@
 package gr.cf9.pants.expense_tracker.api;
 
-import gr.cf9.pants.expense_tracker.core.enums.TransactionType;
 import gr.cf9.pants.expense_tracker.core.exceptions.ValidationException;
 import gr.cf9.pants.expense_tracker.core.filters.CategoryFilters;
 import gr.cf9.pants.expense_tracker.dto.category_dto.CategoryCreateDTO;
 import gr.cf9.pants.expense_tracker.dto.category_dto.CategoryReadOnlyDTO;
 import gr.cf9.pants.expense_tracker.dto.category_dto.CategoryUpdateDTO;
-import gr.cf9.pants.expense_tracker.dto.transaction_dto.TransactionReadOnlyDTO;
 import gr.cf9.pants.expense_tracker.model.User;
 import gr.cf9.pants.expense_tracker.service.ICategoryService;
 import gr.cf9.pants.expense_tracker.service.ITransactionService;
@@ -25,7 +23,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -84,7 +81,7 @@ public class CategoryRestController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<CategoryReadOnlyDTO>> getCategories(
+    public ResponseEntity<Page<CategoryReadOnlyDTO>> getFilteredPaginatedCategories(
             @AuthenticationPrincipal User principal,
             @ModelAttribute CategoryFilters filters,
             @PageableDefault(sort = "type", direction = Sort.Direction.ASC) Pageable pageable
@@ -93,20 +90,20 @@ public class CategoryRestController {
         return ResponseEntity.ok(categoriesPage);
     }
 
-//    @GetMapping("/{uuid}")
-//    public ResponseEntity<CategoryReadOnlyDTO> getCategory(
-//            @PathVariable UUID uuid,
-//            @RequestParam(defaultValue = "false") boolean includeDeleted,
-//            @AuthenticationPrincipal User principal) {
-//
-//        CategoryReadOnlyDTO category = includeDeleted ?
-//                categoryService.getCategoryByUuid(uuid, principal.getUuid()) :
-//                categoryService.getActiveCategoryByUuid(uuid, principal.getUuid());
-//        return ResponseEntity.ok(category);
-//    }
+    @GetMapping("/{uuid}")
+    public ResponseEntity<CategoryReadOnlyDTO> getCategory(
+            @PathVariable UUID uuid,
+            @RequestParam(defaultValue = "false") boolean includeDeleted,
+            @AuthenticationPrincipal User principal) {
+
+        CategoryReadOnlyDTO category = includeDeleted ?
+                categoryService.getCategoryByUuid(uuid, principal.getUuid()) :
+                categoryService.getActiveCategoryByUuid(uuid, principal.getUuid());
+        return ResponseEntity.ok(category);
+    }
 //
 //    @GetMapping
-//    public ResponseEntity<List<CategoryReadOnlyDTO>> getCategories(
+//    public ResponseEntity<List<CategoryReadOnlyDTO>> getFilteredPaginatedCategories(
 //            @RequestParam(required = false) TransactionType type,
 //            @RequestParam(defaultValue = "false") boolean includeDeleted,
 //            @AuthenticationPrincipal User principal) {

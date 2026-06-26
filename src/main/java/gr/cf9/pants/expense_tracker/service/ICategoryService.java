@@ -18,9 +18,9 @@ public interface ICategoryService {
 
     void deleteCategory(UUID categoryUuid, UUID userUuid);
 
-//    CategoryReadOnlyDTO getActiveCategoryByUuid(UUID categoryUuid, UUID userUuid);
-//
-//    CategoryReadOnlyDTO getCategoryByUuid(UUID categoryUuid, UUID userUuid);
+    CategoryReadOnlyDTO getActiveCategoryByUuid(UUID categoryUuid, UUID userUuid);
+
+    CategoryReadOnlyDTO getCategoryByUuid(UUID categoryUuid, UUID userUuid);
 //
 //    List<CategoryReadOnlyDTO> getActiveCategories(UUID userUuid);
 //

@@ -146,32 +146,32 @@ public class AccountService implements IAccountService{
 //                .toList();
 //    }
 //
-//    @Override
-//    @Transactional(readOnly = true)
-//    public AccountReadOnlyDTO getActiveAccountByUuid(UUID accountUuid, UUID userUuid) {
-//
-//        //VALIDATE
-//        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
-//                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
-//        Account account = accountRepository.findAccountByUuidAndUserAndDeletedFalse(accountUuid, user)
-//                .orElseThrow(() -> new EntityNotFoundException("Account", "Account with uuid: " + accountUuid + " not found!"));
-//
-//        //RETURN
-//        return accountMapper.toReadOnly(account);
-//    }
-//
-//    @Override
-//    @Transactional(readOnly = true)
-//    public AccountReadOnlyDTO getAccountByUuid(UUID accountUuid, UUID userUuid) {
-//        //VALIDATE
-//        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
-//                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
-//        Account account = accountRepository.findAccountByUuidAndUser(accountUuid, user)
-//                .orElseThrow(() -> new EntityNotFoundException("Account", "Account with uuid: " + accountUuid + " not found!"));
-//
-//        //RETURN
-//        return accountMapper.toReadOnly(account);
-//    }
+    @Override
+    @Transactional(readOnly = true)
+    public AccountReadOnlyDTO getActiveAccountByUuid(UUID accountUuid, UUID userUuid) {
+
+        //VALIDATE
+        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
+                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
+        Account account = accountRepository.findAccountByUuidAndUserAndDeletedFalse(accountUuid, user)
+                .orElseThrow(() -> new EntityNotFoundException("Account", "Account with uuid: " + accountUuid + " not found!"));
+
+        //RETURN
+        return accountMapper.toReadOnly(account);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public AccountReadOnlyDTO getAccountByUuid(UUID accountUuid, UUID userUuid) {
+        //VALIDATE
+        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
+                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
+        Account account = accountRepository.findAccountByUuidAndUser(accountUuid, user)
+                .orElseThrow(() -> new EntityNotFoundException("Account", "Account with uuid: " + accountUuid + " not found!"));
+
+        //RETURN
+        return accountMapper.toReadOnly(account);
+    }
 //
 //    @Override
 //    public List<AccountReadOnlyDTO> getAccountsByType(UUID userUuid, AccountType accountType) {

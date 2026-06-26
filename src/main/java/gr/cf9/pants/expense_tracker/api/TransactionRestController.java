@@ -1,6 +1,5 @@
 package gr.cf9.pants.expense_tracker.api;
 
-import gr.cf9.pants.expense_tracker.core.enums.TransactionType;
 import gr.cf9.pants.expense_tracker.core.exceptions.ValidationException;
 import gr.cf9.pants.expense_tracker.core.filters.TransactionFilters;
 import gr.cf9.pants.expense_tracker.dto.transaction_dto.*;
@@ -21,7 +20,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -78,16 +76,16 @@ public class TransactionRestController {
         return ResponseEntity.noContent().build();
     }
 
-//    @GetMapping("/{uuid}")
-//    public ResponseEntity<TransactionReadOnlyDTO> getTransaction(
-//            @PathVariable UUID uuid,
-//            @AuthenticationPrincipal User principal) {
-//
-//        return ResponseEntity.ok(transactionService.getTransactionByUuid(uuid, principal.getUuid()));
-//    }
+    @GetMapping("/{uuid}")
+    public ResponseEntity<TransactionReadOnlyDTO> getTransaction(
+            @PathVariable UUID uuid,
+            @AuthenticationPrincipal User principal) {
+
+        return ResponseEntity.ok(transactionService.getTransactionByUuid(uuid, principal.getUuid()));
+    }
 //
 //    @GetMapping
-//    public ResponseEntity<List<TransactionReadOnlyDTO>> getTransactions(
+//    public ResponseEntity<List<TransactionReadOnlyDTO>> getFilteredPaginatedTransactions(
 //            @RequestParam(required = false) TransactionType type,
 //            @PageableDefault(size = 20) Pageable pageable,
 //            @AuthenticationPrincipal User principal) {
@@ -99,7 +97,7 @@ public class TransactionRestController {
 //    }
 
     @GetMapping
-    public ResponseEntity<Page<TransactionReadOnlyDTO>> getTransactions(
+    public ResponseEntity<Page<TransactionReadOnlyDTO>> getFilteredPaginatedTransactions(
             @AuthenticationPrincipal User principal,
             @ModelAttribute TransactionFilters filters,
             @PageableDefault(sort = "transactionDate", direction = Sort.Direction.DESC) Pageable pageable

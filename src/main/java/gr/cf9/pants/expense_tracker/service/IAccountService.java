@@ -26,9 +26,9 @@ public interface IAccountService {
 //
 //    List<AccountReadOnlyDTO> getActiveAccountsByType(UUID userUuid, AccountType accountType);
 //
-//    AccountReadOnlyDTO getActiveAccountByUuid(UUID accountUuid, UUID userUuid);
-//
-//    AccountReadOnlyDTO getAccountByUuid(UUID accountUuid, UUID userUuid);
+    AccountReadOnlyDTO getActiveAccountByUuid(UUID accountUuid, UUID userUuid);
+
+    AccountReadOnlyDTO getAccountByUuid(UUID accountUuid, UUID userUuid);
 
     Page<AccountReadOnlyDTO> getFilteredAndPaginatedAccounts(User user, AccountFilters filters, Pageable pageable);
 }

@@ -152,29 +152,29 @@ public class CategoryService implements ICategoryService{
 
     }
 
-//    @Override
-//    public CategoryReadOnlyDTO getActiveCategoryByUuid(UUID categoryUuid, UUID userUuid) {
-//        //VALIDATE
-//        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
-//                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
-//        Category category = categoryRepository.findCategoryByUuidAndUserAndDeletedFalse(categoryUuid, user)
-//                .orElseThrow(() -> new EntityNotFoundException("Category", "Category with uuid: " + categoryUuid + "not found!"));
-//
-//        //RETURN
-//        return categoryMapper.toReadOnly(category);
-//    }
-//
-//    @Override
-//    public CategoryReadOnlyDTO getCategoryByUuid(UUID categoryUuid, UUID userUuid) {
-//        //VALIDATE
-//        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
-//                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
-//        Category category = categoryRepository.findCategoryByUuidAndUser(categoryUuid, user)
-//                .orElseThrow(() -> new EntityNotFoundException("Category", "Category with uuid: " + categoryUuid + "not found!"));
-//
-//        //RETURN
-//        return categoryMapper.toReadOnly(category);
-//    }
+    @Override
+    public CategoryReadOnlyDTO getActiveCategoryByUuid(UUID categoryUuid, UUID userUuid) {
+        //VALIDATE
+        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
+                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
+        Category category = categoryRepository.findCategoryByUuidAndUserAndDeletedFalse(categoryUuid, user)
+                .orElseThrow(() -> new EntityNotFoundException("Category", "Category with uuid: " + categoryUuid + "not found!"));
+
+        //RETURN
+        return categoryMapper.toReadOnly(category);
+    }
+
+    @Override
+    public CategoryReadOnlyDTO getCategoryByUuid(UUID categoryUuid, UUID userUuid) {
+        //VALIDATE
+        User user = userRepository.findUserByUuidAndDeletedFalse(userUuid)
+                .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid: " + userUuid + " not found!"));
+        Category category = categoryRepository.findCategoryByUuidAndUser(categoryUuid, user)
+                .orElseThrow(() -> new EntityNotFoundException("Category", "Category with uuid: " + categoryUuid + "not found!"));
+
+        //RETURN
+        return categoryMapper.toReadOnly(category);
+    }
 //
 //    @Override
 //    public List<CategoryReadOnlyDTO> getActiveCategoriesByType(TransactionType type, UUID userUuid) {
