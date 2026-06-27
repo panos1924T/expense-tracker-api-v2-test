@@ -41,7 +41,7 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final ObjectMapper objectMapper;
 
-    @Value("${allowed.origins}")
+    @Value("${allowed.origins},http://127.0.0.1:5500")
     private List<String> allowedOrigins;
 
     @Value("12")
