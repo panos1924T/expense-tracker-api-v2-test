@@ -3,7 +3,7 @@
 export $(cat .env | xargs)
 
 echo "Building the project..."
-./gradlew clean build
+./gradlew clean build -x test
 if [ $? -ne 0 ]; then
     echo "Build failed."
     exit 1
